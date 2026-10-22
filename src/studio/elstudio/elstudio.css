@@ -444,7 +444,7 @@
 /* El rótulo: el cuadro de datos de una lámina. */
 .es-rotulo {
   margin: 0;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   border-top: 1px solid rgba(22, 21, 19, 0.42);
   border-left: 1px solid rgba(22, 21, 19, 0.42);
   font-size: 12px;

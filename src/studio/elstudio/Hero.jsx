@@ -2,30 +2,31 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
 import { BAND_H, C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
-import { paint } from './paint'
+import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
 import photoFull from './assets/foto-local.webp'
 import photoSmall from './assets/foto-local-1200.webp'
 
 /**
- * El hero: del boceto al local, sobre una lámina con la grilla a la vista.
+ * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
  *
- * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla y ocupa toda la
- * lámina. Al scrollear (el hero queda fijo), como en un proceso de diseño:
- *   01 Boceto       el cuadrante se corre a la derecha y entra el texto a la izquierda.
- *   02 Volumen      el local sube desde el dibujo, pieza por pieza, y la cámara se eleva con él;
- *                   el trazo se apaga cuando el volumen ya está en pie.
- *   03 Interiorismo el cuadrante cruza a la izquierda (el texto, a la derecha) y el local se
- *                   decora: materiales, objetos, lámparas que se encienden.
- *   04 Experiencia  la cámara se acerca.
- * El rótulo de la lámina (01 → 04) acompaña cada etapa.
+ * La lámina está dividida desde el primer cuadro: a la izquierda la bajada, la etapa y el rótulo;
+ * a la derecha el cuadrante del dibujo (en pantallas angostas, el dibujo arriba y la etapa abajo).
+ * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
+ * (el hero queda fijo):
+ *   01 Boceto       el dibujo.
+ *   02 Volumen      el local sube desde el dibujo, pieza por pieza (como en Illoca); el trazo queda
+ *                   como un fantasma y se apaga cuando el volumen está en pie.
+ *   03 Interiorismo la foto real del local se pinta encima de la maqueta, de izquierda a derecha.
+ *   04 Experiencia  la cámara se acerca sobre la foto.
+ * La cámara del 3D no se mueve: el boceto, la maqueta y la foto calzan uno sobre otro.
  *
  * Con el mouse: al entrar al hero aparecen las líneas de construcción (guías punteadas y una regla
  * en óxido alrededor del cuadrante) y, al hacer clic y arrastrar sobre el dibujo, se ve el otro
- * estado del lado izquierdo del cursor (el local terminado sobre el boceto, o al revés).
+ * estado del lado izquierdo del cursor (la foto sobre el boceto, o el boceto sobre la foto).
  *
- * Con «reducir movimiento»: la lámina quieta, con el local terminado.
+ * Con «reducir movimiento»: la lámina quieta, con la foto.
  */
 
 const REVEAL_SECONDS = 3.2
@@ -36,7 +37,7 @@ const PHOTO_REF = import.meta.env.DEV && typeof window !== 'undefined' && new UR
 const STAGES = [
   { n: '01', title: 'Boceto', text: 'Todo empieza a mano: la idea del espacio, a lápiz y carbonilla.' },
   { n: '02', title: 'Volumen', text: 'El mismo dibujo en tres dimensiones: proporciones, luz y recorridos.' },
-  { n: '03', title: 'Interiorismo', text: 'Materiales, objetos y luz cálida, pensados para quien usa el espacio.' },
+  { n: '03', title: 'Interiorismo', text: 'Materiales, luz y objetos: el espacio como se va a vivir.' },
   { n: '04', title: 'Experiencia', text: 'Un lugar listo para vivirse.' },
 ]
 
@@ -45,40 +46,37 @@ const smooth = (a, b, v) => {
   const t = clamp01((v - a) / (b - a))
   return t * t * (3 - 2 * t)
 }
-const lerp = (a, b, t) => a + (b - a) * t
-const lerpRect = (a, b, t) => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t) })
 
 /**
- * Las medidas de la lámina para un escenario de W × H. Tres posiciones del cuadrante:
- *   full   toda la lámina (el boceto recién dibujado)
- *   right  columnas 4–8, con el texto en las 1–3
- *   left   columnas 1–5, con el texto en las 6–8
- * En el teléfono el cuadrante va arriba y el texto debajo.
+ * Las medidas de la lámina para un escenario de W × H: el cuadrante del dibujo y la columna de texto.
+ * Desde 1024 px: texto en las columnas 1–3 y dibujo en las 4–8. Más angosto: dibujo arriba y la
+ * etapa debajo.
  */
 function sheetLayout(W, H) {
-  const desk = W >= 640
-  const side = desk ? 36 : 16
+  const desk = W >= 1024
+  const side = W >= 640 ? 36 : 16
   const gap = 16
-  const cols = desk ? 8 : 4
+  const cols = W >= 640 ? 8 : 4
   const colW = (W - side * 2 - gap * (cols - 1)) / cols
-  const top = (desk ? NAV_H.desk : NAV_H.phone) + (desk ? 26 : 20)
-  const bottom = H - (desk ? BAND_H.desk : BAND_H.phone) - (desk ? 20 : 14)
-  const full = { x: side, y: top, w: W - side * 2, h: bottom - top }
+  const top = (W >= 640 ? NAV_H.desk : NAV_H.phone) + (W >= 640 ? 26 : 20)
+  const bottom = H - (W >= 640 ? BAND_H.desk : BAND_H.phone) - (W >= 640 ? 20 : 14)
   if (desk) {
     const span = (n) => n * colW + (n - 1) * gap
     const x = (c) => side + c * (colW + gap)
     return {
       desk,
       cols,
-      full,
-      right: { panel: { x: x(3), y: top, w: span(5), h: bottom - top }, text: { x: x(0), y: top, w: span(3) - gap, h: bottom - top } },
-      left: { panel: { x: x(0), y: top, w: span(5), h: bottom - top }, text: { x: x(5) + gap, y: top, w: span(3) - gap, h: bottom - top } },
+      panel: { x: x(3), y: top, w: span(5), h: bottom - top },
+      text: { x: x(0), y: top, w: span(3) - gap, h: bottom - top },
     }
   }
   const textH = 92
-  const panel = { x: side, y: top, w: W - side * 2, h: bottom - top - textH }
-  const text = { x: side, y: bottom - textH + 14, w: W - side * 2, h: textH - 14 }
-  return { desk, cols, full, right: { panel, text }, left: { panel, text } }
+  return {
+    desk,
+    cols,
+    panel: { x: side, y: top, w: W - side * 2, h: bottom - top - textH },
+    text: { x: side, y: bottom - textH + 14, w: W - side * 2, h: textH - 14 },
+  }
 }
 
 /** El cuadro de la cámara dentro del cuadrante: 16:9 entero; si el cuadrante es angosto, un poco más grande (recorta los costados). */
@@ -131,9 +129,9 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const panel = panelRef.current
     const left = leftRef.current
     const phone = window.matchMedia('(max-width: 767px)').matches
-    // La foto del arrastre (solo con mouse): en pantallas chicas, la liviana.
+    // La foto del local (el final del hero y el arrastre): en pantallas chicas, la liviana.
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-    const scene = createLocalScene({ canvas, phone, photo: fine ? (window.innerWidth > 1300 ? photoFull : photoSmall) : null })
+    const scene = createLocalScene({ canvas, phone, photo: window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1600 ? photoFull : photoSmall })
     sceneRef.current = scene
     const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.75 : 2)
     scene.setPixelRatio(dpr)
@@ -168,17 +166,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         })
 
     let shownStage = -1
-    let shownSide = 'none'
     const apply = (p) => {
-      // El cuadrante: toda la lámina → a la derecha (texto a la izquierda) → a la izquierda (texto a la derecha).
-      const toRight = calm ? 1 : smooth(0.03, 0.12, p)
-      const toLeft = calm ? 0 : smooth(0.46, 0.58, p)
-      const P = lerpRect(lerpRect(L.full, L.right.panel, toRight), L.left.panel, toLeft)
-      // El texto no viaja por encima del dibujo: se apaga, salta de lado y se vuelve a pintar.
-      const T = toLeft < 0.5 ? L.right.text : L.left.text
-      // El texto entra con el corrimiento y, al cruzar de lado, se apaga en el medio del viaje.
-      const textAlpha = toRight * (1 - smooth(0, 0.3, toLeft) + smooth(0.7, 1, toLeft))
-      const key = `${P.x.toFixed(1)}|${P.y.toFixed(1)}|${P.w.toFixed(1)}|${P.h.toFixed(1)}|${textAlpha.toFixed(3)}`
       if (PHOTO_REF) {
         const W = stageEl.clientWidth
         const H = stageEl.clientHeight
@@ -187,36 +175,30 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         scene.setRise(1)
         scene.setSketch(0)
         scene.setDecor(1)
-        scene.setCamera(0)
         scene.setReveal(1)
         return
       }
-      if (key !== lastKey) {
-        lastKey = key
+      if (!lastKey) {
+        lastKey = 'set'
+        const P = L.panel
+        const T = L.text
         const f = cameraFrame(P)
         scene.setFrame(f.x, f.y, f.w, f.h)
         canvas.style.clipPath = `inset(${P.y}px ${stageEl.clientWidth - P.x - P.w}px ${stageEl.clientHeight - P.y - P.h}px ${P.x}px)`
         Object.assign(panel.style, { left: `${P.x}px`, top: `${P.y}px`, width: `${P.w}px`, height: `${P.h}px` })
-        Object.assign(left.style, { left: `${T.x}px`, top: `${T.y}px`, width: `${T.w}px`, height: `${T.h}px`, opacity: String(textAlpha) })
-        left.style.visibility = textAlpha < 0.01 ? 'hidden' : 'visible'
+        Object.assign(left.style, { left: `${T.x}px`, top: `${T.y}px`, width: `${T.w}px`, height: `${T.h}px` })
         stageEl.style.setProperty('--px', `${P.x}px`)
         stageEl.style.setProperty('--py', `${P.y}px`)
         stageEl.style.setProperty('--pw', `${P.w}px`)
         stageEl.style.setProperty('--ph', `${P.h}px`)
       }
-      // Cada vez que el texto llega a un lado, se pinta de nuevo (en el teléfono, al aparecer).
-      const sideNow = toRight < 0.5 ? 'none' : toLeft < 0.5 ? 'right' : 'left'
-      if (sideNow !== shownSide) {
-        shownSide = sideNow
-        if (sideNow !== 'none' && !calm) paint(left.querySelectorAll('[data-paint]'), { stagger: 0.05, duration: 0.8 })
-      }
-      // Boceto → el local sube desde el dibujo → se decora → la cámara se acerca.
-      scene.setRise(calm ? 1 : clamp01((p - 0.16) / 0.28))
+      // Boceto → el local sube desde el dibujo → la foto se pinta encima → la cámara se acerca.
+      scene.setRise(calm ? 1 : clamp01((p - 0.06) / 0.34))
       // El trazo queda como un fantasma mientras el volumen sube desde él, y se apaga cuando está en pie.
-      scene.setSketch(calm ? 0 : 1 - 0.86 * smooth(0.13, 0.18, p) - 0.14 * smooth(0.38, 0.47, p))
-      scene.setDecor(calm ? 1 : clamp01((p - 0.5) / 0.32))
-      scene.setCamera(calm ? 0 : clamp01((p - 0.84) / 0.16))
-      const s = calm ? 3 : p < 0.14 ? 0 : p < 0.48 ? 1 : p < 0.84 ? 2 : 3
+      scene.setSketch(calm ? 0 : 1 - 0.86 * smooth(0.04, 0.1, p) - 0.14 * smooth(0.32, 0.42, p))
+      scene.setPhoto(calm ? 1 : smooth(0.46, 0.76, p))
+      scene.setZoom(calm ? 0 : smooth(0.8, 1, p))
+      const s = calm ? 3 : p < 0.06 ? 0 : p < 0.44 ? 1 : p < 0.8 ? 2 : 3
       if (s !== shownStage) {
         shownStage = s
         setStage(s)
@@ -225,6 +207,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     }
     apply(current)
     if (calm) scene.setReveal(1)
+    // Mientras se arrastra, el cartel dice qué se ve del otro lado.
+    const refreshTip = () => setTip(scene.splitShows())
 
     const tick = (_t, deltaMs) => {
       current += (target - current) * (1 - Math.exp(-deltaMs / 110))
@@ -250,7 +234,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       dragging = true
       canvas.setPointerCapture?.(e.pointerId)
       scene.setSplit(e.clientX / stageEl.clientWidth)
-      setTip(scene.splitShows())
+      refreshTip()
       gsap.to(split, { on: 1, duration: 0.45, ease: 'expo.out', overwrite: true, onUpdate: () => scene.setSplitOn(split.on) })
     }
     const onMove = (e) => {
@@ -307,6 +291,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const ctx = gsap.context(() => {
       gsap.set(q('[data-col]'), { scaleY: 0 })
       gsap.set(q('[data-panel-edge]'), { scale: 0 })
+      hidePaint(q('[data-paint]'))
     }, stageRef)
     return () => ctx.revert()
   }, [calm])
@@ -321,6 +306,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     tl.to(pen, { v: 1, duration: REVEAL_SECONDS, ease: 'power1.inOut', onUpdate: () => scene.setReveal(pen.v) }, 0)
       .to(q('[data-panel-edge]'), { scale: 1, duration: 0.9, ease: 'expo.inOut', stagger: 0.05 }, 0.2)
       .to(q('[data-col]'), { scaleY: 1, duration: 1.1, ease: 'expo.out', stagger: 0.06 }, OPEN_DELAY + 0.8)
+      .add(() => paint(q('[data-paint]'), { stagger: 0.05, duration: 0.85 }), OPEN_DELAY + 0.6)
     return () => tl.kill()
   }, [boarded, calm])
 
@@ -335,7 +321,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   ]
 
   return (
-    <section ref={sectionRef} id="inicio" aria-label="Inicio" className="relative h-[600vh] calm:h-svh">
+    <section ref={sectionRef} id="inicio" aria-label="Inicio" className="relative h-[480vh] calm:h-svh">
       <div ref={stageRef} className="es-lamina sticky top-0 h-svh overflow-hidden">
         {/* La grilla de columnas, a la vista. */}
         <div ref={colsRef} className="es-cols" aria-hidden="true" style={{ '--cols': cols }}>
@@ -349,7 +335,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           className="absolute inset-0 block h-full w-full"
           role="img"
           aria-label="Boceto a lápiz de un local que se convierte en una maqueta 3D y se va decorando"
-          data-cursor-tip={tip === 'sketch' ? 'Clic y arrastre · el boceto' : 'Clic y arrastre · el local terminado'}
+          data-cursor-tip={tip === 'sketch' ? 'Clic y arrastre · el boceto' : 'Clic y arrastre · la foto'}
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
@@ -380,11 +366,11 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         </div>
 
         {/* La columna de texto (cambia de lado): bajada, etapa y rótulo. */}
-        <div ref={leftRef} className="es-left" style={{ color: C.ink, opacity: 0, visibility: 'hidden' }}>
+        <div ref={leftRef} className="es-left" style={{ color: C.ink }}>
           <h1 className="sr-only">
             {SITE.name} — {SITE.tagline}
           </h1>
-          <p data-paint className="es-paint es-left__lede hidden sm:block">
+          <p data-paint className="es-paint es-left__lede hidden lg:block">
             Diseño e interiorismo enfocado en la experiencia de usuario.
           </p>
           <div className="es-left__stage" aria-live="polite">
@@ -400,7 +386,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
               </p>
             </div>
           </div>
-          <dl className="es-rotulo hidden sm:grid" style={LABEL}>
+          <dl className="es-rotulo hidden lg:grid" style={LABEL}>
             {rows.map(([k, v]) => (
               <div key={k} className="es-rotulo__row">
                 <dt data-paint className="es-paint">

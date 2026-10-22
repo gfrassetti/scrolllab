@@ -19,7 +19,8 @@ import * as THREE from 'three'
  *   scene.setFrame(x, y, w, h)  el rectángulo de la pantalla donde va el cuadro
  *   scene.setReveal(0..1)       cuánto del boceto está dibujado
  *   scene.setSketch(0..1)       cuánto se ve el boceto (va encima del 3D)
- *   scene.setRise(0..1)         el local sube desde el dibujo (y la cámara con él)
+ *   scene.setRise(0..1)         el local sube desde el dibujo
+ *   scene.setPhoto(0..1)        la foto del local (createLocalScene({ photo })) se pinta encima
  *   scene.setDecor(0..1)        cuánto está decorado
  *   scene.setCamera(0..1)       la cámara se acerca al final
  *   scene.render()              dibuja si algo cambió
@@ -291,6 +292,8 @@ const sketchFragment = /* glsl */ `
   uniform sampler2D tPhoto;   // la foto del local terminado (misma cámara que el arranque)
   uniform float uPhoto;       // 1: el arrastre muestra la foto
   uniform vec4 uFrame;        // el cuadro de la cámara en el canvas (x, y, w, h en 0–1, y hacia arriba)
+  uniform float uPhotoReveal; // cuánto de la foto está pintado sobre la maqueta (el final del hero)
+  uniform float uPhotoZoom;   // el acercamiento final sobre la foto (1 = sin zoom)
   uniform vec2 uRes;      // px del canvas (con el dpr)
   uniform float uDpr;
   uniform float uA;       // cuánto se ve el 3D
@@ -374,20 +377,42 @@ const sketchFragment = /* glsl */ `
     return mix(outColor, vec4(graphite * ink, ink), sketch);
   }
 
+  // La foto dentro del cuadro de la cámara, igualada al papel de la página y con los bordes fundidos.
+  vec4 photoAt(float zoom) {
+    vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
+    vec2 puv = (fuv - vec2(0.5, 0.48)) / zoom + vec2(0.5, 0.48);
+    float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
+    vec3 ph = texture2D(tPhoto, clamp(puv, 0.0, 1.0)).rgb;
+    float edge = smoothstep(0.0, 0.07, fuv.x) * smoothstep(1.0, 0.93, fuv.x) * smoothstep(0.0, 0.08, fuv.y) * smoothstep(1.0, 0.92, fuv.y);
+    // El fondo liso de la foto se recorta: queda el local con su sombra, sobre el papel de la página.
+    float key = smoothstep(0.012, 0.05, distance(ph, vec3(0.937, 0.922, 0.890)));
+    float a = inside * edge * key;
+    return vec4(ph * a, a);
+  }
+
   void main() {
     // El boceto va encima del 3D: mientras el local sube desde el dibujo, el trazo se apaga.
     vec4 a = layer(tColor, tNormal, 0.0, 1.0) * uA;
     vec4 sk = layer(tColorB, tNormalB, 1.0, uReveal) * uSketch;
-    vec4 base = sk + a * (1.0 - sk.a);
+    // La foto se pinta sobre la maqueta: un trazo ancho que barre de izquierda a derecha, con borde
+    // de pincel (ruido estirado a lo largo, como cerdas). El mismo trazo borra la maqueta.
+    float m = 0.0;
+    if (uPhotoReveal > 0.001 && uPhoto > 0.5) {
+      vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
+      vec2 px = vUv * uRes / uDpr;
+      float field = fuv.x * 0.82 + (1.0 - fuv.y) * 0.18 + (fbm(fuv * vec2(3.0, 9.0)) - 0.5) * 0.32
+        + (noise(px * vec2(0.012, 0.16)) - 0.5) * 0.08;
+      float r = uPhotoReveal * 1.45 - 0.2;
+      m = 1.0 - smoothstep(r - 0.06, r, field);
+    }
+    vec4 base = sk + a * (1.0 - m) * (1.0 - sk.a);
+    if (m > 0.0) {
+      vec4 ph = photoAt(uPhotoZoom);
+      base = ph * m + base * (1.0 - ph.a * m);
+    }
     if (uSplitOn > 0.001) {
       vec4 o = layer(tColorO, tNormalO, uSketchO, 1.0);
-      if (uPhoto > 0.5) {
-        // La foto ocupa el cuadro de la cámara; afuera queda el papel.
-        vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
-        float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
-        vec3 ph = texture2D(tPhoto, clamp(fuv, 0.0, 1.0)).rgb;
-        o = vec4(ph, 1.0) * inside;
-      }
+      if (uSketchO < 0.5 && uPhoto > 0.5) o = photoAt(uPhotoZoom);
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
       float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
@@ -513,6 +538,8 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
       tPhoto: { value: null },
       uPhoto: { value: 0 },
       uFrame: { value: new THREE.Vector4(0, 0, 1, 1) },
+      uPhotoReveal: { value: 0 },
+      uPhotoZoom: { value: 1 },
       uSketchO: { value: 0 },
       uSplit: { value: 0.5 },
       uSplitOn: { value: 0 },
@@ -549,7 +576,7 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
   let canvasH = 1
   let dpr = 1
   let frame = { x: 0, y: 0, w: 1, h: 1 }
-  const state = { reveal: 0, sketch: 1, rise: 0, decor: 0, camera: 0, split: 0.5, splitOn: 0 }
+  const state = { reveal: 0, sketch: 1, rise: 0, decor: 0, camera: 0, lift: 0, photo: 0, zoom: 0, split: 0.5, splitOn: 0 }
   let dirty = true
 
   const applyFrame = () => {
@@ -605,9 +632,9 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
     sun.intensity = THREE.MathUtils.lerp(2.2, 2.9, warm)
     sun.color.set('#fff4e2').lerp(new THREE.Color('#ffe6c2'), warm)
 
-    // La cámara: mientras el local sube, se eleva con él (mira más arriba y baja un poco el ángulo,
-    // para que se lea la altura); al final se acerca. El boceto usa la misma cámara: siempre coincide.
-    const lift = smooth(0, 1, state.rise)
+    // La cámara: con `lift` se eleva (mira más arriba); con `camera`, se acerca. El hero las deja en
+    // 0, así la maqueta y la foto calzan con el boceto. El boceto usa la misma cámara: siempre coincide.
+    const lift = smooth(0, 1, state.lift)
     const c = smooth(0, 1, state.camera)
     const polar = START.polar + lift * 0.14 + c * 0.04
     const azimuth = START.azimuth - lift * 0.1 - c * 0.12
@@ -642,7 +669,8 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
   }
 
   /** El estado que muestra el arrastre: el local terminado mientras se ve el boceto, y al revés. */
-  const otherView = () => (state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0, photo: !!photoTex } : { rise: 1, decor: 0, sketch: 1, photo: false })
+  const otherView = () =>
+    state.photo < 0.5 && state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0, photo: !!photoTex } : { rise: 1, decor: 0, sketch: 1, photo: false }
 
   const draw = () => {
     const u = post.uniforms
@@ -650,11 +678,13 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
     u.uSplitOn.value = state.splitOn
     // El otro estado (solo mientras se arrastra).
     const other = otherView()
-    u.uPhoto.value = other.photo ? 1 : 0
+    u.uPhoto.value = photoTex ? 1 : 0
+    u.uPhotoReveal.value = state.photo
+    u.uPhotoZoom.value = 1 + smooth(0, 1, state.zoom) * 0.06
+    u.uSketchO.value = other.sketch
     if (state.splitOn > 0.001 && !other.photo) {
       update({ ...state, ...other })
       pass(rtColorO, rtNormalO, other.sketch > 0.001)
-      u.uSketchO.value = other.sketch
     }
     // La fuente del boceto: el local entero, sin decorar.
     if (state.sketch > 0.001) {
@@ -685,6 +715,10 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
     setReveal: set('reveal'),
     setSketch: set('sketch'),
     setRise: set('rise'),
+    setLift: set('lift'),
+    /** Cuánto de la foto está pintado sobre la maqueta (0–1) y el acercamiento final sobre ella (0–1). */
+    setPhoto: set('photo'),
+    setZoom: set('zoom'),
     setDecor: set('decor'),
     setCamera: set('camera'),
     setSplit: set('split'),

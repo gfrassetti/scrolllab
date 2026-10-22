@@ -113,14 +113,18 @@ export default function Loader({ ready, calm, bridge, onDone }) {
         .to(logo.querySelector('[data-part=sub]'), { autoAlpha: 0, duration: 0.3, ease: 'power2.out' }, 0)
         .to(sheet, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.85, ease: 'expo.inOut' }, 0.15)
       if (target && row) {
+        // El logo escala desde la esquina de su contenedor, y la marca no está pegada a esa esquina
+        // (el renglón le deja aire arriba): el desplazamiento descuenta ese margen ya escalado.
         const a = row.getBoundingClientRect()
         const b = target.getBoundingClientRect()
+        const h = logo.getBoundingClientRect()
+        const k = b.width / a.width
         tl.to(
           logo,
           {
-            x: b.left - a.left,
-            y: b.top - a.top,
-            scale: b.width / a.width,
+            x: b.left - h.left - (a.left - h.left) * k,
+            y: b.top - h.top - (a.top - h.top) * k,
+            scale: k,
             transformOrigin: '0 0',
             duration: 0.85,
             ease: 'expo.inOut',
