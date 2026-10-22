@@ -8,8 +8,6 @@ import Loader from './Loader'
 import Cursor from './Cursor'
 import Nav from './Nav'
 import Hero from './Hero'
-import Statement from './Statement'
-import Contact from './Contact'
 import { FONTS_HREF, SITE } from './brand'
 
 const LOADER_MIN_MS = 2900
@@ -107,19 +105,10 @@ export default function ElStudioPage() {
   return (
     <SmoothScrollProvider>
       <div className="es-root min-h-svh">
-        <a
-          href="#estudio"
-          className="fixed top-3 left-3 z-[200] -translate-y-[200%] px-4 py-2.5 text-[13px] font-medium transition-transform focus:translate-y-0"
-          style={{ background: '#161513', color: '#f3f1ea' }}
-        >
-          Saltar al contenido
-        </a>
         <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav bridge={bridge} />
         <main id="contenido" tabIndex={-1} className="outline-none">
-          <Hero boarded={boarded} calm={calm} />
-          <Statement calm={calm} />
-          <Contact />
+          <Hero />
         </main>
         <Cursor />
       </div>

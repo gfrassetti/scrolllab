@@ -1,27 +1,23 @@
 /*
  * elStudio — el papel y el cursor.
  *
- * Toda la página es una hoja: un color de papel con grano y fibra (dos capas de
- * ruido SVG, sin blend-mode para que el scroll no recomponga) y un borde apenas
- * más oscuro, como una hoja bajo la lámpara. El cursor propio solo existe con
- * mouse (hover + puntero fino); en el teléfono no hay nada que ocultar.
+ * Toda la página es una hoja de papel casi blanco con un grano fino (ruido SVG que se repite).
+ * El cursor propio solo existe con mouse (hover + puntero fino): en el teléfono no hay nada
+ * que ocultar.
  */
 
 .es-root {
   /*
-   * La hoja: papel casi blanco con un grano apenas perceptible y, encima, un papel milimetrado de
-   * plano (líneas finas con hueco en cada cruce y un punto de registro). Las dos capas se repiten
-   * y se mueven con la página, como una hoja que se desliza.
+   * La hoja: papel casi blanco con un grano apenas perceptible, que se repite y se mueve con la página.
    */
   --es-paper: #f3f1ea;
   --es-ink: #161513;
   --es-rust: #c4441f;
   --es-ease: cubic-bezier(0.23, 1, 0.32, 1);
   --es-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.38 -0.13'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
-  --es-grid: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><g stroke='rgb(96,90,78)' stroke-opacity='.17' stroke-width='.5' fill='none'><path d='M.25 8V72M79.75 8V72M8 .25H72M8 79.75H72'/></g><g fill='rgb(96,90,78)' fill-opacity='.2'><rect width='1' height='1'/><rect x='79' width='1' height='1'/><rect y='79' width='1' height='1'/><rect x='79' y='79' width='1' height='1'/></g></svg>");
   background-color: var(--es-paper);
-  background-image: var(--es-grid), var(--es-grain);
-  background-size: 80px 80px, 200px 200px;
+  background-image: var(--es-grain);
+  background-size: 200px 200px;
   color: var(--es-ink);
   font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -31,8 +27,8 @@
 /* La hoja del loader: la misma, un punto más clara. */
 .es-sheet {
   background-color: #f9f7f2;
-  background-image: var(--es-grid), var(--es-grain);
-  background-size: 80px 80px, 200px 200px;
+  background-image: var(--es-grain);
+  background-size: 200px 200px;
 }
 
 /* Selección: la tinta al revés. */
@@ -89,45 +85,4 @@
   color: var(--es-paper);
   white-space: nowrap;
   opacity: 0;
-}
-
-/* ── Links del texto: el subrayado que se dibuja ────────────────────── */
-.es-link {
-  position: relative;
-}
-.es-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -0.08em;
-  height: 1px;
-  background: currentColor;
-  transform-origin: right center;
-  transition: transform 0.55s var(--es-ease);
-}
-@media (hover: hover) {
-  .es-link:hover::after {
-    transform: scaleX(0);
-    transform-origin: right center;
-    animation: es-redraw 0.55s var(--es-ease) 0.2s forwards;
-  }
-}
-@keyframes es-redraw {
-  from {
-    transform: scaleX(0);
-    transform-origin: left center;
-  }
-  to {
-    transform: scaleX(1);
-    transform-origin: left center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .es-link::after,
-  .es-link:hover::after {
-    transition: none;
-    animation: none;
-  }
 }
