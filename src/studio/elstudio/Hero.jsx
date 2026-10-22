@@ -10,6 +10,9 @@ import photoFull from './assets/foto-local.webp'
 import photoSmall from './assets/foto-local-1200.webp'
 import sketchFull from './assets/boceto-local.webp'
 import sketchSmall from './assets/boceto-local-1200.webp'
+import emptyFull from './assets/boceto-vacio.webp'
+import emptySmall from './assets/boceto-vacio-1200.webp'
+import { DESIGN_PIECES } from './designPieces'
 
 /**
  * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
@@ -20,9 +23,11 @@ import sketchSmall from './assets/boceto-local-1200.webp'
  * y una cinta con los servicios. El alto de ese bloque es --band-h (elstudio.css).
  * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
  * (el hero queda fijo):
- *   01 Boceto       el dibujo a lápiz.
- *   02 Volumen      la luz y la sombra (la foto en grises) se pintan debajo de los trazos.
- *   03 Interiorismo entra el color y los trazos se van.
+ *   01 El espacio   el local vacío, dibujado a lápiz (muros, ventana, nicho, luz).
+ *   02 Diseño       cada mueble se dibuja en su lugar, uno por uno, con su anotación
+ *                   (designPieces.js): barra, estantes, banco, mesa, guardado, pedestales, olivo.
+ *   03 Materia y luz la luz y la sombra se pintan debajo de los trazos, entra el color y los
+ *                   trazos se van: queda la foto del local.
  *   04 Experiencia  la cámara se acerca sobre la foto.
  * Todo pasa sobre la misma toma (boceto y foto alineados): las líneas no se corren nunca. El 3D
  * queda debajo solo para medir (la mira lee metros del piso).
@@ -40,9 +45,9 @@ const REVEAL_SECONDS = 3.8
 const PHOTO_REF = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('foto-ref')
 
 const STAGES = [
-  { n: '01', title: 'Boceto', text: 'Todo empieza a mano: la idea del espacio, a lápiz y carbonilla.' },
-  { n: '02', title: 'Volumen', text: 'La luz y la sombra le dan cuerpo al dibujo: proporciones y recorridos.' },
-  { n: '03', title: 'Interiorismo', text: 'Materiales, luz y objetos: el espacio como se va a vivir.' },
+  { n: '01', title: 'El espacio', text: 'Un local vacío: muros, luz y proporciones.' },
+  { n: '02', title: 'Diseño', text: 'Cada pieza se dibuja pensando en quien va a usar el espacio.' },
+  { n: '03', title: 'Materia y luz', text: 'Materiales, luz y color: el espacio como se va a vivir.' },
   { n: '04', title: 'Experiencia', text: 'Un lugar listo para vivirse.' },
 ]
 
@@ -90,6 +95,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   const canvasRef = useRef(null)
   const panelRef = useRef(null)
   const infoRef = useRef(null)
+  const notesRef = useRef([])
   const colsRef = useRef(null)
   const sceneRef = useRef(null)
   const [stage, setStage] = useState(calm ? 3 : 0)
@@ -119,7 +125,13 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
     // El boceto a lápiz y la foto del local (misma toma): en pantallas chicas, los livianos.
     const big = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1600
-    const scene = createLocalScene({ canvas, phone, photo: big ? photoFull : photoSmall, sketch: big ? sketchFull : sketchSmall })
+    const scene = createLocalScene({
+      canvas,
+      phone,
+      photo: big ? photoFull : photoSmall,
+      sketch: big ? sketchFull : sketchSmall,
+      sketchEmpty: big ? emptyFull : emptySmall,
+    })
     sceneRef.current = scene
     const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.75 : 2)
     scene.setPixelRatio(dpr)
@@ -154,6 +166,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         })
 
     let shownStage = -1
+    let frame = null
     const apply = (p) => {
       if (PHOTO_REF) {
         const W = stageEl.clientWidth
@@ -170,6 +183,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         lastKey = 'set'
         const P = L.panel
         const f = cameraFrame(P)
+        frame = f
         scene.setFrame(f.x, f.y, f.w, f.h)
         canvas.style.clipPath = `inset(${P.y}px ${stageEl.clientWidth - P.x - P.w}px ${stageEl.clientHeight - P.y - P.h}px ${P.x}px)`
         Object.assign(panel.style, { left: `${P.x}px`, top: `${P.y}px`, width: `${P.w}px`, height: `${P.h}px` })
@@ -178,13 +192,27 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         stageEl.style.setProperty('--pw', `${P.w}px`)
         stageEl.style.setProperty('--ph', `${P.h}px`)
       }
-      // Boceto → luz y sombra debajo de los trazos → color (los trazos se van) → la cámara se acerca.
+      // El espacio → el diseño, mueble por mueble → luz y sombra, color (los trazos se van) → la cámara se acerca.
       scene.setRise(0)
-      scene.setPhoto(calm ? 1 : smooth(0.08, 0.42, p))
-      scene.setSat(calm ? 1 : smooth(0.48, 0.74, p))
-      scene.setSketch(calm ? 0 : 1 - smooth(0.5, 0.76, p))
-      scene.setZoom(calm ? 0 : smooth(0.8, 1, p))
-      const s = calm ? 3 : p < 0.08 ? 0 : p < 0.46 ? 1 : p < 0.8 ? 2 : 3
+      const n = DESIGN_PIECES.length
+      const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(0.06 + i * 0.058, 0.06 + i * 0.058 + 0.1, p)))
+      scene.setDesign(pieces)
+      scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p))
+      scene.setSat(calm ? 1 : smooth(0.62, 0.78, p))
+      scene.setSketch(calm ? 0 : 1 - smooth(0.62, 0.8, p))
+      scene.setZoom(calm ? 0 : smooth(0.84, 1, p))
+      // Las anotaciones: cada una aparece cuando su mueble ya está dibujado y se van con la luz.
+      const notesOut = calm ? 1 : smooth(0.5, 0.56, p)
+      for (let i = 0; i < n; i += 1) {
+        const el = notesRef.current[i]
+        if (!el || !frame) continue
+        const [ax, ay] = DESIGN_PIECES[i].at
+        el.style.transform = `translate3d(${frame.x + (ax / 1600) * frame.w}px, ${frame.y + (ay / 900) * frame.h}px, 0)`
+        const on = smooth(0.55, 0.9, pieces[i]) * (1 - notesOut)
+        el.style.opacity = String(on)
+        el.style.setProperty('--note', String(on))
+      }
+      const s = calm ? 3 : p < 0.06 ? 0 : p < 0.52 ? 1 : p < 0.84 ? 2 : 3
       if (s !== shownStage) {
         shownStage = s
         setStage(s)
@@ -328,7 +356,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           ref={canvasRef}
           className="absolute inset-0 block h-full w-full"
           role="img"
-          aria-label="Boceto a lápiz de un local que se convierte en una maqueta 3D y se va decorando"
+          aria-label="Un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
           data-cursor-tip={tip === 'sketch' ? 'Clic y arrastre · el boceto' : 'Clic y arrastre · la foto'}
         />
 
@@ -375,6 +403,23 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span className="es-guide es-guide--v" style={{ left: 'calc(var(--px) + var(--pw))' }} />
           <span className="es-guide es-guide--rust-v" />
           <span className="es-guide es-guide--rust-h" />
+        </div>
+
+        {/* Las anotaciones del diseño: una por mueble, como en una lámina de interiorismo. */}
+        <div className="es-notes" aria-hidden="true">
+          {DESIGN_PIECES.map((piece, i) => (
+            <span
+              key={piece.id}
+              ref={(el) => {
+                notesRef.current[i] = el
+              }}
+              className={`es-note es-note--${piece.side}`}
+              style={LABEL}
+            >
+              <span className="es-note__tick" />
+              <span className="es-note__text">{piece.label}</span>
+            </span>
+          ))}
         </div>
 
         {/* El bloque de abajo: el título grande, la bajada, el botón y la cinta de servicios. */}

@@ -16,3 +16,8 @@ boceto → foto alineada: (175,213 → 232,262), (604,60 → 628,126), (1390,182
 (1093,895 → 1075,852), (835,128 → 838,188), (797,515 → 803,520), (1310,565 → 1275,560),
 (1400,555 → 1340,545)), se pasó el papel a blanco y a escala de grises:
 `src/studio/elstudio/assets/boceto-local*.webp`.
+
+`vacio-a.png` (no viaja al repo): el mismo boceto con el local vacío (Higgsfield, edición del boceto
+alineado). Calza con el boceto completo sin deformar: se escaló a 2400×1350, se pasó el papel a
+blanco y a grises: `src/studio/elstudio/assets/boceto-vacio*.webp`. Los rectángulos de cada mueble
+están en `src/studio/elstudio/designPieces.js` (px de 1600×900).
