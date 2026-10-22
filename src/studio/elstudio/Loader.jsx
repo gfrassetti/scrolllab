@@ -6,14 +6,28 @@ import Logo from './Logo'
 /**
  * elStudio — el loader.
  *
- * Una hoja clara con el logo en el centro que se arma pieza por pieza: las
- * letras de STUDIO suben desde una línea, «el» entra de costado, la tapa óxido
- * cae sobre la T y se apoya, y por último se escribe «Diseño e Interiorismo».
+ * Una hoja clara con el logo en el centro que se dibuja a sí mismo: primero se traza la S de
+ * STUDIO (el contorno y después el relleno), luego el resto de las letras con el mismo gesto, «el»,
+ * la tapa óxido de la T y por último se escribe «Diseño e Interiorismo».
  * Abajo, un contador de 000 a 100 y una línea de tinta que se llena. Al llegar,
  * la hoja se levanta como una cortina y el logo viaja hasta su lugar en el
  * encabezado (`bridge.current.target()`), donde se enciende el de verdad.
  * Con «reducir movimiento»: un fundido corto. Sin sonido.
  */
+
+// Orden y tiempos del dibujo: [pieza, segundo en que empieza, cuánto tarda el trazo].
+// La S va sola; el resto de STUDIO la sigue de a una, después «el» y por último la tapa de mesa.
+const DRAW_ORDER = [
+  ['S', 0, 1.7],
+  ['T', 1.85, 1.15],
+  ['U', 2.01, 1.15],
+  ['D', 2.17, 1.15],
+  ['I', 2.33, 1.15],
+  ['O', 2.49, 1.15],
+  ['e', 2.8, 1],
+  ['l', 2.96, 1],
+  ['slab', 3.2, 0.8],
+]
 
 export default function Loader({ progress, ready, calm, bridge, onDone }) {
   const rootRef = useRef(null)
@@ -25,7 +39,9 @@ export default function Loader({ progress, ready, calm, bridge, onDone }) {
   const doneRef = useRef(false)
   const pct = Math.round(progress * 100)
 
-  // La armada del logo (una vez, al montar).
+  // La armada del logo (una vez, al montar): cada pieza se dibuja con un contorno fino y después
+  // se rellena. Primero la S de STUDIO, sola; después el resto de la palabra, «el» y, al final, la
+  // tapa de mesa. Todas con el mismo gesto.
   useLayoutEffect(() => {
     const logo = logoRef.current
     const q = gsap.utils.selector(logo)
@@ -35,18 +51,24 @@ export default function Loader({ progress, ready, calm, bridge, onDone }) {
       return undefined
     }
     const ctx = gsap.context(() => {
-      gsap.set(q('[data-part=ch]'), { yPercent: 112 })
-      gsap.set(q('[data-part=el]'), { autoAlpha: 0, x: -18 })
-      gsap.set(q('[data-part=slab]'), { autoAlpha: 0, y: -90, rotate: -6, transformOrigin: '20% 100%' })
+      const part = (id) => ({
+        fill: q(`[data-part=${id}] [data-fill]`),
+        strokes: q(`[data-part=${id}] [data-stroke]`),
+      })
+      const ids = [...DRAW_ORDER.map(([id]) => id)]
+      ids.forEach((id) => gsap.set(part(id).fill, { opacity: 0 }))
       gsap.set(q('[data-part=sub]'), { autoAlpha: 0, letterSpacing: '0.7em' })
       gsap.set(footRef.current, { autoAlpha: 0, y: 10 })
-      const tl = gsap.timeline({ delay: 0.25, defaults: { ease: 'expo.out' } })
-      tl.to(q('[data-part=ch]'), { yPercent: 0, duration: 1.1, stagger: 0.07 }, 0)
-        .to(q('[data-part=el]'), { autoAlpha: 1, x: 0, duration: 1 }, 0.45)
-        // La tapa cae y se apoya: un golpe corto, sin rebote de dibujito.
-        .to(q('[data-part=slab]'), { autoAlpha: 1, y: 0, rotate: 0, duration: 0.8, ease: 'power4.out' }, 0.95)
-        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1.2 }, 1.35)
-        .to(footRef.current, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.9)
+      const tl = gsap.timeline({ delay: 0.25 })
+      DRAW_ORDER.forEach(([id, at, dur]) => {
+        const { fill, strokes } = part(id)
+        // El contorno se traza, el relleno entra cuando va por la mitad y el trazo se apaga.
+        tl.to(strokes, { strokeDashoffset: 0, duration: dur, ease: 'power2.inOut' }, at)
+          .to(fill, { opacity: 1, duration: 0.6, ease: 'power1.out' }, at + dur * 0.78)
+          .to(strokes, { opacity: 0, duration: 0.45, ease: 'power1.out' }, at + dur * 0.9)
+      })
+      tl.to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1.2, ease: 'expo.out' }, 3.6)
+        .to(footRef.current, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, 0.5)
     }, logo)
     return () => ctx.revert()
   }, [calm])
@@ -74,7 +96,7 @@ export default function Loader({ progress, ready, calm, bridge, onDone }) {
       return () => tween.kill()
     }
     const ctx = gsap.context(() => {
-      const row = logo.querySelector('[data-part=row]')
+      const row = logo.querySelector('svg[data-part=row]')
       const target = bridge?.current.target?.()
       const tl = gsap.timeline({ delay: 0.4, onComplete: finish })
       tl.to(footRef.current, { autoAlpha: 0, y: -8, duration: 0.35, ease: 'power2.out' }, 0)

@@ -15,7 +15,7 @@ export default function Nav({ bridge }) {
     const logo = logoRef.current
     logo.style.opacity = '0'
     bridge.current = {
-      target: () => logo.querySelector('[data-part=row]'),
+      target: () => logo.querySelector('svg[data-part=row]'),
       show: () => {
         logo.style.opacity = '1'
       },

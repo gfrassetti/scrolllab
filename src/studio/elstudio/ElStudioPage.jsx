@@ -10,7 +10,7 @@ import Nav from './Nav'
 import Hero from './Hero'
 import { FONTS_HREF, SITE } from './brand'
 
-const LOADER_MIN_MS = 2900
+const LOADER_MIN_MS = 5000 // lo que dura el dibujo del logo
 const FONT_WAIT_MS = 4000
 
 // Siempre se arranca arriba: al recargar, el navegador devolvía la página a donde estaba y el

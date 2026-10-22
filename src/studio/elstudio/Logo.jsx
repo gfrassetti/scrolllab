@@ -1,12 +1,16 @@
 import { LOGO_FONT, C, SITE } from './brand'
+import { LOGO_PARTS, LOGO_VIEWBOX as VB, LOGO_WORD_X } from './logoPaths'
 
 /**
- * El logo de elStudio en código (no es una imagen): «el» en itálica fina,
- * STUDIO en geométrica y la tapa óxido apoyada sobre la T, como la tapa de una
- * mesa vista en perspectiva. Cada pieza lleva `data-part` para que el loader
- * las arme una por una. El tamaño lo manda el `font-size` del padre.
+ * El logo de elStudio en vector: «el» en itálica fina, STUDIO en geométrica y la tapa óxido
+ * apoyada sobre la T, como la tapa de una mesa vista en perspectiva. Cada pieza es un grupo con
+ * `data-part="<id>"` con dos capas: el relleno y el contorno (que por defecto queda sin dibujar),
+ * para que el loader trace el contorno y recién después rellene. En el encabezado se ve solo el
+ * relleno. El tamaño lo manda el `font-size` del padre (1000 unidades = 1 em), así el logo del
+ * loader y el del encabezado son el mismo dibujo a otra escala.
  */
-const LETTERS = ['S', 'T', 'U', 'D', 'I', 'O']
+// El subtítulo es más chico que el logo (0.115 em): sus márgenes se miden en su propio em.
+const SUB = 0.115
 
 export default function Logo({ compact = false, className = '', style, ...rest }) {
   return (
@@ -17,48 +21,45 @@ export default function Logo({ compact = false, className = '', style, ...rest }
       style={{ ...LOGO_FONT, color: C.ink, ...style }}
       {...rest}
     >
-      <span data-part="row" aria-hidden="true" className="inline-flex items-baseline">
-        <span
-          data-part="el"
-          className="inline-block italic"
-          style={{ fontWeight: 300, letterSpacing: '-0.02em', marginRight: '0.03em' }}
-        >
-          el
-        </span>
-        <span data-part="word" className="inline-flex" style={{ fontWeight: 500, letterSpacing: '-0.015em' }}>
-          {LETTERS.map((ch) => (
-            // La máscara deja asomar la letra desde abajo; el hueco extra evita que se corte el trazo.
-            <span key={ch} className="relative inline-block overflow-hidden" style={{ padding: '0.04em 0.1em 0.06em 0.04em', margin: '-0.04em -0.1em -0.06em -0.04em' }}>
-              <span data-part="ch" className="relative inline-block">
-                {ch}
-                {ch === 'T' && (
-                  <span
-                    data-part="slab"
-                    className="absolute block"
-                    style={{
-                      left: '-0.04em',
-                      right: '-0.1em',
-                      top: '0.075em',
-                      height: '0.085em',
-                      background: C.rust,
-                      clipPath: 'polygon(14% 0, 100% 0, 84% 100%, 0 100%)',
-                    }}
-                  />
-                )}
-              </span>
-            </span>
-          ))}
-        </span>
-      </span>
+      <svg
+        data-part="row"
+        aria-hidden="true"
+        viewBox={`${VB.x} ${VB.y} ${VB.w} ${VB.h}`}
+        style={{ display: 'block', width: `${VB.w / 1000}em`, height: `${VB.h / 1000}em`, overflow: 'visible' }}
+      >
+        {LOGO_PARTS.map((part) => {
+          const color = part.id === 'slab' ? C.rust : C.ink
+          return (
+            <g key={part.id} data-part={part.id}>
+              <path data-fill d={part.fill} fill={color} />
+              {part.contours.map((d, i) => (
+                <path
+                  key={i}
+                  data-stroke
+                  d={d}
+                  pathLength="1"
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="11"
+                  strokeLinejoin="round"
+                  // Sin dibujar: la raya vale 1 (el largo normalizado) y arranca desplazada un largo entero.
+                  strokeDasharray="1"
+                  strokeDashoffset="1"
+                />
+              ))}
+            </g>
+          )
+        })}
+      </svg>
       {!compact && (
         <span
           data-part="sub"
           aria-hidden="true"
           className="block whitespace-nowrap"
           style={{
-            marginTop: '0.34em',
-            marginLeft: '1.05em',
-            fontSize: '0.115em',
+            marginTop: `${0.3 / SUB}em`,
+            marginLeft: `${(LOGO_WORD_X - VB.x) / 1000 / SUB}em`,
+            fontSize: `${SUB}em`,
             fontWeight: 500,
             letterSpacing: '0.34em',
             color: C.mute,
