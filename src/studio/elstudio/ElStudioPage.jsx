@@ -91,7 +91,7 @@ export default function ElStudioPage() {
         <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav bridge={bridge} />
         <main id="contenido" tabIndex={-1} className="outline-none">
-          <Hero />
+          <Hero boarded={boarded} calm={calm} />
         </main>
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}

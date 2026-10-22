@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
+import { readPlanProbe } from './planProbe'
 
 /**
  * El cursor de elStudio. Solo con mouse (hover + puntero fino): en el teléfono no se monta nada.
  *
  * En el hero es una mira de plano: una cruz roja en el puntero, dos ejes finos que cruzan toda la
- * pantalla y, al costado, las coordenadas en px (`X:289PX / Y:63PX`) contadas desde la esquina del
- * hero, así que cambian también cuando la página se mueve bajo el mouse. Sobre un link la cruz se
+ * pantalla y, al costado, las coordenadas: sobre el plano, en metros (`X:4.20M / Y:2.85M`); fuera de
+ * él, en px contados desde la esquina del hero (cambian también cuando la página se mueve). Sobre un link la cruz se
  * gira a 45° (una ×). Fuera del hero es un punto de tinta con inercia, que sobre algo con
  * `data-cursor="Ver"` se vuelve un disco con esa palabra.
  *
@@ -77,7 +78,11 @@ export default function Cursor() {
         lineH.current.style.transform = `translate3d(0, ${Math.round(y)}px, 0)`
         lineV.current.style.transform = `translate3d(${Math.round(x)}px, 0, 0)`
         point.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
-        coords.current.textContent = `X:${Math.round(x - rect.left)}PX\nY:${Math.round(y - rect.top)}PX`
+        // Sobre el plano, metros reales; fuera de él, píxeles del hero.
+        const m = readPlanProbe(x, y)
+        coords.current.textContent = m
+          ? `X:${m.x.toFixed(2)}M\nY:${m.y.toFixed(2)}M`
+          : `X:${Math.round(x - rect.left)}PX\nY:${Math.round(y - rect.top)}PX`
         // Cerca de un borde del visor las coordenadas pasan al otro lado de la cruz, para no cortarse.
         coords.current.dataset.flipX = x < 130 ? '1' : '0'
         coords.current.dataset.flipY = y > window.innerHeight - 64 ? '1' : '0'
