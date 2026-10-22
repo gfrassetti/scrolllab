@@ -19,7 +19,7 @@
   background-image: var(--es-grain);
   background-size: 200px 200px;
   color: var(--es-ink);
-  font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

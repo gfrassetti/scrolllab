@@ -60,8 +60,6 @@ export default function ElStudioPage() {
     const load = Promise.allSettled([
       document.fonts.load('500 1em Jost'),
       document.fonts.load('italic 300 1em Jost'),
-      document.fonts.load('300 1em "Hanken Grotesk"'),
-      document.fonts.load('500 1em "Hanken Grotesk"'),
     ])
     const timeout = new Promise((r) => setTimeout(r, FONT_WAIT_MS))
     Promise.race([load, timeout]).then(() => alive && setFontsReady(true))
