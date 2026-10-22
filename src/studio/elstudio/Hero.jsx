@@ -17,12 +17,12 @@ import sketchSmall from './assets/boceto-local-1200.webp'
  * a la derecha el cuadrante del dibujo (en pantallas angostas, el dibujo arriba y la etapa abajo).
  * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
  * (el hero queda fijo):
- *   01 Boceto       el dibujo.
- *   02 Volumen      el local sube desde el dibujo, pieza por pieza (como en Illoca); el trazo queda
- *                   como un fantasma y se apaga cuando el volumen está en pie.
- *   03 Interiorismo la foto real del local se pinta encima de la maqueta, de izquierda a derecha.
+ *   01 Boceto       el dibujo a lápiz.
+ *   02 Volumen      la luz y la sombra (la foto en grises) se pintan debajo de los trazos.
+ *   03 Interiorismo entra el color y los trazos se van.
  *   04 Experiencia  la cámara se acerca sobre la foto.
- * La cámara del 3D no se mueve: el boceto, la maqueta y la foto calzan uno sobre otro.
+ * Todo pasa sobre la misma toma (boceto y foto alineados): las líneas no se corren nunca. El 3D
+ * queda debajo solo para medir (la mira lee metros del piso).
  *
  * Con el mouse: al entrar al hero aparecen las líneas de construcción (guías punteadas y una regla
  * en óxido alrededor del cuadrante) y, al hacer clic y arrastrar sobre el dibujo, se ve el otro
@@ -38,7 +38,7 @@ const PHOTO_REF = import.meta.env.DEV && typeof window !== 'undefined' && new UR
 
 const STAGES = [
   { n: '01', title: 'Boceto', text: 'Todo empieza a mano: la idea del espacio, a lápiz y carbonilla.' },
-  { n: '02', title: 'Volumen', text: 'El mismo dibujo en tres dimensiones: proporciones, luz y recorridos.' },
+  { n: '02', title: 'Volumen', text: 'La luz y la sombra le dan cuerpo al dibujo: proporciones y recorridos.' },
   { n: '03', title: 'Interiorismo', text: 'Materiales, luz y objetos: el espacio como se va a vivir.' },
   { n: '04', title: 'Experiencia', text: 'Un lugar listo para vivirse.' },
 ]
@@ -195,13 +195,13 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         stageEl.style.setProperty('--pw', `${P.w}px`)
         stageEl.style.setProperty('--ph', `${P.h}px`)
       }
-      // Boceto → el local sube desde el dibujo → la foto se pinta encima → la cámara se acerca.
-      scene.setRise(calm ? 1 : clamp01((p - 0.06) / 0.34))
-      // El trazo queda como un fantasma mientras el volumen sube desde él, y se apaga cuando está en pie.
-      scene.setSketch(calm ? 0 : 1 - 0.86 * smooth(0.04, 0.1, p) - 0.14 * smooth(0.32, 0.42, p))
-      scene.setPhoto(calm ? 1 : smooth(0.46, 0.76, p))
+      // Boceto → luz y sombra debajo de los trazos → color (los trazos se van) → la cámara se acerca.
+      scene.setRise(0)
+      scene.setPhoto(calm ? 1 : smooth(0.08, 0.42, p))
+      scene.setSat(calm ? 1 : smooth(0.48, 0.74, p))
+      scene.setSketch(calm ? 0 : 1 - smooth(0.5, 0.76, p))
       scene.setZoom(calm ? 0 : smooth(0.8, 1, p))
-      const s = calm ? 3 : p < 0.06 ? 0 : p < 0.44 ? 1 : p < 0.8 ? 2 : 3
+      const s = calm ? 3 : p < 0.08 ? 0 : p < 0.46 ? 1 : p < 0.8 ? 2 : 3
       if (s !== shownStage) {
         shownStage = s
         setStage(s)
@@ -307,11 +307,20 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const q = gsap.utils.selector(stageRef.current)
     const pen = { v: 0 }
     const tl = gsap.timeline()
-    tl.to(pen, { v: 1, duration: REVEAL_SECONDS, ease: 'power1.inOut', onUpdate: () => scene.setReveal(pen.v) }, 0)
+    // El dibujo arranca cuando la imagen está (si tarda, el marco se arma igual y el dibujo lo sigue).
+    let alive = true
+    scene.sketchReady.then(() => {
+      if (alive) gsap.to(pen, { v: 1, duration: REVEAL_SECONDS, ease: 'power1.inOut', onUpdate: () => scene.setReveal(pen.v) })
+    })
+    tl
       .to(q('[data-panel-edge]'), { scale: 1, duration: 0.9, ease: 'expo.inOut', stagger: 0.05 }, 0.2)
       .to(q('[data-col]'), { scaleY: 1, duration: 1.1, ease: 'expo.out', stagger: 0.06 }, OPEN_DELAY + 0.8)
       .add(() => paint(q('[data-paint]'), { stagger: 0.05, duration: 0.85 }), OPEN_DELAY + 0.6)
-    return () => tl.kill()
+    return () => {
+      alive = false
+      tl.kill()
+      gsap.killTweensOf(pen)
+    }
   }, [boarded, calm])
 
   const st = STAGES[stage]

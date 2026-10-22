@@ -294,6 +294,7 @@ const sketchFragment = /* glsl */ `
   uniform vec4 uFrame;        // el cuadro de la cámara en el canvas (x, y, w, h en 0–1, y hacia arriba)
   uniform float uPhotoReveal; // cuánto de la foto está pintado sobre la maqueta (el final del hero)
   uniform float uPhotoZoom;   // el acercamiento final sobre la foto (1 = sin zoom)
+  uniform float uPhotoSat;    // el color de la foto (0 = en grises: luz y sombra)
   uniform sampler2D tSketchImg; // el boceto dibujado a lápiz (misma toma que la foto)
   uniform float uSketchImg;     // 1: el boceto es la imagen; 0: el filtro sobre el 3D
   uniform vec2 uRes;      // px del canvas (con el dpr)
@@ -380,14 +381,16 @@ const sketchFragment = /* glsl */ `
   }
 
   // La foto dentro del cuadro de la cámara, igualada al papel de la página y con los bordes fundidos.
-  vec4 photoAt(float zoom) {
+  vec4 photoAt(float zoom, float sat) {
     vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
     vec2 puv = (fuv - vec2(0.5, 0.48)) / zoom + vec2(0.5, 0.48);
     float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
     vec3 ph = texture2D(tPhoto, clamp(puv, 0.0, 1.0)).rgb;
-    float edge = smoothstep(0.0, 0.07, fuv.x) * smoothstep(1.0, 0.93, fuv.x) * smoothstep(0.0, 0.08, fuv.y) * smoothstep(1.0, 0.92, fuv.y);
-    // El fondo liso de la foto se recorta: queda el local con su sombra, sobre el papel de la página.
     float key = smoothstep(0.012, 0.05, distance(ph, vec3(0.937, 0.922, 0.890)));
+    ph = mix(vec3(lum(ph)) * vec3(1.0, 0.985, 0.955), ph, sat);
+    float edge = smoothstep(0.0, 0.07, fuv.x) * smoothstep(1.0, 0.93, fuv.x) * smoothstep(0.0, 0.08, fuv.y) * smoothstep(1.0, 0.92, fuv.y);
+    // El fondo liso de la foto se recorta (key, medido antes de quitarle el color): queda el local con
+    // su sombra, sobre el papel de la página.
     float a = inside * edge * key;
     return vec4(ph * a, a);
   }
@@ -429,14 +432,16 @@ const sketchFragment = /* glsl */ `
       float r = uPhotoReveal * 1.45 - 0.2;
       m = 1.0 - smoothstep(r - 0.06, r, field);
     }
-    vec4 base = sk + a * (1.0 - m) * (1.0 - sk.a);
+    // Debajo, el 3D (si lo hay) y la foto pintándose; encima, los trazos del boceto.
+    vec4 base = a * (1.0 - m);
     if (m > 0.0) {
-      vec4 ph = photoAt(uPhotoZoom);
+      vec4 ph = photoAt(uPhotoZoom, uPhotoSat);
       base = ph * m + base * (1.0 - ph.a * m);
     }
+    base = sk + base * (1.0 - sk.a);
     if (uSplitOn > 0.001) {
       vec4 o = layer(tColorO, tNormalO, uSketchO, 1.0);
-      if (uSketchO < 0.5 && uPhoto > 0.5) o = photoAt(uPhotoZoom);
+      if (uSketchO < 0.5 && uPhoto > 0.5) o = photoAt(uPhotoZoom, 1.0);
       if (uSketchO > 0.5 && uSketchImg > 0.5) o = sketchAt(1.0, uPhotoZoom);
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
@@ -564,6 +569,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       uPhoto: { value: 0 },
       uFrame: { value: new THREE.Vector4(0, 0, 1, 1) },
       uPhotoReveal: { value: 0 },
+      uPhotoSat: { value: 1 },
       tSketchImg: { value: null },
       uSketchImg: { value: 0 },
       uPhotoZoom: { value: 1 },
@@ -595,8 +601,11 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   }
   // El boceto a lápiz como imagen (misma toma que la foto). Hasta que llega, el filtro sobre el 3D.
   let sketchTex = null
+  let sketchLoaded = () => {}
+  const sketchReady = sketch ? new Promise((resolve) => (sketchLoaded = resolve)) : Promise.resolve()
   if (sketch) {
     new THREE.TextureLoader().load(sketch, (tex) => {
+      sketchLoaded()
       tex.colorSpace = THREE.NoColorSpace
       tex.minFilter = THREE.LinearMipmapLinearFilter
       tex.anisotropy = 4
@@ -616,7 +625,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   let canvasH = 1
   let dpr = 1
   let frame = { x: 0, y: 0, w: 1, h: 1 }
-  const state = { reveal: 0, sketch: 1, rise: 0, decor: 0, camera: 0, lift: 0, photo: 0, zoom: 0, split: 0.5, splitOn: 0 }
+  const state = { reveal: 0, sketch: 1, rise: 0, decor: 0, camera: 0, lift: 0, photo: 0, sat: 1, zoom: 0, split: 0.5, splitOn: 0 }
   let dirty = true
 
   const applyFrame = () => {
@@ -710,7 +719,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
 
   /** El estado que muestra el arrastre: el local terminado mientras se ve el boceto, y al revés. */
   const otherView = () =>
-    state.photo < 0.5 && state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0, photo: !!photoTex } : { rise: 1, decor: 0, sketch: 1, photo: false }
+    state.sat < 0.5 && state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0, photo: !!photoTex } : { rise: 1, decor: 0, sketch: 1, photo: false }
 
   const draw = () => {
     const u = post.uniforms
@@ -720,14 +729,15 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     const other = otherView()
     u.uPhoto.value = photoTex ? 1 : 0
     u.uPhotoReveal.value = state.photo
+    u.uPhotoSat.value = state.sat
     u.uPhotoZoom.value = 1 + smooth(0, 1, state.zoom) * 0.06
     u.uSketchO.value = other.sketch
-    if (state.splitOn > 0.001 && !other.photo && !(other.sketch && sketchTex)) {
+    if (state.splitOn > 0.001 && !other.photo && !(other.sketch && sketch)) {
       update({ ...state, ...other })
       pass(rtColorO, rtNormalO, other.sketch > 0.001)
     }
     // La fuente del boceto: el local entero, sin decorar.
-    if (state.sketch > 0.001 && !sketchTex) {
+    if (state.sketch > 0.001 && !sketch) {
       update({ ...state, rise: 1, decor: 0 })
       pass(rtColorB, rtNormalB, true)
     }
@@ -738,7 +748,8 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       pass(rtColor, rtNormal, false)
     }
     u.uA.value = a3d
-    u.uSketch.value = state.sketch
+    // Con boceto en imagen, no se muestra el filtro sobre el 3D mientras carga (no calzaría).
+    u.uSketch.value = sketch && !sketchTex ? 0 : state.sketch
     u.uReveal.value = state.reveal
     renderer.setRenderTarget(null)
     renderer.render(postScene, postCamera)
@@ -758,6 +769,9 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     setLift: set('lift'),
     /** Cuánto de la foto está pintado sobre la maqueta (0–1) y el acercamiento final sobre ella (0–1). */
     setPhoto: set('photo'),
+    setSat: set('sat'),
+    /** Se resuelve cuando el boceto en imagen está listo para pintarse. */
+    sketchReady,
     setZoom: set('zoom'),
     setDecor: set('decor'),
     setCamera: set('camera'),
