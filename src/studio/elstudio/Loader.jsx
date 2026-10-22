@@ -19,9 +19,9 @@ import { LOGO_VIEWBOX as VB } from './logoPaths'
 // Qué se dibuja y en qué orden. La S va primero y sola; el resto de STUDIO la sigue, después «el»
 // y por último la tapa de mesa.
 const ORDER = ['S', 'T', 'U', 'D', 'I', 'O', 'e', 'l', 'slab']
-const S_SECONDS = 1.6 // lo que tarda la mira en recorrer la S (la firma: despacio)
-const REST_SPEED = 9 // el resto va más rápido, con el mismo gesto (× la velocidad de la S)
-const HOP = 0.09 // lo que tarda la mira en pasar de una letra a la siguiente
+const S_SECONDS = 1.2 // lo que tarda la mira en recorrer la S (la firma: despacio)
+const REST_SPEED = 14 // el resto va más rápido, con el mismo gesto (× la velocidad de la S)
+const HOP = 0.06 // lo que tarda la mira en pasar de una letra a la siguiente
 
 export default function Loader({ ready, calm, bridge, onDone }) {
   const rootRef = useRef(null)
@@ -77,17 +77,17 @@ export default function Loader({ ready, calm, bridge, onDone }) {
 
       const speed = pieces[0].length / S_SECONDS // unidades por segundo
       const tl = gsap.timeline({
-        delay: 0.35,
+        delay: 0.2,
         onUpdate: () => gsap.set(lineRef.current, { scaleX: tl.progress() }),
         onComplete: () => setDrawn(true),
       })
       tl.to(footRef.current, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, 0)
         .to(pen, { autoAlpha: 1, duration: 0.4 }, 0.2)
 
-      let t = 0.35
+      let t = 0.2
       const trail = { p: 0 }
       pieces.forEach((p, i) => {
-        const dur = i === 0 ? S_SECONDS : Math.min(0.6, Math.max(0.26, p.length / (speed * REST_SPEED)))
+        const dur = i === 0 ? S_SECONDS : Math.min(0.45, Math.max(0.2, p.length / (speed * REST_SPEED)))
         // La mira llega al punto de arranque de la letra…
         tl.call(() => place(p, 0), null, t)
         // …y recorre su contorno (el trazo se dibuja detrás de ella).
@@ -111,8 +111,8 @@ export default function Loader({ ready, calm, bridge, onDone }) {
         t += dur + HOP
       })
       tl.to(pen, { autoAlpha: 0, duration: 0.35 }, t - HOP + 0.1)
-        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 0.9, ease: 'expo.out' }, t - HOP)
-        .to({}, { duration: 0.35 }) // un respiro antes de salir
+        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 0.7, ease: 'expo.out' }, t - HOP)
+        .to({}, { duration: 0.15 }) // un respiro antes de salir
     }, logo)
     return () => ctx.revert()
   }, [calm])
@@ -140,7 +140,7 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       const tl = gsap.timeline({ onComplete: finish })
       tl.to(footRef.current, { autoAlpha: 0, y: -8, duration: 0.35, ease: 'power2.out' }, 0)
         .to(logo.querySelector('[data-part=sub]'), { autoAlpha: 0, duration: 0.3, ease: 'power2.out' }, 0)
-        .to(sheet, { clipPath: 'inset(0% 0% 100% 0%)', duration: 1.15, ease: 'expo.inOut' }, 0.25)
+        .to(sheet, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.95, ease: 'expo.inOut' }, 0.15)
       if (target && row) {
         const a = row.getBoundingClientRect()
         const b = target.getBoundingClientRect()
@@ -151,10 +151,10 @@ export default function Loader({ ready, calm, bridge, onDone }) {
             y: b.top - a.top,
             scale: b.width / a.width,
             transformOrigin: '0 0',
-            duration: 1.15,
+            duration: 0.95,
             ease: 'expo.inOut',
           },
-          0.25,
+          0.15,
         )
       } else {
         tl.to(logo, { autoAlpha: 0, duration: 0.5 }, 0.4)
