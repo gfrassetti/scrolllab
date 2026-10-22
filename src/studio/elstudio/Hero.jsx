@@ -7,6 +7,8 @@ import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
 import photoFull from './assets/foto-local.webp'
 import photoSmall from './assets/foto-local-1200.webp'
+import sketchFull from './assets/boceto-local.webp'
+import sketchSmall from './assets/boceto-local-1200.webp'
 
 /**
  * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
@@ -29,7 +31,7 @@ import photoSmall from './assets/foto-local-1200.webp'
  * Con «reducir movimiento»: la lámina quieta, con la foto.
  */
 
-const REVEAL_SECONDS = 3.2
+const REVEAL_SECONDS = 3.8
 // `?foto-ref`: el local terminado con la cámara de arranque y el cuadro a todo el canvas, para
 // generar la foto del arrastre a partir de él (scripts propios, no se usa en el sitio).
 const PHOTO_REF = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('foto-ref')
@@ -129,9 +131,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const panel = panelRef.current
     const left = leftRef.current
     const phone = window.matchMedia('(max-width: 767px)').matches
-    // La foto del local (el final del hero y el arrastre): en pantallas chicas, la liviana.
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-    const scene = createLocalScene({ canvas, phone, photo: window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1600 ? photoFull : photoSmall })
+    // El boceto a lápiz y la foto del local (misma toma): en pantallas chicas, los livianos.
+    const big = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1600
+    const scene = createLocalScene({ canvas, phone, photo: big ? photoFull : photoSmall, sketch: big ? sketchFull : sketchSmall })
     sceneRef.current = scene
     const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.75 : 2)
     scene.setPixelRatio(dpr)

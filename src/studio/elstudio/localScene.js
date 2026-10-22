@@ -294,6 +294,8 @@ const sketchFragment = /* glsl */ `
   uniform vec4 uFrame;        // el cuadro de la cámara en el canvas (x, y, w, h en 0–1, y hacia arriba)
   uniform float uPhotoReveal; // cuánto de la foto está pintado sobre la maqueta (el final del hero)
   uniform float uPhotoZoom;   // el acercamiento final sobre la foto (1 = sin zoom)
+  uniform sampler2D tSketchImg; // el boceto dibujado a lápiz (misma toma que la foto)
+  uniform float uSketchImg;     // 1: el boceto es la imagen; 0: el filtro sobre el 3D
   uniform vec2 uRes;      // px del canvas (con el dpr)
   uniform float uDpr;
   uniform float uA;       // cuánto se ve el 3D
@@ -390,10 +392,32 @@ const sketchFragment = /* glsl */ `
     return vec4(ph * a, a);
   }
 
+  // El boceto a lápiz (imagen), como tinta sobre el papel de la página. Se dibuja desde el centro:
+  // primero los trazos fuertes, después los tonos suaves y el sombreado.
+  vec4 sketchAt(float reveal, float zoom) {
+    vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
+    vec2 puv = (fuv - vec2(0.5, 0.48)) / zoom + vec2(0.5, 0.48);
+    float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
+    float edge = smoothstep(0.0, 0.05, fuv.x) * smoothstep(1.0, 0.95, fuv.x) * smoothstep(0.0, 0.06, fuv.y) * smoothstep(1.0, 0.94, fuv.y);
+    vec3 c = texture2D(tSketchImg, clamp(puv, 0.0, 1.0)).rgb;
+    // Cuánto grafito hay: lo que se aparta del papel del dibujo.
+    float ink = clamp((0.93 - lum(c)) / 0.8, 0.0, 1.0);
+    ink = smoothstep(0.03, 1.0, ink);
+    vec2 px = vUv * uRes / uDpr;
+    float dist = length((vUv - uCenter) * vec2(uRes.x / uRes.y, 1.0));
+    float field = dist * 0.85 + (fbm(px * 0.006) - 0.5) * 0.45;
+    float strong = smoothstep(0.35, 0.7, ink);
+    float lineMask = 1.0 - smoothstep(reveal * 1.12 - 0.1, reveal * 1.12, field);
+    float toneMask = 1.0 - smoothstep(reveal * 1.12 - 0.32, reveal * 1.12 - 0.14, field);
+    float a = ink * mix(toneMask, lineMask, strong) * inside * edge;
+    vec3 graphite = vec3(0.16, 0.155, 0.145);
+    return vec4(graphite * a, a);
+  }
+
   void main() {
     // El boceto va encima del 3D: mientras el local sube desde el dibujo, el trazo se apaga.
     vec4 a = layer(tColor, tNormal, 0.0, 1.0) * uA;
-    vec4 sk = layer(tColorB, tNormalB, 1.0, uReveal) * uSketch;
+    vec4 sk = (uSketchImg > 0.5 ? sketchAt(uReveal, uPhotoZoom) : layer(tColorB, tNormalB, 1.0, uReveal)) * uSketch;
     // La foto se pinta sobre la maqueta: un trazo ancho que barre de izquierda a derecha, con borde
     // de pincel (ruido estirado a lo largo, como cerdas). El mismo trazo borra la maqueta.
     float m = 0.0;
@@ -413,6 +437,7 @@ const sketchFragment = /* glsl */ `
     if (uSplitOn > 0.001) {
       vec4 o = layer(tColorO, tNormalO, uSketchO, 1.0);
       if (uSketchO < 0.5 && uPhoto > 0.5) o = photoAt(uPhotoZoom);
+      if (uSketchO > 0.5 && uSketchImg > 0.5) o = sketchAt(1.0, uPhotoZoom);
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
       float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
@@ -426,7 +451,7 @@ const sketchFragment = /* glsl */ `
   }
 `
 
-export function createLocalScene({ canvas, phone = false, photo = null }) {
+export function createLocalScene({ canvas, phone = false, photo = null, sketch = null }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, premultipliedAlpha: true })
   renderer.setClearColor(0x000000, 0)
   renderer.shadowMap.enabled = true
@@ -539,6 +564,8 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
       uPhoto: { value: 0 },
       uFrame: { value: new THREE.Vector4(0, 0, 1, 1) },
       uPhotoReveal: { value: 0 },
+      tSketchImg: { value: null },
+      uSketchImg: { value: 0 },
       uPhotoZoom: { value: 1 },
       uSketchO: { value: 0 },
       uSplit: { value: 0.5 },
@@ -563,6 +590,19 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
       tex.anisotropy = 4
       photoTex = tex
       post.uniforms.tPhoto.value = tex
+      dirty = true
+    })
+  }
+  // El boceto a lápiz como imagen (misma toma que la foto). Hasta que llega, el filtro sobre el 3D.
+  let sketchTex = null
+  if (sketch) {
+    new THREE.TextureLoader().load(sketch, (tex) => {
+      tex.colorSpace = THREE.NoColorSpace
+      tex.minFilter = THREE.LinearMipmapLinearFilter
+      tex.anisotropy = 4
+      sketchTex = tex
+      post.uniforms.tSketchImg.value = tex
+      post.uniforms.uSketchImg.value = 1
       dirty = true
     })
   }
@@ -682,12 +722,12 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
     u.uPhotoReveal.value = state.photo
     u.uPhotoZoom.value = 1 + smooth(0, 1, state.zoom) * 0.06
     u.uSketchO.value = other.sketch
-    if (state.splitOn > 0.001 && !other.photo) {
+    if (state.splitOn > 0.001 && !other.photo && !(other.sketch && sketchTex)) {
       update({ ...state, ...other })
       pass(rtColorO, rtNormalO, other.sketch > 0.001)
     }
     // La fuente del boceto: el local entero, sin decorar.
-    if (state.sketch > 0.001) {
+    if (state.sketch > 0.001 && !sketchTex) {
       update({ ...state, rise: 1, decor: 0 })
       pass(rtColorB, rtNormalB, true)
     }
@@ -766,6 +806,7 @@ export function createLocalScene({ canvas, phone = false, photo = null }) {
       ;[edgeMat, normalMat, post, ground.material].forEach((m) => m.dispose())
       ;[rtColor, rtNormal, rtColorB, rtNormalB, rtColorO, rtNormalO].forEach((t) => t.dispose())
       photoTex?.dispose()
+      sketchTex?.dispose()
       renderer.dispose()
     },
   }
