@@ -103,6 +103,8 @@ design/masters/apex-3d/
 
 # cāpsula33: demo privado del Estudio con fotos de un negocio real (no viajan al repo).
 design/masters/capsula33/
+# elStudio: el original de la foto generada (el sitio usa el WebP de src/studio/elstudio/assets).
+design/masters/elstudio/*.png
 public/studio/
 dist-capsula33
 dist-elstudio

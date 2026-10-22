@@ -5,6 +5,8 @@ import { BAND_H, C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
 import { paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
+import photoFull from './assets/foto-local.webp'
+import photoSmall from './assets/foto-local-1200.webp'
 
 /**
  * El hero: del boceto al local, sobre una lámina con la grilla a la vista.
@@ -129,7 +131,9 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const panel = panelRef.current
     const left = leftRef.current
     const phone = window.matchMedia('(max-width: 767px)').matches
-    const scene = createLocalScene({ canvas, phone })
+    // La foto del arrastre (solo con mouse): en pantallas chicas, la liviana.
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    const scene = createLocalScene({ canvas, phone, photo: fine ? (window.innerWidth > 1300 ? photoFull : photoSmall) : null })
     sceneRef.current = scene
     const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.75 : 2)
     scene.setPixelRatio(dpr)
@@ -239,7 +243,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     })
 
     // El arrastre sobre el dibujo (solo con mouse): el otro estado a la izquierda del cursor.
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches
     const split = { on: 0 }
     let dragging = false
     const onDown = (e) => {
@@ -346,7 +349,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           className="absolute inset-0 block h-full w-full"
           role="img"
           aria-label="Boceto a lápiz de un local que se convierte en una maqueta 3D y se va decorando"
-          data-cursor-tip={tip === 'final' ? 'Clic y arrastre · el local terminado' : 'Clic y arrastre · el boceto'}
+          data-cursor-tip={tip === 'sketch' ? 'Clic y arrastre · el boceto' : 'Clic y arrastre · el local terminado'}
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
