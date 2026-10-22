@@ -29,6 +29,7 @@ export default function Logo({ compact = false, className = '', style, ...rest }
       >
         {LOGO_PARTS.map((part) => {
           const color = part.id === 'slab' ? C.rust : C.ink
+          // El trazo que dibuja la mira va en óxido (el color de la tapa); el relleno, en tinta.
           return (
             <g key={part.id} data-part={part.id}>
               <path data-fill d={part.fill} fill={color} />
@@ -39,7 +40,7 @@ export default function Logo({ compact = false, className = '', style, ...rest }
                   d={d}
                   pathLength="1"
                   fill="none"
-                  stroke={color}
+                  stroke={C.rust}
                   strokeWidth="11"
                   strokeLinejoin="round"
                   // Sin dibujar: la raya vale 1 (el largo normalizado) y arranca desplazada un largo entero.

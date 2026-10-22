@@ -10,7 +10,6 @@ import Nav from './Nav'
 import Hero from './Hero'
 import { FONTS_HREF, SITE } from './brand'
 
-const LOADER_MIN_MS = 5000 // lo que dura el dibujo del logo
 const FONT_WAIT_MS = 4000
 
 // Siempre se arranca arriba: al recargar, el navegador devolvía la página a donde estaba y el
@@ -41,7 +40,6 @@ export default function ElStudioPage() {
   const [calm] = useState(() => prefersReducedMotion())
   const bridge = useRef({})
   const [fontsReady, setFontsReady] = useState(false)
-  const [elapsed, setElapsed] = useState(0)
   const [boarded, setBoarded] = useState(false)
 
   // Las fuentes, una sola vez (el sitio publicado ya las trae en el HTML).
@@ -68,20 +66,7 @@ export default function ElStudioPage() {
     }
   }, [])
 
-  // La secuencia dura lo que tiene que durar aunque todo esté en caché.
-  useEffect(() => {
-    let raf = 0
-    const t0 = performance.now()
-    const tick = (now) => {
-      const t = Math.min(1, (now - t0) / LOADER_MIN_MS)
-      setElapsed(t)
-      if (t < 1) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [])
-  const progress = fontsReady ? elapsed : Math.min(elapsed, 0.9)
-  const ready = fontsReady && elapsed >= 1
+  const ready = fontsReady
 
   // Hasta que termina el loader, la página no se mueve.
   useEffect(() => {
@@ -103,12 +88,13 @@ export default function ElStudioPage() {
   return (
     <SmoothScrollProvider>
       <div className="es-root min-h-svh">
-        <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
+        <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav bridge={bridge} />
         <main id="contenido" tabIndex={-1} className="outline-none">
           <Hero />
         </main>
-        <Cursor />
+        {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
+        {boarded && <Cursor />}
       </div>
     </SmoothScrollProvider>
   )

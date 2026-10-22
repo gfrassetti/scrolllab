@@ -170,3 +170,48 @@
   white-space: nowrap;
   opacity: 0;
 }
+
+/* ── La mira del loader: la que dibuja el logo ─────────────────────── */
+.es-pen {
+  --pen: 196, 68, 31;
+  --pen-axis: min(92px, 22vw);
+  will-change: transform;
+}
+.es-pen__h,
+.es-pen__v {
+  position: absolute;
+  background: rgba(var(--pen), 0.38);
+}
+.es-pen__h {
+  left: calc(var(--pen-axis) * -1);
+  width: calc(var(--pen-axis) * 2);
+  top: 0;
+  height: 1px;
+}
+.es-pen__v {
+  top: calc(var(--pen-axis) * -1);
+  height: calc(var(--pen-axis) * 2);
+  left: 0;
+  width: 1px;
+}
+.es-pen__box {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 1.5px solid rgb(var(--pen));
+  background: var(--es-paper);
+}
+.es-pen__coords {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  white-space: pre;
+  font-family: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(var(--pen), 0.7);
+  font-variant-numeric: tabular-nums;
+}
