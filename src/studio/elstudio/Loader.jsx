@@ -17,7 +17,7 @@ import Logo from './Logo'
 
 // Solo la S de STUDIO se dibuja, despacio (la firma). El resto del logo entra después con
 // el gesto de siempre: letras que suben desde una línea, «el» de costado, la tapa que cae.
-const S_SECONDS = 2.4 // lo que tarda en trazarse la S
+const S_SECONDS = 1.9 // lo que tarda en trazarse la S
 const RISE = ['T', 'U', 'D', 'I', 'O']
 
 export default function Loader({ ready, calm, bridge, onDone }) {
@@ -54,7 +54,7 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       gsap.set(q('[data-part=sub]'), { autoAlpha: 0, letterSpacing: '0.7em' })
       gsap.set(footRef.current, { autoAlpha: 0, y: 10 })
 
-      const start = 0.35
+      const start = 0.25
       const end = start + S_SECONDS // la S termina y entra el resto
       const trail = { p: 0 }
       const tl = gsap.timeline({
@@ -82,8 +82,8 @@ export default function Loader({ ready, calm, bridge, onDone }) {
         .to(q('[data-part=e]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.45)
         .to(q('[data-part=l]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.5)
         .to(q('[data-part=slab]'), { autoAlpha: 1, y: 0, rotation: 0, duration: 0.8, ease: 'power4.out' }, end + 0.95)
-        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1.2, ease: 'expo.out' }, end + 1.35)
-        .to({}, { duration: 0.4 }) // un respiro antes de salir
+        .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1.1, ease: 'expo.out' }, end + 1.1)
+        .to({}, { duration: 0.25 }) // un respiro antes de salir
     }, logo)
     return () => ctx.revert()
   }, [calm])
