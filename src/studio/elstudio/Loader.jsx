@@ -104,8 +104,7 @@ export default function Loader({ progress, ready, calm, bridge, onDone }) {
 
   return (
     <div ref={rootRef} className="fixed inset-0 z-50" role="status" aria-live="polite" aria-label="Cargando elStudio">
-      <div ref={sheetRef} className="absolute inset-0" style={{ background: C.sheet, clipPath: 'inset(0% 0% 0% 0%)' }}>
-        <div className="es-paper" style={{ position: 'absolute' }} aria-hidden="true" />
+      <div ref={sheetRef} className="es-sheet absolute inset-0" style={{ clipPath: 'inset(0% 0% 0% 0%)' }}>
         <div
           ref={footRef}
           className="absolute inset-x-0 bottom-0 flex items-end justify-between px-5 pb-6 text-[11px] font-medium tracking-[0.16em] uppercase sm:px-9 sm:pb-8"

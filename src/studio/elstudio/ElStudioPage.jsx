@@ -110,18 +110,17 @@ export default function ElStudioPage() {
         <a
           href="#estudio"
           className="fixed top-3 left-3 z-[200] -translate-y-[200%] px-4 py-2.5 text-[13px] font-medium transition-transform focus:translate-y-0"
-          style={{ background: '#161513', color: '#ece5d6' }}
+          style={{ background: '#161513', color: '#f3f1ea' }}
         >
           Saltar al contenido
         </a>
         <Loader progress={progress} ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav bridge={bridge} />
-        <main id="contenido" tabIndex={-1} className="relative z-[1] outline-none">
+        <main id="contenido" tabIndex={-1} className="outline-none">
           <Hero boarded={boarded} calm={calm} />
           <Statement calm={calm} />
           <Contact />
         </main>
-        <div className="es-paper" aria-hidden="true" />
         <Cursor />
       </div>
     </SmoothScrollProvider>

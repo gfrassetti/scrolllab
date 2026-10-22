@@ -40,7 +40,7 @@ export default function Nav({ bridge }) {
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 transition-opacity duration-500"
-        style={{ opacity: scrolled ? 1 : 0, background: 'linear-gradient(to bottom, rgba(236,229,214,0.97) 55%, rgba(236,229,214,0))' }}
+        style={{ opacity: scrolled ? 1 : 0, background: 'linear-gradient(to bottom, rgba(243,241,234,0.97) 55%, rgba(243,241,234,0))' }}
       />
       <a
         ref={logoRef}

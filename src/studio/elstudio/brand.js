@@ -9,8 +9,8 @@
  */
 
 export const C = {
-  paper: '#ece5d6', // la hoja
-  sheet: '#f4efe4', // una hoja más clara (el loader)
+  paper: '#f3f1ea', // la hoja
+  sheet: '#f9f7f2', // una hoja más clara (el loader)
   ink: '#161513',
   mute: '#6d675c',
   hair: 'rgba(22, 21, 19, 0.18)',

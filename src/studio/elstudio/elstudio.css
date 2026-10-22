@@ -8,28 +8,31 @@
  */
 
 .es-root {
-  --es-paper: #ece5d6;
+  /*
+   * La hoja: papel casi blanco con un grano apenas perceptible y, encima, un papel milimetrado de
+   * plano (líneas finas con hueco en cada cruce y un punto de registro). Las dos capas se repiten
+   * y se mueven con la página, como una hoja que se desliza.
+   */
+  --es-paper: #f3f1ea;
   --es-ink: #161513;
   --es-rust: #c4441f;
   --es-ease: cubic-bezier(0.23, 1, 0.32, 1);
-  background: var(--es-paper);
+  --es-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.38 -0.13'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  --es-grid: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><g stroke='rgb(96,90,78)' stroke-opacity='.17' stroke-width='.5' fill='none'><path d='M.25 8V72M79.75 8V72M8 .25H72M8 79.75H72'/></g><g fill='rgb(96,90,78)' fill-opacity='.2'><rect width='1' height='1'/><rect x='79' width='1' height='1'/><rect y='79' width='1' height='1'/><rect x='79' y='79' width='1' height='1'/></g></svg>");
+  background-color: var(--es-paper);
+  background-image: var(--es-grid), var(--es-grain);
+  background-size: 80px 80px, 200px 200px;
   color: var(--es-ink);
   font-family: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* La hoja: grano fino + moteado de fibra + borde. Fija detrás del contenido, sin tocar el toque. */
-.es-paper {
-  position: fixed;
-  inset: 0;
-  z-index: 0; /* detrás del contenido: la tinta queda pura, el papel se ve entre las letras */
-  pointer-events: none;
-  background-image:
-    radial-gradient(ellipse at 50% 45%, transparent 62%, rgba(110, 84, 46, 0.08) 100%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='g' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0.4 -0.1'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='m' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.006' numOctaves='4' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.34  0 0 0 0 0.18  0 0 0 0.3 -0.1'/></filter><rect width='100%' height='100%' filter='url(%23m)'/></svg>");
-  background-size: 100% 100%, 240px 240px, 600px 600px;
+/* La hoja del loader: la misma, un punto más clara. */
+.es-sheet {
+  background-color: #f9f7f2;
+  background-image: var(--es-grid), var(--es-grain);
+  background-size: 80px 80px, 200px 200px;
 }
 
 /* Selección: la tinta al revés. */
