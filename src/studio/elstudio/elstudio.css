@@ -24,9 +24,9 @@
   text-rendering: optimizeLegibility;
 }
 
-/* La hoja del loader: la misma, un punto más clara. */
+/* La hoja del loader: exactamente la misma que la de la página (si no, al subir la cortina se ve un salto de color). */
 .es-sheet {
-  background-color: #f9f7f2;
+  background-color: var(--es-paper);
   background-image: var(--es-grain);
   background-size: 200px 200px;
 }
