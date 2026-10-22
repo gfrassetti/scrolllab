@@ -27,6 +27,8 @@ export const DISPLAY = { fontFamily: "'Helvetica Neue', Helvetica, Arial, 'Liber
 /** Alto del nav y de la franja de abajo del marco (px), en el teléfono y desde 640 px (elstudio.css lo repite). */
 export const NAV_H = { phone: 60, desk: 72 }
 export const BAND_H = { phone: 56, desk: 64 }
+/** Cuándo se abre el marco después del loader (s): el boceto ya va bastante pintado. */
+export const OPEN_DELAY = 1.7
 
 export const SITE = {
   name: 'elStudio',

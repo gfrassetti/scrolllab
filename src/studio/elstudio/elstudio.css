@@ -141,6 +141,27 @@
   bottom: 12px;
 }
 
+/* El cartel junto a la mira: abajo a la derecha (cerca del borde derecho, a la izquierda). */
+.es-cross__tip {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  max-width: 220px;
+  padding: 7px 10px 8px;
+  background: #1d1c1a;
+  color: #f3f1ea;
+  font-family: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 10.5px;
+  line-height: 1.45;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: normal;
+  width: max-content;
+}
+.es-cross__tip[data-flip-x='1'] {
+  left: auto;
+  right: 14px;
+}
 /* Fuera del hero: el punto de tinta (disco con texto sobre `data-cursor`). */
 .es-cursor__dot {
   position: absolute;
@@ -172,13 +193,13 @@
 }
 
 /* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
-.es-frame {
+.es-root {
   --nav-h: 60px;
   --band-h: 56px;
   --line: rgba(22, 21, 19, 0.5);
 }
 @media (min-width: 640px) {
-  .es-frame {
+  .es-root {
     --nav-h: 72px;
     --band-h: 64px;
   }
@@ -283,4 +304,253 @@
 .es-frame__mark--br {
   right: 12px;
   bottom: calc(var(--band-h) + 10px);
+}
+
+/* ── La lámina del hero ─────────────────────────────────────────────── */
+/* La grilla de columnas, entre el nav y la franja de abajo. */
+.es-cols {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(var(--nav-h) + 9px);
+  bottom: var(--band-h);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  column-gap: 16px;
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .es-cols {
+    left: 36px;
+    right: 36px;
+  }
+}
+.es-cols > span {
+  border-left: 1px solid rgba(22, 21, 19, 0.075);
+  transform-origin: top center;
+}
+.es-cols > span:last-child {
+  border-right: 1px solid rgba(22, 21, 19, 0.075);
+}
+
+/* El cuadrante del dibujo: cuatro bordes y sus rótulos. */
+.es-panel {
+  position: absolute;
+  pointer-events: none;
+}
+.es-panel__edge {
+  position: absolute;
+  background: rgba(22, 21, 19, 0.42);
+}
+.es-panel__edge--t,
+.es-panel__edge--b {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+.es-panel__edge--l,
+.es-panel__edge--r {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.es-panel__edge--t {
+  top: 0;
+  transform-origin: left center;
+}
+.es-panel__edge--r {
+  right: 0;
+  transform-origin: center top;
+}
+.es-panel__edge--b {
+  bottom: 0;
+  transform-origin: right center;
+}
+.es-panel__edge--l {
+  left: 0;
+  transform-origin: center bottom;
+}
+.es-panel__label {
+  position: absolute;
+  top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6d675c;
+}
+.es-panel__label--tl {
+  left: 12px;
+}
+.es-panel__label--tr {
+  right: 12px;
+}
+
+/* La marca gigante: se ubica y se escala desde el JS (font-size = el ancho de la lámina). */
+.es-word {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+  line-height: 0;
+}
+
+/* La columna de la izquierda. */
+.es-left {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+}
+.es-left__lede {
+  max-width: 22ch;
+  font-size: clamp(20px, 1.9vw, 30px);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.es-left__stage {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  align-items: start;
+}
+.es-left__n {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--es-rust);
+  padding-top: 0.55em;
+}
+.es-left__title {
+  margin: 0;
+  font-size: clamp(22px, 2.3vw, 36px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.es-left__text {
+  margin: 8px 0 0;
+  max-width: 34ch;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #4d4840;
+}
+.es-left__stage-in {
+  animation: es-stage-in 0.7s var(--es-ease) both;
+}
+@keyframes es-stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* El rótulo: el cuadro de datos de una lámina. */
+.es-rotulo {
+  margin: 0;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid rgba(22, 21, 19, 0.42);
+  border-left: 1px solid rgba(22, 21, 19, 0.42);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.es-rotulo__row {
+  padding: 7px 9px 8px;
+  border-right: 1px solid rgba(22, 21, 19, 0.42);
+  border-bottom: 1px solid rgba(22, 21, 19, 0.42);
+  min-width: 0;
+}
+.es-rotulo__row dt {
+  color: #8a8478;
+  font-size: 9.5px;
+}
+.es-rotulo__row dd {
+  margin: 3px 0 0;
+  color: var(--es-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.es-rotulo__row--sign {
+  grid-column: 1 / -1;
+}
+
+/* Las líneas de construcción: guías punteadas y una regla en óxido alrededor del cuadrante. */
+.es-guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.es-guide {
+  position: absolute;
+  opacity: 0;
+  transition:
+    opacity 0.35s var(--es-ease),
+    transform 0.8s var(--es-ease);
+}
+.es-guide--h {
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(to right, rgba(22, 21, 19, 0.3) 0 6px, transparent 6px 11px);
+  transform: scaleX(0);
+}
+.es-guide--v {
+  top: calc(var(--nav-h) + 9px);
+  bottom: var(--band-h);
+  width: 1px;
+  background: repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.3) 0 6px, transparent 6px 11px);
+  transform: scaleY(0);
+}
+.es-guide--rust-v {
+  left: calc(var(--px) - 14px);
+  top: var(--py);
+  height: var(--ph);
+  width: 1.5px;
+  background: var(--es-rust);
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+.es-guide--rust-h {
+  left: var(--px);
+  top: calc(var(--py) - 14px);
+  width: var(--pw);
+  height: 1.5px;
+  background: var(--es-rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.es-guide--h:nth-child(2),
+.es-guide--v:nth-child(6) {
+  transition-delay: 0.05s;
+}
+.es-guide--h:nth-child(3) {
+  transition-delay: 0.1s;
+}
+.es-guide--h:nth-child(4),
+.es-guide--v:nth-child(7) {
+  transition-delay: 0.15s;
+}
+.es-guide--rust-v,
+.es-guide--rust-h {
+  transition-delay: 0.12s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .es-lamina.is-hover .es-guide {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .es-guide {
+    transition: opacity 0.2s linear;
+  }
 }

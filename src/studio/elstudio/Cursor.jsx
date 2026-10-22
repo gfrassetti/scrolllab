@@ -28,6 +28,7 @@ export default function Cursor() {
   const point = useRef(null)
   const plus = useRef(null)
   const coords = useRef(null)
+  const tipRef = useRef(null)
   const dotRoot = useRef(null)
   const dotBody = useRef(null)
   const dotLabel = useRef(null)
@@ -40,10 +41,12 @@ export default function Cursor() {
     const body = dotBody.current
     const label = dotLabel.current
     const plusEl = plus.current
+    const tip = tipRef.current
 
     gsap.set([cross, root], { autoAlpha: 0 })
     gsap.set(body, { xPercent: -50, yPercent: -50 }) // centrado sobre el puntero aunque cambie de tamaño
     gsap.set(plusEl, { xPercent: -50, yPercent: -50 })
+    gsap.set(tip, { autoAlpha: 0 })
     const dotX = gsap.quickTo(root, 'x', { duration: 0.35, ease: 'power3' })
     const dotY = gsap.quickTo(root, 'y', { duration: 0.35, ease: 'power3' })
 
@@ -52,6 +55,8 @@ export default function Cursor() {
     let dotState = 'dot'
     let last = { x: 0, y: 0 }
     let overLink = false
+    let tipEl = null // lo que está bajo el puntero y pide un cartel (data-cursor-tip)
+    let tipShown = ''
 
     const setMode = (next) => {
       if (next === mode) return
@@ -86,6 +91,14 @@ export default function Cursor() {
         // Cerca de un borde del visor las coordenadas pasan al otro lado de la cruz, para no cortarse.
         coords.current.dataset.flipX = x < 130 ? '1' : '0'
         coords.current.dataset.flipY = y > window.innerHeight - 64 ? '1' : '0'
+        // El cartel junto a la mira (al estilo de un plano anotado), si lo que está debajo lo pide.
+        const text = tipEl?.getAttribute('data-cursor-tip') || ''
+        if (text !== tipShown) {
+          tipShown = text
+          if (text) tip.textContent = text
+          gsap.to(tip, { autoAlpha: text ? 1 : 0, duration: text ? 0.3 : 0.15, overwrite: 'auto' })
+        }
+        tip.dataset.flipX = x > window.innerWidth - 260 ? '1' : '0'
       } else {
         dotX(x)
         dotY(y)
@@ -108,6 +121,7 @@ export default function Cursor() {
       const target = e.target instanceof Element ? e.target : null
       const interactive = !!target?.closest(INTERACTIVE)
       overLink = interactive
+      tipEl = target?.closest('[data-cursor-tip]') || null
       gsap.to(plusEl, { rotation: interactive ? 45 : 0, scale: interactive ? 1.3 : 1, duration: 0.4, ease: 'expo.out' })
       const tagged = target?.closest('[data-cursor]')
       if (tagged) return setDot('label', tagged.getAttribute('data-cursor'))
@@ -145,7 +159,7 @@ export default function Cursor() {
       html.removeEventListener('mouseleave', onLeave)
       html.removeEventListener('mouseenter', onEnter)
       html.classList.remove('es-has-cursor')
-      gsap.killTweensOf([cross, root, body, label, plusEl])
+      gsap.killTweensOf([cross, root, body, label, plusEl, tip])
     }
   }, [])
 
@@ -157,6 +171,7 @@ export default function Cursor() {
         <span ref={point} className="es-cross__pt">
           <span ref={plus} className="es-cross__plus" />
           <span ref={coords} className="es-cross__coords" data-flip-x="0" data-flip-y="0" />
+          <span ref={tipRef} className="es-cross__tip" />
         </span>
       </div>
       <div ref={dotRoot} className="es-cursor__dot">

@@ -39,6 +39,7 @@ FIRST VIEWPORT: el encabezado, un titular enorme en peso liviano y una sola lín
 export default function ElStudioPage() {
   const [calm] = useState(() => prefersReducedMotion())
   const bridge = useRef({})
+  const navLogoRef = useRef(null)
   const [fontsReady, setFontsReady] = useState(false)
   const [boarded, setBoarded] = useState(false)
 
@@ -89,9 +90,9 @@ export default function ElStudioPage() {
     <SmoothScrollProvider>
       <div className="es-root min-h-svh">
         <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
-        <Nav bridge={bridge} open={boarded} calm={calm} />
+        <Nav logoRef={navLogoRef} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
-          <Hero boarded={boarded} calm={calm} />
+          <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} />
         </main>
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}

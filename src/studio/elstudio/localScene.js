@@ -278,14 +278,19 @@ const sketchVertex = /* glsl */ `
 `
 
 const sketchFragment = /* glsl */ `
-  uniform sampler2D tColor;
+  uniform sampler2D tColor;   // capa A: lo que se ve
   uniform sampler2D tNormal;
+  uniform sampler2D tColorB;  // capa B: lo que muestra el arrastre (el otro estado)
+  uniform sampler2D tNormalB;
   uniform vec2 uRes;      // px del canvas (con el dpr)
   uniform float uDpr;
-  uniform float uSketch;  // 1 boceto, 0 render
+  uniform float uSketch;  // capa A: 1 boceto, 0 render
+  uniform float uSketchB; // capa B: ídem
   uniform float uReveal;  // cuánto del boceto está dibujado
   uniform vec2 uCenter;   // desde dónde se pinta (0–1)
   uniform float uExposure;
+  uniform float uSplit;   // dónde corta el arrastre (0–1 en x); la capa B va a la izquierda
+  uniform float uSplitOn; // 0 sin arrastre, 1 con
   varying vec2 vUv;
 
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -302,12 +307,6 @@ const sketchFragment = /* glsl */ `
   vec3 toSrgb(vec3 c) { return pow(max(c, 0.0), vec3(1.0 / 2.2)); }
   // Tone mapping fílmico (ACES, aproximación de Narkowicz): las luces altas no se queman.
   vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
-
-  // El render compuesto sobre papel blanco, en sRGB (el tono como se ve).
-  vec3 onPaper(vec2 uv) {
-    vec4 c = texture2D(tColor, uv);
-    return mix(vec3(1.0), toSrgb(c.rgb), c.a);
-  }
   float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
   // Una familia de rayas en pantalla (px de CSS), con el trazo un poco tembloroso.
@@ -318,51 +317,64 @@ const sketchFragment = /* glsl */ `
     return 1.0 - smoothstep(width * 0.5, width * 0.5 + 0.9, f);
   }
 
-  void main() {
-    vec4 render = texture2D(tColor, vUv);
+  // Una capa: el render (con tone mapping) o, según sketch, su boceto a lápiz y carbonilla.
+  vec4 layer(sampler2D col, sampler2D nrm, float sketch, float reveal) {
+    vec4 render = texture2D(col, vUv);
     vec4 outColor = vec4(toSrgb(aces(render.rgb * uExposure)) * render.a, render.a);
+    if (sketch < 0.001) return outColor;
 
-    if (uSketch > 0.001) {
-      vec2 px = vUv * uRes / uDpr;
-      // El temblor de la mano: el dibujo se lee con un leve corrimiento que cambia a lo largo del trazo.
-      vec2 wob = (vec2(fbm(px * 0.02), fbm(px * 0.02 + 17.0)) - 0.5) * 2.2 * uDpr / uRes;
-      vec2 uv = vUv + wob;
-      float l = lum(onPaper(uv));
+    vec2 px = vUv * uRes / uDpr;
+    // El temblor de la mano: el dibujo se lee con un leve corrimiento que cambia a lo largo del trazo.
+    vec2 wob = (vec2(fbm(px * 0.02), fbm(px * 0.02 + 17.0)) - 0.5) * 2.2 * uDpr / uRes;
+    vec2 uv = vUv + wob;
+    vec4 c = texture2D(col, uv);
+    float l = lum(mix(vec3(1.0), toSrgb(c.rgb), c.a));
 
-      // Contornos: las aristas en tinta del render (lo más oscuro) y los saltos de normal (siluetas).
-      vec2 e = uDpr / uRes;
-      vec4 nc = texture2D(tNormal, uv);
-      vec4 nx1 = texture2D(tNormal, uv + vec2(e.x, 0.0));
-      vec4 nx0 = texture2D(tNormal, uv - vec2(e.x, 0.0));
-      vec4 ny1 = texture2D(tNormal, uv + vec2(0.0, e.y));
-      vec4 ny0 = texture2D(tNormal, uv - vec2(0.0, e.y));
-      float nEdge = length(nx1 - nx0) + length(ny1 - ny0);
-      float silhouette = smoothstep(0.4, 1.0, nEdge);
-      float inkLine = smoothstep(0.62, 0.3, l);
-      // El grafito no es parejo: la línea se aclara y se corta a tramos.
-      float pressure = mix(0.45, 1.0, smoothstep(0.25, 0.7, noise(px * vec2(0.09, 0.07))));
-      float line = clamp(max(inkLine, silhouette * 0.85), 0.0, 1.0) * pressure;
+    // Contornos: las aristas en tinta del render (lo más oscuro) y los saltos de normal (siluetas).
+    vec2 e = uDpr / uRes;
+    float nEdge = length(texture2D(nrm, uv + vec2(e.x, 0.0)) - texture2D(nrm, uv - vec2(e.x, 0.0)))
+      + length(texture2D(nrm, uv + vec2(0.0, e.y)) - texture2D(nrm, uv - vec2(0.0, e.y)));
+    float silhouette = smoothstep(0.4, 1.0, nEdge);
+    float inkLine = smoothstep(0.62, 0.3, l);
+    // El grafito no es parejo: la línea se aclara y se corta a tramos.
+    float pressure = mix(0.45, 1.0, smoothstep(0.25, 0.7, noise(px * vec2(0.09, 0.07))));
+    float line = clamp(max(inkLine, silhouette * 0.85), 0.0, 1.0) * pressure;
 
-      // Sombreado: cuanto más oscuro, más capas de rayado; en lo más hondo, carbonilla.
-      float tone = clamp((0.95 - l) / 0.36, 0.0, 1.0) * (1.0 - inkLine);
-      float h = hatch(px, 0.785, 6.5, 0.9) * smoothstep(0.08, 0.2, tone);
-      h = max(h, hatch(px, -0.785, 6.5, 0.9) * smoothstep(0.38, 0.5, tone));
-      h = max(h, hatch(px, 0.2, 4.5, 0.8) * smoothstep(0.65, 0.8, tone));
-      float charcoal = smoothstep(0.4, 1.0, tone) * (0.3 + 0.4 * fbm(px * 0.012));
-      float shade = clamp(h * (0.28 + 0.42 * tone) + charcoal, 0.0, 1.0);
+    // Sombreado: cuanto más oscuro, más capas de rayado; en lo más hondo, carbonilla.
+    float tone = clamp((0.95 - l) / 0.36, 0.0, 1.0) * (1.0 - inkLine);
+    float h = hatch(px, 0.785, 6.5, 0.9) * smoothstep(0.08, 0.2, tone);
+    h = max(h, hatch(px, -0.785, 6.5, 0.9) * smoothstep(0.38, 0.5, tone));
+    h = max(h, hatch(px, 0.2, 4.5, 0.8) * smoothstep(0.65, 0.8, tone));
+    float charcoal = smoothstep(0.4, 1.0, tone) * (0.3 + 0.4 * fbm(px * 0.012));
+    float shade = clamp(h * (0.28 + 0.42 * tone) + charcoal, 0.0, 1.0);
 
-      // Se pinta desde el centro del cuadro hacia afuera, con un borde irregular de trazo;
-      // las líneas van un poco adelante del sombreado.
-      float dist = length((vUv - uCenter) * vec2(uRes.x / uRes.y, 1.0));
-      float field = dist * 0.85 + (fbm(px * 0.006) - 0.5) * 0.45;
-      float lineMask = 1.0 - smoothstep(uReveal * 1.12 - 0.1, uReveal * 1.12, field);
-      float shadeMask = 1.0 - smoothstep(uReveal * 1.12 - 0.3, uReveal * 1.12 - 0.12, field);
+    // Se pinta desde el centro del cuadro hacia afuera, con un borde irregular de trazo;
+    // las líneas van un poco adelante del sombreado.
+    float dist = length((vUv - uCenter) * vec2(uRes.x / uRes.y, 1.0));
+    float field = dist * 0.85 + (fbm(px * 0.006) - 0.5) * 0.45;
+    float lineMask = 1.0 - smoothstep(reveal * 1.12 - 0.1, reveal * 1.12, field);
+    float shadeMask = 1.0 - smoothstep(reveal * 1.12 - 0.3, reveal * 1.12 - 0.12, field);
 
-      float ink = clamp(line * lineMask + shade * shadeMask, 0.0, 1.0);
-      vec3 graphite = vec3(0.17, 0.165, 0.155);
-      outColor = mix(outColor, vec4(graphite * ink, ink), uSketch);
+    float ink = clamp(line * lineMask + shade * shadeMask, 0.0, 1.0);
+    vec3 graphite = vec3(0.17, 0.165, 0.155);
+    return mix(outColor, vec4(graphite * ink, ink), sketch);
+  }
+
+  void main() {
+    vec4 a = layer(tColor, tNormal, uSketch, uReveal);
+    if (uSplitOn > 0.001) {
+      vec4 b = layer(tColorB, tNormalB, uSketchB, 1.0);
+      float pxX = vUv.x * uRes.x;
+      float cut = uSplit * uRes.x;
+      float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
+      vec4 mixed = mix(a, b, side);
+      // La línea del corte, en el óxido de la marca.
+      float lineW = 1.0 * uDpr;
+      float onLine = 1.0 - smoothstep(lineW * 0.5, lineW * 0.5 + uDpr, abs(pxX - cut));
+      mixed = mix(mixed, vec4(vec3(0.769, 0.267, 0.122), 1.0), onLine);
+      a = mix(a, mixed, uSplitOn);
     }
-    gl_FragColor = outColor;
+    gl_FragColor = a;
   }
 `
 
@@ -455,6 +467,9 @@ export function createLocalScene({ canvas, phone = false }) {
   // Los pases: el render (con MSAA), las normales (para las siluetas del boceto) y el filtro final.
   const rtColor = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
   const rtNormal = new THREE.WebGLRenderTarget(1, 1)
+  // La capa B (el otro estado, para el arrastre): se dibuja solo mientras se arrastra.
+  const rtColorB = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
+  const rtNormalB = new THREE.WebGLRenderTarget(1, 1)
   const normalMat = new THREE.MeshNormalMaterial()
   const post = new THREE.ShaderMaterial({
     vertexShader: sketchVertex,
@@ -462,6 +477,11 @@ export function createLocalScene({ canvas, phone = false }) {
     uniforms: {
       tColor: { value: rtColor.texture },
       tNormal: { value: rtNormal.texture },
+      tColorB: { value: rtColorB.texture },
+      tNormalB: { value: rtNormalB.texture },
+      uSketchB: { value: 0 },
+      uSplit: { value: 0.5 },
+      uSplitOn: { value: 0 },
       uRes: { value: new THREE.Vector2(1, 1) },
       uDpr: { value: 1 },
       uSketch: { value: 1 },
@@ -483,7 +503,7 @@ export function createLocalScene({ canvas, phone = false }) {
   let canvasH = 1
   let dpr = 1
   let frame = { x: 0, y: 0, w: 1, h: 1 }
-  const state = { reveal: 0, sketch: 1, decor: 0, camera: 0 }
+  const state = { reveal: 0, sketch: 1, decor: 0, camera: 0, split: 0.5, splitOn: 0 }
   let dirty = true
 
   const applyFrame = () => {
@@ -498,16 +518,18 @@ export function createLocalScene({ canvas, phone = false }) {
     const h = Math.max(1, Math.round(canvasH * dpr))
     rtColor.setSize(w, h)
     rtNormal.setSize(w, h)
+    rtColorB.setSize(w, h)
+    rtNormalB.setSize(w, h)
     post.uniforms.uRes.value.set(w, h)
     post.uniforms.uDpr.value = dpr
   }
 
-  const update = () => {
+  const update = (view = state) => {
     // Decorar: cada paso tiene su tramo; una pieza toma su color, un objeto entra creciendo.
     const n = steps.length
     let lit = 0
     steps.forEach((p, i) => {
-      const k = clamp01((state.decor * (n + 1.5) - i) / 2.5)
+      const k = clamp01((view.decor * (n + 1.5) - i) / 2.5)
       if (p.object) {
         p.group.visible = k > 0
         p.group.scale.setScalar(Math.max(0.0001, backOut(k)))
@@ -519,7 +541,7 @@ export function createLocalScene({ canvas, phone = false }) {
     bulbs.forEach((b) => {
       b.intensity = lit * 1.4
     })
-    const warm = smooth(0.3, 1, state.decor)
+    const warm = smooth(0.3, 1, view.decor)
     edgeMat.opacity = THREE.MathUtils.lerp(0.6, 0.14, warm)
     hemi.intensity = THREE.MathUtils.lerp(2.1, 1.05, warm)
     hemi.color.set('#ffffff').lerp(new THREE.Color('#fff1dc'), warm)
@@ -537,28 +559,44 @@ export function createLocalScene({ canvas, phone = false }) {
       TARGET.z + dist * Math.sin(polar) * Math.cos(azimuth),
     )
     camera.lookAt(TARGET)
-    post.uniforms.uSketch.value = state.sketch
-    post.uniforms.uReveal.value = state.reveal
   }
 
-  const draw = () => {
-    update()
-    renderer.setRenderTarget(rtColor)
+  // Una pasada de la escena a su par de targets: el color y, si hay boceto, las normales.
+  const pass = (colorTarget, normalTarget, withNormals) => {
+    renderer.setRenderTarget(colorTarget)
     renderer.clear()
     renderer.render(scene, camera)
-    if (state.sketch > 0.001) {
-      // Normales: sin aristas, sin vidrio y sin el piso de sombras.
-      const hidden = [ground, ...edgeLines]
-      scene.traverse((o) => o.userData.glass && hidden.push(o))
-      const was = hidden.map((o) => o.visible)
-      hidden.forEach((o) => (o.visible = false))
-      scene.overrideMaterial = normalMat
-      renderer.setRenderTarget(rtNormal)
-      renderer.clear()
-      renderer.render(scene, camera)
-      scene.overrideMaterial = null
-      hidden.forEach((o, i) => (o.visible = was[i]))
+    if (!withNormals) return
+    // Normales: sin aristas, sin vidrio y sin el piso de sombras.
+    const hidden = [ground, ...edgeLines]
+    scene.traverse((o) => o.userData.glass && hidden.push(o))
+    const was = hidden.map((o) => o.visible)
+    hidden.forEach((o) => (o.visible = false))
+    scene.overrideMaterial = normalMat
+    renderer.setRenderTarget(normalTarget)
+    renderer.clear()
+    renderer.render(scene, camera)
+    scene.overrideMaterial = null
+    hidden.forEach((o, i) => (o.visible = was[i]))
+  }
+
+  /** El estado que muestra el arrastre: el local terminado mientras se ve el boceto, y al revés. */
+  const otherView = () => (state.decor < 0.5 ? { decor: 1, sketch: 0 } : { decor: 0, sketch: 1 })
+
+  const draw = () => {
+    const u = post.uniforms
+    u.uSplit.value = state.split
+    u.uSplitOn.value = state.splitOn
+    if (state.splitOn > 0.001) {
+      const other = otherView()
+      update({ ...state, ...other })
+      pass(rtColorB, rtNormalB, other.sketch > 0.001)
+      u.uSketchB.value = other.sketch
     }
+    update()
+    pass(rtColor, rtNormal, state.sketch > 0.001)
+    u.uSketch.value = state.sketch
+    u.uReveal.value = state.reveal
     renderer.setRenderTarget(null)
     renderer.render(postScene, postCamera)
   }
@@ -575,6 +613,10 @@ export function createLocalScene({ canvas, phone = false }) {
     setSketch: set('sketch'),
     setDecor: set('decor'),
     setCamera: set('camera'),
+    setSplit: set('split'),
+    setSplitOn: set('splitOn'),
+    /** Qué muestra el arrastre ahora: 'final' (el local terminado) o 'sketch' (el boceto). */
+    splitShows: () => (otherView().decor === 1 ? 'final' : 'sketch'),
     setPixelRatio(v) {
       dpr = v
       renderer.setPixelRatio(v)
@@ -614,8 +656,7 @@ export function createLocalScene({ canvas, phone = false }) {
       scene.traverse((o) => o.geometry?.dispose?.())
       ownMats.forEach((m) => m.dispose())
       ;[edgeMat, normalMat, post, ground.material].forEach((m) => m.dispose())
-      rtColor.dispose()
-      rtNormal.dispose()
+      ;[rtColor, rtNormal, rtColorB, rtNormalB].forEach((t) => t.dispose())
       renderer.dispose()
     },
   }

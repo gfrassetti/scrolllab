@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap } from '../../lib/gsap'
 import { scrollToSection } from '../../hooks/useLenis'
-import { BAND_H, C, NAV_H, SITE } from './brand'
+import { BAND_H, C, NAV_H, OPEN_DELAY, SITE } from './brand'
 import Logo from './Logo'
 
 /**
@@ -12,9 +12,9 @@ import Logo from './Logo'
  * queda como el borde de la franja de abajo. Después se trazan las divisiones del nav (de arriba
  * hacia abajo), entran los botones, la regla y las cruces de registro de las esquinas.
  *
- * `bridge` es el puente con el loader: el logo del loader aterriza en el del nav.
+ * El logo chico (`logoRef`) arranca invisible: el loader aterriza en la marca gigante del hero, y
+ * es el hero el que lo enciende cuando esa marca se achica hasta acá al scrollear.
  */
-const OPEN_DELAY = 1.7 // el boceto ya va bastante pintado cuando se abre el marco
 
 const LINKS = [
   { id: 'estudio', label: 'Estudio' },
@@ -24,24 +24,8 @@ const LINKS = [
 
 const MONO = { fontFamily: "'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace" }
 
-export default function Nav({ bridge, open, calm }) {
+export default function Nav({ logoRef, open, calm }) {
   const rootRef = useRef(null)
-  const logoRef = useRef(null)
-
-  // El logo: el loader aterriza acá.
-  useEffect(() => {
-    const logo = logoRef.current
-    logo.style.opacity = '0'
-    bridge.current = {
-      target: () => logo.querySelector('svg[data-part=row]'),
-      show: () => {
-        logo.style.opacity = '1'
-      },
-    }
-    return () => {
-      bridge.current = {}
-    }
-  }, [bridge])
 
   // Antes de abrir, todo lo del marco está escondido (las líneas, en el centro y sin largo).
   useLayoutEffect(() => {
@@ -90,7 +74,7 @@ export default function Nav({ bridge, open, calm }) {
           onClick={go('inicio')}
           aria-label={`${SITE.name}, ir al inicio`}
           className="pointer-events-auto flex items-center px-4 sm:px-9"
-          style={{ fontSize: 26 }}
+          style={{ fontSize: 26, opacity: 0 }}
         >
           <Logo compact />
         </a>
