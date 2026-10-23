@@ -17,7 +17,7 @@ const SUB = 0.115
 // debajo de la línea de base.
 const RISERS = new Set(['T', 'U', 'D', 'I', 'O'])
 
-export default function Logo({ compact = false, className = '', style, ...rest }) {
+export default function Logo({ compact = false, hairline = false, className = '', style, ...rest }) {
   const clipId = `${useId().replace(/:/g, '')}-clip`
   return (
     <span
@@ -52,7 +52,9 @@ export default function Logo({ compact = false, className = '', style, ...rest }
                   pathLength="1"
                   fill="none"
                   stroke={C.rust}
-                  strokeWidth="11"
+                  // En chico (el nav) el trazo es de un px de pantalla, a cualquier tamaño.
+                  strokeWidth={hairline ? 1.1 : 11}
+                  vectorEffect={hairline ? 'non-scaling-stroke' : undefined}
                   strokeLinejoin="round"
                   // Sin dibujar: la raya vale 1 (el largo normalizado) y arranca desplazada un largo entero.
                   strokeDasharray="1"

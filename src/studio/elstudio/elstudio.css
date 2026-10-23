@@ -540,6 +540,7 @@
 /* ── El bloque de abajo del hero ───────────────────────────────────── */
 .es-info {
   position: absolute;
+  /* la señal de scroll se ubica contra este bloque */
   left: 0;
   right: 0;
   bottom: 0;
@@ -669,5 +670,112 @@
   .es-info__cta {
     min-width: clamp(140px, 11vw, 190px);
     padding: 16px 18px;
+  }
+}
+
+/* ── La señal de scroll: «Scroll» y una flecha de boceto ───────────── */
+.es-scrollcue {
+  position: absolute;
+  display: none; /* en el teléfono no entra junto al título */
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+  color: var(--es-ink);
+}
+.es-scrollcue__label {
+  padding-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.6s var(--es-ease);
+}
+.es-scrollcue__arrow {
+  width: 30px;
+  height: 64px;
+  overflow: visible;
+}
+.es-scrollcue__arrow path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.es-scrollcue__s1 {
+  stroke-width: 1.6;
+}
+/* En pantallas anchas va al pie de la columna del título, a la derecha. */
+@media (min-width: 640px) {
+  .es-scrollcue {
+    display: flex;
+    bottom: 28px;
+    left: calc((100% - 36px) * 5 / 8 - 96px);
+  }
+  .es-scrollcue__arrow {
+    width: 34px;
+    height: 78px;
+  }
+}
+.es-scrollcue__s2 {
+  stroke-width: 0.8;
+  opacity: 0.55;
+}
+.es-scrollcue__h1,
+.es-scrollcue__h2 {
+  stroke-width: 1.6;
+}
+.es-scrollcue.is-on .es-scrollcue__label {
+  opacity: 1;
+}
+/* La flecha se traza como un lápiz (el asta, la segunda pasada y la punta), queda, se borra y vuelve. */
+.es-scrollcue.is-on .es-scrollcue__arrow {
+  animation: es-cue-bob 2.8s var(--es-ease) infinite;
+}
+.es-scrollcue.is-on .es-scrollcue__s1 {
+  animation: es-cue-s1 2.8s infinite;
+}
+.es-scrollcue.is-on .es-scrollcue__s2 {
+  animation: es-cue-s2 2.8s infinite;
+}
+.es-scrollcue.is-on .es-scrollcue__h1 {
+  animation: es-cue-h1 2.8s infinite;
+}
+.es-scrollcue.is-on .es-scrollcue__h2 {
+  animation: es-cue-h2 2.8s infinite;
+}
+@keyframes es-cue-s1 {
+  0% { stroke-dashoffset: 1; opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  30% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes es-cue-s2 {
+  0%, 12% { stroke-dashoffset: 1; opacity: 0.55; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  40% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 0.55; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes es-cue-h1 {
+  0%, 32% { stroke-dashoffset: 1; opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  44% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes es-cue-h2 {
+  0%, 40% { stroke-dashoffset: 1; opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  52% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes es-cue-bob {
+  0%, 30% { transform: translateY(0); }
+  60% { transform: translateY(5px); }
+  100% { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .es-scrollcue .es-scrollcue__arrow,
+  :where(:root:not([data-motion='full'])) .es-scrollcue path {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }

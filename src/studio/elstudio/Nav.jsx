@@ -15,6 +15,8 @@ import Logo from './Logo'
  * hacia abajo), los botones se pintan (paint.js) y entran la regla y las cruces de registro.
  *
  * El logo chico (`logoRef`) arranca invisible: el loader aterriza ahí y lo enciende (vía el hero).
+ * Al pasar el mouse, el logo se vuelve a escribir: de la «e» a la «O», cada letra trazada en óxido y
+ * después rellena, y al final cae la tapa de la T.
  */
 
 const LINKS = [
@@ -59,6 +61,30 @@ export default function Nav({ logoRef, open, calm }) {
     return () => tl.kill()
   }, [open, calm])
 
+  // El logo se escribe de nuevo al pasar el mouse (una vez por pasada; con «reducir movimiento», nada).
+  const writing = useRef(null)
+  const writeLogo = () => {
+    if (calm || writing.current?.isActive()) return
+    const svg = logoRef.current?.querySelector('svg[data-part=row]')
+    if (!svg) return
+    const order = ['e', 'l', 'S', 'T', 'U', 'D', 'I', 'O', 'slab']
+    const tl = gsap.timeline({ defaults: { ease: 'power1.inOut' } })
+    order.forEach((id, i) => {
+      const fill = svg.querySelector(`[data-part=${id}] [data-fill]`)
+      const strokes = [...svg.querySelectorAll(`[data-part=${id}] [data-stroke]`)]
+      const trail = { p: 0 }
+      const at = i * 0.075
+      tl.set(fill, { opacity: 0 }, 0)
+        .set(strokes, { opacity: 1 }, 0)
+        .call(() => strokes.forEach((el) => el.setAttribute('stroke-dashoffset', '1')), null, 0)
+        .to(trail, { p: 1, duration: 0.42, onUpdate: () => strokes.forEach((el) => el.setAttribute('stroke-dashoffset', String(1 - trail.p))) }, at)
+        .to(fill, { opacity: 1, duration: 0.28, ease: 'power1.out' }, at + 0.3)
+        .to(strokes, { opacity: 0, duration: 0.25 }, at + 0.42)
+    })
+    writing.current = tl
+  }
+  useEffect(() => () => writing.current?.kill(), [])
+
   const go = (id) => (e) => {
     e.preventDefault()
     scrollToSection(id)
@@ -72,11 +98,12 @@ export default function Nav({ logoRef, open, calm }) {
           ref={logoRef}
           href="#inicio"
           onClick={go('inicio')}
+          onPointerEnter={(e) => e.pointerType !== 'touch' && writeLogo()}
           aria-label={`${SITE.name}, ir al inicio`}
           className="pointer-events-auto flex items-center px-4 sm:px-9"
           style={{ fontSize: 26, opacity: 0 }}
         >
-          <Logo compact />
+          <Logo compact hairline />
         </a>
         <nav aria-label="Principal" className="flex items-stretch">
           {LINKS.map((l) => (

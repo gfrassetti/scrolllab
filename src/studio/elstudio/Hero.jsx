@@ -86,6 +86,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   const canvasRef = useRef(null)
   const panelRef = useRef(null)
   const infoRef = useRef(null)
+  const cueRef = useRef(null)
   const colsRef = useRef(null)
   const sceneRef = useRef(null)
   const [stage, setStage] = useState(calm ? 3 : 0)
@@ -171,6 +172,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         stageEl.style.setProperty('--pw', `${P.w}px`)
         stageEl.style.setProperty('--ph', `${P.h}px`)
       }
+      // La señal de scroll se va apenas se empieza a bajar.
+      if (cueRef.current) cueRef.current.style.opacity = String(calm ? 0 : 1 - smooth(0.004, 0.035, p))
       // El espacio → el diseño, mueble por mueble → luz y sombra, color (los trazos se van) → la cámara se acerca.
       scene.setRise(0)
       const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(0.06 + i * 0.058, 0.06 + i * 0.058 + 0.1, p)))
@@ -299,6 +302,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       .to(q('[data-panel-edge]'), { scale: 1, duration: 0.9, ease: 'expo.inOut', stagger: 0.05 }, 0.2)
       .to(q('[data-col]'), { scaleY: 1, duration: 1.1, ease: 'expo.out', stagger: 0.06 }, OPEN_DELAY + 0.8)
       .add(() => paint(q('[data-paint]'), { stagger: 0.05, duration: 0.85 }), OPEN_DELAY + 0.6)
+      .add(() => cueRef.current?.classList.add('is-on'), OPEN_DELAY + 1.4)
     return () => {
       alive = false
       tl.kill()
@@ -364,6 +368,19 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
               para quien lo vive
             </span>
           </h1>
+          {/* La señal de scroll: la palabra y una flecha dibujada a mano que se traza una y otra vez. */}
+          <div ref={cueRef} className="es-scrollcue" aria-hidden="true">
+            <span className="es-scrollcue__label" style={LABEL}>
+              Scroll
+            </span>
+            <svg className="es-scrollcue__arrow" viewBox="0 0 30 64" fill="none">
+              <path className="es-scrollcue__s1" pathLength="1" d="M15.2 2 C14.4 14, 16.3 24, 15 36 S14.6 50, 15.4 58.5" />
+              <path className="es-scrollcue__s2" pathLength="1" d="M16.4 4.5 C15.6 18, 16.8 30, 15.9 42 S15.6 52, 15.8 57" />
+              <path className="es-scrollcue__h1" pathLength="1" d="M5.5 46.5 C9 50.5, 12.4 54.6, 15.3 59.4" />
+              <path className="es-scrollcue__h2" pathLength="1" d="M25.2 45.4 C21.6 50, 18.4 54.4, 15.1 59.6 L14.2 61" />
+            </svg>
+          </div>
+
           <div className="es-info__side">
             <p data-paint className="es-paint es-info__lede">
               Estudio multidisciplinario de diseño e interiorismo, enfocado en la experiencia de usuario. Desde la Patagonia y Buenos
