@@ -53,11 +53,9 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
 /**
- * El contenido de Proyectos: el título, la tarjeta 01 y su ficha. Se usa dos veces: en la sección y en
- * su folio sobre la mesa (Plano.jsx), que además trae el boceto de la foto (`sketchSrc`, encima, en
- * multiplicar) y vuelve a lápiz con --sk.
+ * El contenido de Proyectos: el título, la tarjeta 01 y su ficha.
  */
-export function ProyectosBody({ refs, src, sketchSrc, titleId }) {
+function ProyectosBody({ refs, src, titleId }) {
   const localCard = useRef(null)
   const cardRef = refs?.card ?? localCard
   // La foto de la tarjeta (y su boceto), recortada al local (en %, así acompaña los cambios de tamaño).
@@ -95,10 +93,9 @@ export function ProyectosBody({ refs, src, sketchSrc, titleId }) {
             ref={refs?.img}
             src={src}
             alt={titleId ? `${PROJECT.name}, ${PROJECT.kind.toLowerCase()} en ${PROJECT.place}` : ''}
-            className="es-proj__img es-proj__img--photo"
+            className="es-proj__img"
             decoding="async"
           />
-          {sketchSrc && <img src={sketchSrc} alt="" className="es-proj__img es-proj__img--sketch" decoding="async" />}
           <span className="es-proj__slot" aria-hidden="true" />
         </div>
         <dl ref={refs?.ficha} className="es-proj__ficha">
@@ -133,8 +130,8 @@ const projectPhoto = () =>
   typeof window !== 'undefined' && window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1400 ? photoFull : photoSmall
 
 /**
- * La sección. `mode`: 'plano' (llega desde su folio, Plano.jsx: va encima del final del hero y se
- * muestra recién cuando el folio la llena) o 'proyecto' (la foto del hero vuela a la tarjeta).
+ * La sección. `mode`: 'proyecto' (la foto del hero vuela a la tarjeta) o cualquier otra salida (la
+ * sección sigue al hero, sin vuelo).
  */
 export default function Proyectos({ calm, exit, mode = 'proyecto' }) {
   const sectionRef = useRef(null)
@@ -236,7 +233,7 @@ export default function Proyectos({ calm, exit, mode = 'proyecto' }) {
       ref={sectionRef}
       id="proyectos"
       aria-labelledby="proyectos-title"
-      className={`es-proj es-sheet relative min-h-svh ${mode === 'plano' ? 'z-[3] -mt-[100svh] calm:mt-0' : ''}`}
+      className="es-proj relative min-h-svh"
     >
       <ProyectosBody refs={{ card: cardRef, img: cardImgRef, ficha: fichaRef }} src={src} titleId="proyectos-title" />
 

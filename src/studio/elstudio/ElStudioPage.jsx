@@ -10,19 +10,19 @@ import Nav from './Nav'
 import Hero from './Hero'
 import Estudio from './Estudio'
 import Proyectos from './Proyectos'
-import Plano from './Plano'
+import Boceto from './Boceto'
 import { FONTS_HREF, SITE } from './brand'
 
 const FONT_WAIT_MS = 4000
 
 /**
  * Cómo se sale del hero (pruebas):
- *   'plano'     todo el hero vuelve a boceto y queda como un folio sobre una mesa de dibujo; la cámara
- *               va al folio de Proyectos, que se diseña al llenar la pantalla (Plano.jsx).
+ *   'boceto'    al terminar, todo el hero (menos el nav) vuelve a boceto en su hoja y después sigue el
+ *               scroll hacia Proyectos (Boceto.jsx).
  *   'proyecto'  la foto del local se despega de la lámina y aterriza en la tarjeta 01 de Proyectos.
  *   'lamina'    cambio de lámina: la hoja del hero se levanta y debajo está la de Estudio.
  */
-const SALIDA = 'plano'
+const SALIDA = 'boceto'
 
 // Siempre se arranca arriba: al recargar, el navegador devolvía la página a donde estaba y el
 // loader (que viaja hacia el encabezado) quedaba descolocado.
@@ -105,8 +105,8 @@ export default function ElStudioPage() {
         <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav logoRef={navLogoRef} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
-          <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} plano={SALIDA === 'plano'} />
-          {SALIDA === 'plano' && <Plano calm={calm} exit={heroExit} />}
+          <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} boceto={SALIDA === 'boceto'} />
+          {SALIDA === 'boceto' && <Boceto calm={calm} exit={heroExit} />}
           {SALIDA === 'lamina' ? <Estudio calm={calm} /> : <Proyectos calm={calm} exit={heroExit} mode={SALIDA} />}
         </main>
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
