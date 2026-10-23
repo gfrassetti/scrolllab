@@ -6,12 +6,39 @@
  * que ocultar.
  */
 
+/*
+ * «ES Helvetica»: la Helvetica instalada de verdad (Mac, iOS), por nombre exacto. En Windows el
+ * nombre «Helvetica» se redirige a Arial y en Linux a otra sans: local() no cae en esos alias, así
+ * que ahí falla y la pila sigue con Schibsted Grotesk.
+ */
+@font-face {
+  font-family: 'ES Helvetica';
+  font-weight: 300;
+  src: local('Helvetica Neue Light'), local('HelveticaNeue-Light');
+}
+@font-face {
+  font-family: 'ES Helvetica';
+  font-weight: 400;
+  src: local('Helvetica Neue'), local('HelveticaNeue'), local('Helvetica');
+}
+@font-face {
+  font-family: 'ES Helvetica';
+  font-weight: 500;
+  src: local('Helvetica Neue Medium'), local('HelveticaNeue-Medium');
+}
+@font-face {
+  font-family: 'ES Helvetica';
+  font-weight: 600 700;
+  src: local('Helvetica Neue Bold'), local('HelveticaNeue-Bold'), local('Helvetica Bold'), local('Helvetica-Bold');
+}
+
 .es-root {
-  --es-font-body: 'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', sans-serif;
+  /* Helvetica, como santalarch; donde no está instalada, Schibsted Grotesk (no Arial). */
+  --es-font-body: 'ES Helvetica', 'Schibsted Grotesk', Arial, sans-serif;
   --es-font-display: var(--es-font-body);
-  --es-font-label: 'Archivo Narrow', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --es-font-label: var(--es-font-body);
   --es-title-weight: 500;
-  --es-title-tracking: -0.04em;
+  --es-title-tracking: -0.045em;
   --es-body-scale: 1;
   /*
    * La hoja: papel casi blanco con un grano apenas perceptible, que se repite y se mueve con la página.
@@ -600,29 +627,6 @@
   max-width: 38ch;
   font-size: calc(1em * var(--es-body-scale));
   line-height: calc(1.4 / var(--es-body-scale) + 0.2);
-}
-/* La etiqueta de la prueba de tipografías (temporal). */
-.es-fonttag {
-  position: absolute;
-  left: 36px;
-  top: calc(100% - var(--band-h) + 14px);
-  z-index: 2;
-  padding: 6px 10px 7px;
-  background: var(--es-ink);
-  color: var(--es-paper);
-  font-family: 'Archivo Narrow', Arial, sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  pointer-events: none;
-}
-.es-fonttag small {
-  display: block;
-  margin-top: 2px;
-  font-size: 10.5px;
-  text-transform: none;
-  letter-spacing: 0.02em;
-  opacity: 0.7;
 }
 .es-info__cta {
   position: relative;

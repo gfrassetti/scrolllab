@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
 import { scrollToSection } from '../../hooks/useLenis'
-import { C, FONT_OPTIONS, FONT_TRIAL, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
+import { C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT } from './localScene'
@@ -267,21 +267,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     }
   }, [calm])
 
-  // Prueba de tipografías (temporal): cada hoja aplica una combinación en toda la página.
-  useEffect(() => {
-    if (!FONT_TRIAL) return undefined
-    const root = stageRef.current?.closest('.es-root')
-    const f = FONT_OPTIONS[stage]
-    if (!root || !f) return undefined
-    root.style.setProperty('--es-font-display', f.display)
-    root.style.setProperty('--es-font-body', f.body)
-    root.style.setProperty('--es-font-label', f.label)
-    root.style.setProperty('--es-title-weight', String(f.weight))
-    root.style.setProperty('--es-title-tracking', f.tracking)
-    root.style.setProperty('--es-body-scale', String(f.bodyScale || 1))
-    return undefined
-  }, [stage])
-
   // Al cambiar de etapa, lo que cambia se vuelve a pintar (el título, el texto, el estado y la lámina).
   const firstStage = useRef(true)
   useEffect(() => {
@@ -363,13 +348,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
             Alzado · Esc. 1:50 · Lámina {st.n} / 04
           </span>
         </div>
-
-        {FONT_TRIAL && (
-          <div className="es-fonttag" aria-hidden="true">
-            Tipografía {FONT_OPTIONS[stage].name}
-            <small>{FONT_OPTIONS[stage].ref}</small>
-          </div>
-        )}
 
         {/* Las líneas de construcción (con el mouse). */}
         <div className="es-guides" aria-hidden="true">
