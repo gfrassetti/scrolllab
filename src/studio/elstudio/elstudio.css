@@ -7,6 +7,12 @@
  */
 
 .es-root {
+  --es-font-body: 'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', sans-serif;
+  --es-font-display: var(--es-font-body);
+  --es-font-label: 'Archivo Narrow', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --es-title-weight: 500;
+  --es-title-tracking: -0.04em;
+  --es-body-scale: 1;
   /*
    * La hoja: papel casi blanco con un grano apenas perceptible, que se repite y se mueve con la página.
    */
@@ -19,7 +25,7 @@
   background-image: var(--es-grain);
   background-size: 200px 200px;
   color: var(--es-ink);
-  font-family: 'Helvetica Neue', Helvetica, Arial, 'Liberation Sans', sans-serif;
+  font-family: var(--es-font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -122,7 +128,7 @@
   top: 12px;
   white-space: pre;
   text-align: right;
-  font-family: 'Archivo Narrow', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--es-font-label);
   font-weight: 500;
   font-size: 12px;
   line-height: 1.45;
@@ -149,7 +155,7 @@
   padding: 7px 10px 8px;
   background: #1d1c1a;
   color: #f3f1ea;
-  font-family: 'Archivo Narrow', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--es-font-label);
   font-weight: 500;
   font-size: 11.5px;
   line-height: 1.4;
@@ -552,10 +558,11 @@
   margin: 0;
   padding: 18px 16px 14px;
   align-self: end;
+  font-family: var(--es-font-display);
   font-size: clamp(30px, 8.6vw, 44px);
-  font-weight: 500;
+  font-weight: var(--es-title-weight);
   line-height: 0.9;
-  letter-spacing: -0.04em;
+  letter-spacing: var(--es-title-tracking);
   text-transform: uppercase;
   text-wrap: balance;
 }
@@ -591,6 +598,31 @@
 .es-info__copy {
   margin: 0;
   max-width: 38ch;
+  font-size: calc(1em * var(--es-body-scale));
+  line-height: calc(1.4 / var(--es-body-scale) + 0.2);
+}
+/* La etiqueta de la prueba de tipografías (temporal). */
+.es-fonttag {
+  position: absolute;
+  left: 36px;
+  top: calc(100% - var(--band-h) + 14px);
+  z-index: 2;
+  padding: 6px 10px 7px;
+  background: var(--es-ink);
+  color: var(--es-paper);
+  font-family: 'Archivo Narrow', Arial, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.es-fonttag small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  opacity: 0.7;
 }
 .es-info__cta {
   position: relative;
