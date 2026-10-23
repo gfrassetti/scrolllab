@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { DESIGN_PIECES } from './designPieces'
+import { DESIGN_PIECES, IMG } from './designPieces'
 
 /**
  * La escena del hero: un local (café / showroom) en maqueta, visto como una casa de muñecas (dos
@@ -29,7 +29,7 @@ import { DESIGN_PIECES } from './designPieces'
 
 export const ROOM = { w: 9, d: 6, h: 3.3, t: 0.2 }
 /** El cuadro: la cámara encuadra este aspecto, entero, dentro del rectángulo que le den. */
-export const FRAME_ASPECT = 16 / 9
+export const FRAME_ASPECT = 21 / 9 // el alzado (boceto, vacío y foto) es 21:9
 
 const INK = new THREE.Color('#161513')
 const PAPER = new THREE.Color('#f6f4ee')
@@ -595,7 +595,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       tSketchImg: { value: null },
       tSketchEmpty: { value: null },
       uHasEmpty: { value: 0 },
-      uRegions: { value: DESIGN_PIECES.map(({ rect: [x0, y0, x1, y1] }) => new THREE.Vector4(x0 / 1600, 1 - y1 / 900, x1 / 1600, 1 - y0 / 900)) },
+      uRegions: { value: DESIGN_PIECES.map(({ rect: [x0, y0, x1, y1] }) => new THREE.Vector4(x0 / IMG.w, 1 - y1 / IMG.h, x1 / IMG.w, 1 - y0 / IMG.h)) },
       uDesign: { value: DESIGN_PIECES.map(() => 0) },
       uSketchImg: { value: 0 },
       uPhotoZoom: { value: 1 },

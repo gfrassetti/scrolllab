@@ -5,20 +5,20 @@ import { scrollToSection } from '../../hooks/useLenis'
 import { C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
-import { createLocalScene, FRAME_ASPECT, ROOM } from './localScene'
+import { createLocalScene, FRAME_ASPECT } from './localScene'
 import photoFull from './assets/foto-local.webp'
 import photoSmall from './assets/foto-local-1200.webp'
 import sketchFull from './assets/boceto-local.webp'
 import sketchSmall from './assets/boceto-local-1200.webp'
 import emptyFull from './assets/boceto-vacio.webp'
 import emptySmall from './assets/boceto-vacio-1200.webp'
-import { DESIGN_PIECES } from './designPieces'
+import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
 
 /**
  * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
  *
  * La disposición (como la de un hero de plano): arriba, tres cuartos de la pantalla para el cuadrante
- * del dibujo, a todo el ancho, con la etapa y el rótulo de la lámina en sus esquinas; abajo, el
+ * del dibujo (un alzado, 21:9), a todo el ancho, con la etapa y la lámina en sus esquinas; abajo, el
  * bloque de texto: el título grande a la izquierda y, a la derecha, la bajada, el botón a proyectos
  * y una cinta con los servicios. El alto de ese bloque es --band-h (elstudio.css).
  * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
@@ -39,9 +39,6 @@ import { DESIGN_PIECES } from './designPieces'
  */
 
 const REVEAL_SECONDS = 3.8
-// `?foto-ref`: el local terminado con la cámara de arranque y el cuadro a todo el canvas, para
-// generar la foto del arrastre a partir de él (scripts propios, no se usa en el sitio).
-const PHOTO_REF = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('foto-ref')
 
 const STAGES = [
   { n: '01', title: 'El espacio', text: 'Un local vacío: muros, luz y proporciones.' },
@@ -70,21 +67,16 @@ function sheetLayout(W, H, infoTop) {
 
 const SERVICES = ['Interiorismo', 'Locales comerciales', 'Mobiliario a medida', 'Vivienda', 'Objetos', 'Dirección de obra']
 
-/** El cuadro de la cámara dentro del cuadrante: 16:9 entero; si el cuadrante es angosto, un poco más grande (recorta los costados). */
+/**
+ * El cuadro del alzado dentro del cuadrante: lo más grande posible sin cortar el local (el papel de
+ * arriba y abajo puede quedar afuera). En pantallas angostas se agranda y recorta los costados.
+ */
 function cameraFrame(p) {
   const aspect = p.w / p.h
-  let fw
-  let fh
-  if (aspect > FRAME_ASPECT) {
-    fh = p.h * 0.96
-    fw = fh * FRAME_ASPECT
-  } else {
-    fw = p.w * 0.96
-    fh = fw / FRAME_ASPECT
-  }
-  const over = Math.min(1.85, Math.max(1, (FRAME_ASPECT / aspect) * 0.86))
+  let fw = Math.min(p.w, p.h * 1.06 * FRAME_ASPECT)
+  const over = Math.min(2.2, Math.max(1, (FRAME_ASPECT / aspect) * 0.86))
   fw *= over
-  fh *= over
+  const fh = fw / FRAME_ASPECT
   return { x: p.x + (p.w - fw) / 2, y: p.y + (p.h - fh) / 2, w: fw, h: fh }
 }
 
@@ -164,22 +156,13 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         })
 
     let shownStage = -1
+    let frame = null
     const apply = (p) => {
-      if (PHOTO_REF) {
-        const W = stageEl.clientWidth
-        const H = stageEl.clientHeight
-        scene.setFrame(0, 0, W, H)
-        canvas.style.clipPath = 'none'
-        scene.setRise(1)
-        scene.setSketch(0)
-        scene.setDecor(1)
-        scene.setReveal(1)
-        return
-      }
       if (!lastKey) {
         lastKey = 'set'
         const P = L.panel
         const f = cameraFrame(P)
+        frame = f
         scene.setFrame(f.x, f.y, f.w, f.h)
         canvas.style.clipPath = `inset(${P.y}px ${stageEl.clientWidth - P.x - P.w}px ${stageEl.clientHeight - P.y - P.h}px ${P.x}px)`
         Object.assign(panel.style, { left: `${P.x}px`, top: `${P.y}px`, width: `${P.w}px`, height: `${P.h}px` })
@@ -216,12 +199,17 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     }
     gsap.ticker.add(tick)
 
-    // La mira del cursor pregunta acá en qué punto del local está (en metros), solo dentro del cuadrante.
+    // La mira del cursor pregunta acá en qué punto del alzado está, en metros: a lo largo del muro y
+    // de alto desde el piso. Solo dentro del interior del local.
     setPlanProbe((x, y) => {
-      const r = panel.getBoundingClientRect()
-      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return null
+      if (!frame) return null
       const c = canvas.getBoundingClientRect()
-      return scene.probe(x - c.left, y - c.top)
+      const u = (x - c.left - frame.x) / frame.w
+      const v = (y - c.top - frame.y) / frame.h
+      const mx = ((u - RI.x0) / (RI.x1 - RI.x0)) * RI.w
+      const my = ((RI.y1 - v) / (RI.y1 - RI.y0)) * RI.h
+      if (mx < 0 || mx > RI.w || my < 0 || my > RI.h) return null
+      return { x: mx, y: my }
     })
 
     // El arrastre sobre el dibujo (solo con mouse): el otro estado a la izquierda del cursor.
@@ -319,12 +307,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   }, [boarded, calm])
 
   const st = STAGES[stage]
-  const rows = [
-    ['Proyecto', 'Local · café'],
-    ['Superficie', `${ROOM.w * ROOM.d} m²`],
-    ['Estado', st.title],
-    ['Lámina', `${st.n} / 04`],
-  ]
 
   return (
     <section ref={sectionRef} id="inicio" aria-label="Inicio" className="relative h-[480vh] calm:h-svh">
@@ -340,7 +322,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           ref={canvasRef}
           className="absolute inset-0 block h-full w-full"
           role="img"
-          aria-label="Un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
+          aria-label="Alzado de un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
           data-cursor-tip={tip === 'sketch' ? 'Clic y arrastre · el boceto' : 'Clic y arrastre · la foto'}
         />
 
@@ -350,30 +332,12 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span data-panel-edge className="es-panel__edge es-panel__edge--r" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--b" />
           <span data-panel-edge className="es-panel__edge es-panel__edge--l" />
-          <span className="es-panel__label es-panel__label--tl" style={LABEL}>
-            <span data-paint data-paint-stage className="es-paint block">
-              {st.n} — {st.title}
-            </span>
-            <span data-paint data-paint-stage className="es-paint es-panel__sub">
-              {st.text}
-            </span>
+          <span data-paint data-paint-stage className="es-paint es-panel__label es-panel__label--tl" style={LABEL}>
+            {st.n} — {st.title}
           </span>
-          <span data-paint className="es-paint es-panel__label es-panel__label--tr" style={LABEL}>
-            Esc. 1:50 · N ↑
+          <span data-paint data-paint-stage className="es-paint es-panel__label es-panel__label--tr hidden sm:block" style={LABEL}>
+            Alzado · Esc. 1:50 · Lámina {st.n} / 04
           </span>
-          {/* El rótulo de la lámina, como el cuadro de datos de un plano. */}
-          <dl className="es-rotulo hidden xl:grid" style={LABEL}>
-            {rows.map(([k, v]) => (
-              <div key={k} className="es-rotulo__row">
-                <dt data-paint className="es-paint">
-                  {k}
-                </dt>
-                <dd data-paint {...(k === 'Estado' || k === 'Lámina' ? { 'data-paint-stage': '' } : {})} className="es-paint">
-                  {v}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </div>
 
         {/* Las líneas de construcción (con el mouse). */}

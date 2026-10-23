@@ -21,3 +21,11 @@ boceto → foto alineada: (175,213 → 232,262), (604,60 → 628,126), (1390,182
 alineado). Calza con el boceto completo sin deformar: se escaló a 2400×1350, se pasó el papel a
 blanco y a grises: `src/studio/elstudio/assets/boceto-vacio*.webp`. Los rectángulos de cada mueble
 están en `src/studio/elstudio/designPieces.js` (px de 1600×900).
+
+## Alzado (desde 2026-10-23, el hero usa estas)
+
+El hero pasó a un alzado frontal 21:9. `alzado-foto-b.png` (foto, Higgsfield texto → imagen),
+`alzado-boceto-b.png` (boceto, edición de la foto) y `alzado-vacio-a.png` (vacío, edición del boceto)
+calzan entre sí sin deformar. Se escalaron a 2400×1029; la foto con el fondo llevado a #efebe3 y los
+bocetos con el papel a blanco y en grises. Reemplazan a los WebP de `src/studio/elstudio/assets/`
+(mismos nombres). Rectángulos de cada mueble y el interior en metros: `designPieces.js`.
