@@ -34,6 +34,10 @@ import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
  * en óxido alrededor del cuadrante). En la última hoja, con el local terminado, se habilita el clic y
  * arrastre: del lado izquierdo del cursor se ve el boceto del local vacío (el antes).
  *
+ * Al salir (con `plano`, Plano.jsx): 300vh más de scroll con la lámina fija, en los que todo vuelve a
+ * boceto (la foto se despinta, el texto y el marco pasan a lápiz) y la hoja queda como un folio
+ * sobre la mesa de dibujo.
+ *
  * Con «reducir movimiento»: la lámina quieta, con la foto.
  */
 
@@ -93,7 +97,7 @@ function cameraFrame(p) {
   }
 }
 
-export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
+export default function Hero({ boarded, calm, bridge, navLogoRef, exit, plano = false }) {
   const sectionRef = useRef(null)
   const stageRef = useRef(null)
   const canvasRef = useRef(null)
@@ -162,7 +166,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
       : ScrollTrigger.create({
           trigger: sectionRef.current,
           start: 'top top',
-          end: 'bottom bottom',
+          // Con el plano, después de las cuatro etapas sigue la vuelta a boceto (Plano.jsx): 300vh más.
+          end: plano ? () => `+=${window.innerHeight * 3.8}` : 'bottom bottom',
           onUpdate: (self) => {
             target = self.progress
           },
@@ -172,6 +177,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
     let canDrag = false
     let release = () => {}
     let frame = null
+    // La vuelta a boceto al salir (0 → 1, la maneja Plano.jsx): la foto se despinta y vuelven los trazos.
+    let back = 0
     const apply = (p) => {
       if (!lastKey) {
         lastKey = 'set'
@@ -192,23 +199,25 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
       scene.setRise(0)
       const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(0.06 + i * 0.058, 0.06 + i * 0.058 + 0.1, p)))
       scene.setDesign(pieces)
-      scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p))
+      scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p) * (1 - back))
       scene.setSat(calm ? 1 : smooth(0.62, 0.78, p))
-      scene.setSketch(calm ? 0 : 1 - smooth(0.62, 0.8, p))
-      scene.setZoom(calm ? 0 : smooth(0.84, 1, p))
+      scene.setSketch(calm ? 0 : Math.max(1 - smooth(0.62, 0.8, p), back))
+      scene.setZoom(calm ? 0 : smooth(0.84, 1, p) * (1 - back))
       const s = calm ? 3 : p < 0.06 ? 0 : p < 0.52 ? 1 : p < 0.84 ? 2 : 3
       if (s !== shownStage) {
         shownStage = s
         setStage(s)
         // El arrastre (antes / después) se habilita recién en la última hoja, con el local terminado.
-        canDrag = s === 3
+        canDrag = s === 3 && back === 0
         if (!canDrag) release()
       }
     }
     apply(current)
     if (calm) scene.setReveal(1)
 
+    let parked = false
     const tick = (_t, deltaMs) => {
+      if (parked) return
       current += (target - current) * (1 - Math.exp(-deltaMs / 110))
       if (Math.abs(target - current) < 1e-4) current = target
       apply(current)
@@ -237,8 +246,34 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
           const y1 = Math.min(img.y + PHOTO_IN.y1 * h, r.top + P.y + P.h)
           return { img, clip: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } }
         },
+        /** Al salir, todo vuelve a boceto: la foto (en la escena) y el texto y el marco (--sk, CSS). */
+        setBack(v) {
+          if (v === back) return
+          back = v
+          stageEl.style.setProperty('--sk', String(v))
+          stageEl.classList.toggle('is-sketch', v > 0.001)
+          canDrag = shownStage === 3 && v === 0
+          if (v > 0) release()
+        },
+        /** La hoja como folio sobre la mesa (una transformación; '' = en su lugar). */
+        setFolio(transform) {
+          // Con will-change la hoja se dibuja una vez y la GPU la escala (si no, el navegador la vuelve
+          // a dibujar, filtro de lápiz incluido, en cada cuadro del zoom).
+          if (!transform !== !stageEl.style.transform) {
+            stageEl.style.willChange = transform ? 'transform' : ''
+            stageEl.style.pointerEvents = transform ? 'none' : ''
+          }
+          stageEl.style.transform = transform
+        },
+        setHidden(hidden) {
+          stageEl.style.visibility = hidden ? 'hidden' : ''
+        },
         hidePhoto(hidden) {
+          if (hidden === parked) return
+          // Mientras la foto vuela, el lienzo no se ve: el hero deja de calcular y de dibujar.
+          parked = hidden
           canvas.style.visibility = hidden ? 'hidden' : ''
+          if (!hidden) scene.render(true)
         },
       }
     }
@@ -301,7 +336,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
       scene.dispose()
       sceneRef.current = null
     }
-  }, [calm, exit])
+  }, [calm, exit, plano])
 
   // Al cambiar de etapa, lo que cambia se vuelve a pintar (el título, el texto, el estado y la lámina).
   const firstStage = useRef(true)
@@ -362,8 +397,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
   const st = STAGES[stage]
 
   return (
-    <section ref={sectionRef} id="inicio" aria-label="Inicio" className="relative z-[2] h-[480vh] calm:h-svh">
-      <div ref={stageRef} data-hero-sheet className="es-lamina es-sheet sticky top-0 h-svh overflow-hidden">
+    <section ref={sectionRef} id="inicio" aria-label="Inicio" className={`relative z-[2] ${plano ? 'h-[780vh]' : 'h-[480vh]'} calm:h-svh`}>
+      <div ref={stageRef} data-hero-sheet className="es-lamina es-sheet es-sk sticky top-0 h-svh overflow-hidden">
         {/* La grilla de columnas, a la vista. */}
         <div ref={colsRef} className="es-cols" aria-hidden="true" style={{ '--cols': cols }}>
           {Array.from({ length: cols }, (_, i) => (

@@ -774,7 +774,8 @@
   overflow: hidden;
   visibility: hidden;
   pointer-events: none;
-  will-change: transform, width, height;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 .es-proj__fly img {
   position: absolute;
@@ -782,6 +783,8 @@
   top: 0;
   max-width: none;
   display: block;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 @media (min-width: 640px) {
   .es-proj {
@@ -800,6 +803,89 @@
   }
 }
 
+/* ── El boceto: la hoja que se deja atrás vuelve a lápiz (--sk 0 → 1) ── */
+.es-sk {
+  --sk: 0;
+}
+/* Los títulos: de tinta a contorno con rayado de grafito. */
+.es-sk .es-info__line,
+.es-sk .es-proj__title {
+  color: rgb(22 21 19 / calc(1 - var(--sk)));
+  -webkit-text-stroke: calc(var(--sk) * 1.1px) rgb(46 43 39 / var(--sk));
+  background-image: repeating-linear-gradient(-58deg, rgb(46 43 39 / calc(var(--sk) * 0.5)) 0 1px, transparent 1px 5px);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* El resto del texto, a grafito. */
+.es-sk .es-info__copy,
+.es-sk .es-proj__ficha,
+.es-sk .es-proj__label {
+  color: color-mix(in srgb, #3b3833, #8a857b calc(var(--sk) * 100%));
+}
+.es-sk .es-proj__row--name dd {
+  color: color-mix(in srgb, var(--es-ink), #6f6a61 calc(var(--sk) * 100%));
+}
+.es-sk .es-proj__n {
+  color: color-mix(in srgb, var(--es-rust), #8a857b calc(var(--sk) * 100%));
+}
+/* El temblor del lápiz (filtros en Plano.jsx), solo mientras hay boceto. */
+.es-sk.is-sketch .es-info,
+.es-sk.is-sketch .es-panel,
+.es-sk.is-sketch .es-frame__line,
+.es-sk.is-sketch .es-proj__head,
+.es-sk.is-sketch .es-proj__ficha {
+  filter: url(#es-pencil);
+}
+.es-plano__folio.is-sketch .es-proj__head,
+.es-plano__folio.is-sketch .es-proj__ficha,
+.es-plano__folio.is-sketch .es-plano__frame {
+  filter: url(#es-pencil-f);
+}
+/* La tarjeta del folio: el boceto (en multiplicar, el blanco del dibujo desaparece) sobre la foto. */
+.es-sk .es-proj__img--photo {
+  opacity: calc(1 - var(--sk));
+}
+.es-proj__img--sketch {
+  opacity: var(--sk);
+  mix-blend-mode: multiply;
+}
+
+/* ── El plano: los folios sobre la mesa ────────────────────────────── */
+.es-plano__folio,
+.es-plano__shadow {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.es-plano__folio {
+  overflow: hidden;
+}
+.es-plano__shadow {
+  box-shadow:
+    0 2px 6px rgba(22, 21, 19, 0.12),
+    0 40px 80px -20px rgba(22, 21, 19, 0.35);
+}
+.es-plano__frame {
+  position: absolute;
+  inset: calc(var(--nav-h) + 16px) 16px 28px;
+  border: 1px solid rgba(22, 21, 19, 0.42);
+}
+@media (min-width: 640px) {
+  .es-plano__frame {
+    inset: calc(var(--nav-h) + 22px) 36px 36px;
+  }
+}
+.es-plano__cap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #6d675c;
+}
 /* ── La señal de scroll: «Scroll» y una flecha de boceto ───────────── */
 .es-scrollcue {
   position: absolute;

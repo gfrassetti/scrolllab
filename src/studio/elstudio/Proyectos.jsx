@@ -52,97 +52,36 @@ const lerpRect = (a, b, t) => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
-export default function Proyectos({ calm, exit }) {
-  const sectionRef = useRef(null)
-  const cardRef = useRef(null)
-  const cardImgRef = useRef(null)
-  const flyRef = useRef(null)
-  const flyImgRef = useRef(null)
-  const fichaRef = useRef(null)
-  const src = typeof window !== 'undefined' && window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1400 ? photoFull : photoSmall
-
-  // La foto de la tarjeta, recortada al local (en %, así acompaña los cambios de tamaño).
+/**
+ * El contenido de Proyectos: el título, la tarjeta 01 y su ficha. Se usa dos veces: en la sección y en
+ * su folio sobre la mesa (Plano.jsx), que además trae el boceto de la foto (`sketchSrc`, encima, en
+ * multiplicar) y vuelve a lápiz con --sk.
+ */
+export function ProyectosBody({ refs, src, sketchSrc, titleId }) {
+  const localCard = useRef(null)
+  const cardRef = refs?.card ?? localCard
+  // La foto de la tarjeta (y su boceto), recortada al local (en %, así acompaña los cambios de tamaño).
   useLayoutEffect(() => {
     const card = cardRef.current
-    const img = cardImgRef.current
     const fit = () => {
       const w = card.clientWidth
       const h = card.clientHeight
       if (!w || !h) return
       const r = coverRoom({ x: 0, y: 0, w, h })
-      Object.assign(img.style, { left: `${(r.x / w) * 100}%`, top: `${(r.y / h) * 100}%`, width: `${(r.w / w) * 100}%`, height: `${(r.h / h) * 100}%` })
+      for (const img of card.querySelectorAll('img')) {
+        Object.assign(img.style, { left: `${(r.x / w) * 100}%`, top: `${(r.y / h) * 100}%`, width: `${(r.w / w) * 100}%`, height: `${(r.h / h) * 100}%` })
+      }
     }
     fit()
     const ro = new ResizeObserver(fit)
     ro.observe(card)
     return () => ro.disconnect()
-  }, [])
-
-  // El vuelo.
-  useLayoutEffect(() => {
-    if (calm || !exit) return undefined
-    const fly = flyRef.current
-    const flyImg = flyImgRef.current
-    const card = cardRef.current
-    const cardImg = cardImgRef.current
-    const ficha = fichaRef.current
-    let t = 0
-    let flying = false
-
-    const draw = () => {
-      const from = exit.current?.place()
-      const on = t > 0 && t < 1 && !!from
-      if (on !== flying) {
-        flying = on
-        fly.style.visibility = on ? 'visible' : 'hidden'
-      }
-      // Antes de despegar, la foto es la del lienzo; al aterrizar, la de la tarjeta.
-      exit.current?.hidePhoto(t > 0)
-      cardImg.style.visibility = t >= 1 ? 'visible' : 'hidden'
-      const k = smoothstep(0.72, 1, t)
-      ficha.style.opacity = String(k)
-      ficha.style.transform = `translateY(${(1 - k) * 14}px)`
-      if (!on) return
-      const c = card.getBoundingClientRect()
-      const to = { x: c.left, y: c.top, w: c.width, h: c.height }
-      const e = ease(t)
-      const box = lerpRect(from.clip, to, e)
-      const img = lerpRect(from.img, coverRoom(to), e)
-      Object.assign(fly.style, { transform: `translate3d(${box.x}px, ${box.y}px, 0)`, width: `${box.w}px`, height: `${box.h}px` })
-      Object.assign(flyImg.style, { transform: `translate3d(${img.x - box.x}px, ${img.y - box.y}px, 0)`, width: `${img.w}px`, height: `${img.h}px` })
-    }
-
-    // Del final del hero (esta sección asoma abajo) a esta sección arriba de todo.
-    const st = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top bottom',
-      end: 'top top',
-      onUpdate: (self) => {
-        t = clamp01(self.progress)
-        draw()
-      },
-      onRefresh: (self) => {
-        t = clamp01(self.progress)
-        draw()
-      },
-    })
-    // El rectángulo de partida se mueve con la hoja del hero: se redibuja en cada cuadro del vuelo.
-    const tick = () => flying && draw()
-    gsap.ticker.add(tick)
-    return () => {
-      gsap.ticker.remove(tick)
-      st.kill()
-      fly.style.visibility = 'hidden'
-      cardImg.style.visibility = ''
-      ficha.style.opacity = ''
-      ficha.style.transform = ''
-    }
-  }, [calm, exit])
+  }, [cardRef])
 
   return (
-    <section ref={sectionRef} id="proyectos" aria-labelledby="proyectos-title" className="es-proj relative min-h-svh">
+    <>
       <header className="es-proj__head">
-        <h2 id="proyectos-title" className="es-proj__title">
+        <h2 id={titleId} className="es-proj__title">
           Proyectos
         </h2>
         <span className="es-proj__label" style={LABEL}>
@@ -152,10 +91,17 @@ export default function Proyectos({ calm, exit }) {
 
       <article className="es-proj__item">
         <div ref={cardRef} className="es-proj__card">
-          <img ref={cardImgRef} src={src} alt={`${PROJECT.name}, ${PROJECT.kind.toLowerCase()} en ${PROJECT.place}`} className="es-proj__img" decoding="async" />
+          <img
+            ref={refs?.img}
+            src={src}
+            alt={titleId ? `${PROJECT.name}, ${PROJECT.kind.toLowerCase()} en ${PROJECT.place}` : ''}
+            className="es-proj__img es-proj__img--photo"
+            decoding="async"
+          />
+          {sketchSrc && <img src={sketchSrc} alt="" className="es-proj__img es-proj__img--sketch" decoding="async" />}
           <span className="es-proj__slot" aria-hidden="true" />
         </div>
-        <dl ref={fichaRef} className="es-proj__ficha">
+        <dl ref={refs?.ficha} className="es-proj__ficha">
           <div className="es-proj__row es-proj__row--name">
             <dt className="sr-only">Proyecto</dt>
             <dd>
@@ -178,14 +124,131 @@ export default function Proyectos({ calm, exit }) {
           ))}
         </dl>
       </article>
+    </>
+  )
+}
+
+/** La foto de la tarjeta según la pantalla (la misma en la sección y en su folio). */
+const projectPhoto = () =>
+  typeof window !== 'undefined' && window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1400 ? photoFull : photoSmall
+
+/**
+ * La sección. `mode`: 'plano' (llega desde su folio, Plano.jsx: va encima del final del hero y se
+ * muestra recién cuando el folio la llena) o 'proyecto' (la foto del hero vuela a la tarjeta).
+ */
+export default function Proyectos({ calm, exit, mode = 'proyecto' }) {
+  const sectionRef = useRef(null)
+  const cardRef = useRef(null)
+  const cardImgRef = useRef(null)
+  const flyRef = useRef(null)
+  const flyImgRef = useRef(null)
+  const fichaRef = useRef(null)
+  const src = projectPhoto()
+  const flies = mode === 'proyecto'
+
+  // El vuelo.
+  useLayoutEffect(() => {
+    if (calm || !exit || !flies) return undefined
+    const fly = flyRef.current
+    const flyImg = flyImgRef.current
+    const card = cardRef.current
+    const cardImg = cardImgRef.current
+    const ficha = fichaRef.current
+    let t = 0
+    let flying = false
+    let needs = true
+    // El tamaño de base de la foto en vuelo (el de la partida). En el vuelo solo cambian transformaciones:
+    // la placa de la foto se dibuja una vez y la GPU la mueve y la escala (cambiar ancho y alto en cada
+    // cuadro la volvía a dibujar entera, a 2400 px, y el pase se trababa).
+    let base = null
+
+    // La foto, decodificada de antemano (si no, el primer cuadro del vuelo la decodifica).
+    flyImg.decode?.().catch(() => {})
+    cardImg.decode?.().catch(() => {})
+
+    const draw = () => {
+      // Primero se mide todo (el local en el hero y la tarjeta) y después se escribe.
+      const from = exit.current?.place()
+      const c = card.getBoundingClientRect()
+      const on = t > 0 && t < 1 && !!from
+      if (on !== flying) {
+        flying = on
+        fly.style.visibility = on ? 'visible' : 'hidden'
+        if (on && !base) {
+          base = { box: from.clip, img: from.img }
+          Object.assign(fly.style, { width: `${base.box.w}px`, height: `${base.box.h}px` })
+          Object.assign(flyImg.style, { width: `${base.img.w}px`, height: `${base.img.h}px` })
+        }
+      }
+      // Antes de despegar, la foto es la del lienzo; al aterrizar, la de la tarjeta.
+      exit.current?.hidePhoto(t > 0)
+      cardImg.style.visibility = t >= 1 ? 'visible' : 'hidden'
+      const k = smoothstep(0.72, 1, t)
+      ficha.style.opacity = String(k)
+      ficha.style.transform = `translate3d(0, ${(1 - k) * 14}px, 0)`
+      if (!on) return
+      const to = { x: c.left, y: c.top, w: c.width, h: c.height }
+      const e = ease(t)
+      const box = lerpRect(from.clip, to, e)
+      const img = lerpRect(from.img, coverRoom(to), e)
+      const sx = box.w / base.box.w
+      const sy = box.h / base.box.h
+      const si = img.w / base.img.w
+      fly.style.transform = `translate3d(${box.x}px, ${box.y}px, 0) scale(${sx}, ${sy})`
+      flyImg.style.transform = `translate3d(${(img.x - box.x) / sx}px, ${(img.y - box.y) / sy}px, 0) scale(${si / sx}, ${si / sy})`
+    }
+
+    // Del final del hero (esta sección asoma abajo) a esta sección arriba de todo.
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top bottom',
+      end: 'top top',
+      onUpdate: (self) => {
+        t = clamp01(self.progress)
+        needs = true
+      },
+      onRefresh: (self) => {
+        t = clamp01(self.progress)
+        base = null
+        flying = false
+        needs = true
+      },
+    })
+    // Un solo dibujo por cuadro, y solo si el scroll se movió.
+    const tick = () => {
+      if (!needs) return
+      needs = false
+      draw()
+    }
+    gsap.ticker.add(tick)
+    return () => {
+      gsap.ticker.remove(tick)
+      st.kill()
+      fly.style.visibility = 'hidden'
+      cardImg.style.visibility = ''
+      ficha.style.opacity = ''
+      ficha.style.transform = ''
+    }
+  }, [calm, exit, flies])
+
+  return (
+    <section
+      ref={sectionRef}
+      id="proyectos"
+      aria-labelledby="proyectos-title"
+      className={`es-proj es-sheet relative min-h-svh ${mode === 'plano' ? 'z-[3] -mt-[100svh] calm:mt-0' : ''}`}
+    >
+      <ProyectosBody refs={{ card: cardRef, img: cardImgRef, ficha: fichaRef }} src={src} titleId="proyectos-title" />
 
       {/* El resto de la sección (por ahora vacío). */}
       <div style={{ height: '1vh' }} />
 
       {/* La foto en vuelo, del hero a la tarjeta. */}
-      <div ref={flyRef} className="es-proj__fly" aria-hidden="true">
-        <img ref={flyImgRef} src={src} alt="" decoding="async" />
-      </div>
+      {flies && (
+        <div ref={flyRef} className="es-proj__fly" aria-hidden="true">
+          <img ref={flyImgRef} src={src} alt="" decoding="async" />
+        </div>
+      )}
     </section>
   )
 }
