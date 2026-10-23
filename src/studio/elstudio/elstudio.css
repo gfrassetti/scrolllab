@@ -807,20 +807,26 @@
 .es-sk {
   --sk: 0;
 }
-/* El título: de tinta a contorno con rayado de grafito. */
+/* El título: de tinta a grafito. Las letras quedan en el gris de un lápiz blando, con el grano del
+   papel comiéndose el trazo (sin contorno ni rayado, que en letras grandes se ven de libro para
+   colorear, y sin temblor). */
 .es-sk .es-info__line {
-  color: rgb(22 21 19 / calc(1 - var(--sk)));
-  -webkit-text-stroke: calc(var(--sk) * 1.1px) rgb(46 43 39 / var(--sk));
-  background-image: repeating-linear-gradient(-58deg, rgb(46 43 39 / calc(var(--sk) * 0.5)) 0 1px, transparent 1px 5px);
+  color: color-mix(in srgb, #161513, rgb(66 62 56 / 0.58) calc(var(--sk) * 100%));
+  background-image: var(--es-pencil-grain);
+  background-size: 140px 140px;
   -webkit-background-clip: text;
   background-clip: text;
+}
+.es-sk {
+  /* El grano del grafito: puntos claros que dejan ver el papel a través del trazo. */
+  --es-pencil-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.19  0 0 0 0 0.17  0 0 0 1.5 -0.5'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
 }
 /* El resto del texto, a grafito. */
 .es-sk .es-info__copy {
   color: color-mix(in srgb, #3b3833, #8a857b calc(var(--sk) * 100%));
 }
 /* El temblor del lápiz (filtro #es-pencil, Boceto.jsx), solo mientras hay boceto. */
-.es-sk.is-sketch .es-info,
+.es-sk.is-sketch .es-info__side,
 .es-sk.is-sketch .es-panel,
 .es-sk.is-sketch .es-frame__line {
   filter: url(#es-pencil);
