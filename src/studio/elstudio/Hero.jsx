@@ -290,6 +290,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const ctx = gsap.context(() => {
       gsap.set(q('[data-col]'), { scaleY: 0 })
       gsap.set(q('[data-panel-edge]'), { scale: 0 })
+      // La línea de abajo del marco nace en el centro de la pantalla, con la del nav (Nav.jsx).
+      const mid = window.innerHeight / 2
+      gsap.set(q('[data-frame-line]'), { scaleX: 0, y: (_i, el) => mid - el.getBoundingClientRect().top })
+      gsap.set(q('[data-frame-mark]'), { autoAlpha: 0, scale: 0.4 })
       hidePaint(q('[data-paint]'))
     }, stageRef)
     return () => ctx.revert()
@@ -309,6 +313,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     })
     tl
       .to(q('[data-panel-edge]'), { scale: 1, duration: 0.9, ease: 'expo.inOut', stagger: 0.05 }, 0.2)
+      // Los mismos tiempos que la línea del nav: se estira en el centro y baja a su lugar.
+      .to(q('[data-frame-line]'), { scaleX: 1, duration: 0.8, ease: 'expo.inOut' }, OPEN_DELAY)
+      .to(q('[data-frame-line]'), { y: 0, duration: 1, ease: 'expo.inOut' }, OPEN_DELAY + 0.75)
+      .to(q('[data-frame-mark]'), { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', stagger: 0.05 }, OPEN_DELAY + 2.1)
       .to(q('[data-col]'), { scaleY: 1, duration: 1.1, ease: 'expo.out', stagger: 0.06 }, OPEN_DELAY + 0.8)
       .add(() => paint(q('[data-paint]'), { stagger: 0.05, duration: 0.85 }), OPEN_DELAY + 0.6)
       .add(() => cueRef.current?.classList.add('is-on'), OPEN_DELAY + 1.4)
@@ -322,8 +330,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   const st = STAGES[stage]
 
   return (
-    <section ref={sectionRef} id="inicio" aria-label="Inicio" className="relative h-[480vh] calm:h-svh">
-      <div ref={stageRef} className="es-lamina sticky top-0 h-svh overflow-hidden">
+    <section ref={sectionRef} id="inicio" aria-label="Inicio" className="relative z-[2] h-[480vh] calm:h-svh">
+      <div ref={stageRef} data-hero-sheet className="es-lamina es-sheet sticky top-0 h-svh overflow-hidden">
         {/* La grilla de columnas, a la vista. */}
         <div ref={colsRef} className="es-cols" aria-hidden="true" style={{ '--cols': cols }}>
           {Array.from({ length: cols }, (_, i) => (
@@ -365,6 +373,12 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span className="es-guide es-guide--rust-v" />
           <span className="es-guide es-guide--rust-h" />
         </div>
+
+        {/* El borde de la franja de abajo y sus cruces: el marco de esta hoja (se va con ella). */}
+        <span data-frame-line className="es-frame__line es-frame__line--bottom" aria-hidden="true" />
+        {['bl', 'br'].map((k) => (
+          <span key={k} data-frame-mark className={`es-frame__mark es-frame__mark--${k}`} aria-hidden="true" />
+        ))}
 
         {/* La franja de abajo: el título grande y, a la derecha, el texto de la etapa. */}
         <div ref={infoRef} className="es-info" style={{ color: C.ink }}>

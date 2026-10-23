@@ -11,7 +11,8 @@ import Logo from './Logo'
  *
  * La apertura (después de que el boceto se pinta): dos líneas finas nacen en el centro de la
  * pantalla y se estiran hasta los bordes; una sube y queda como el borde del nav, la otra baja y
- * queda como el borde del bloque de abajo. Después se trazan las divisiones del nav (de arriba
+ * queda como el borde del bloque de abajo (esa la dibuja el hero, Hero.jsx, con los mismos tiempos:
+ * es de su hoja). Después se trazan las divisiones del nav (de arriba
  * hacia abajo), los botones se pintan (paint.js) y entran la regla y las cruces de registro.
  *
  * El logo chico (`logoRef`) arranca invisible: el loader aterriza ahí y lo enciende (vía el hero).
@@ -92,6 +93,9 @@ export default function Nav({ logoRef, open, calm }) {
 
   return (
     <div ref={rootRef} className="es-frame pointer-events-none fixed inset-0 z-40" style={{ color: C.ink }}>
+      {/* El lomo del block: papel opaco detrás del nav y la regla. Al cambiar de lámina, la hoja que se
+          va pasa por debajo. */}
+      <span className="es-sheet es-frame__binding" aria-hidden="true" />
       {/* El nav. */}
       <header className="es-frame__nav absolute inset-x-0 top-0 flex items-stretch justify-between">
         <a
@@ -134,13 +138,12 @@ export default function Nav({ logoRef, open, calm }) {
         </nav>
       </header>
 
-      {/* Las dos líneas del marco y la regla bajo el nav. */}
+      {/* La línea del marco y la regla bajo el nav (la de abajo es de la hoja del hero: se va con ella). */}
       <span data-line="top" className="es-frame__line es-frame__line--top" aria-hidden="true" />
       <span data-ruler className="es-frame__ruler" aria-hidden="true" />
-      <span data-line="bottom" className="es-frame__line es-frame__line--bottom" aria-hidden="true" />
 
-      {/* Cruces de registro en las cuatro esquinas del cuadro. */}
-      {['tl', 'tr', 'bl', 'br'].map((k) => (
+      {/* Cruces de registro en las esquinas de arriba (las de abajo, también de la hoja). */}
+      {['tl', 'tr'].map((k) => (
         <span key={k} data-mark className={`es-frame__mark es-frame__mark--${k}`} aria-hidden="true" />
       ))}
 

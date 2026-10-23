@@ -244,6 +244,13 @@
 .es-frame__band {
   height: var(--band-h);
 }
+.es-frame__binding {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(var(--nav-h) + 9px);
+}
 .es-frame__line {
   position: absolute;
   left: 0;
@@ -620,6 +627,49 @@
   .es-info__copy {
     padding: 16px 20px;
     font-size: clamp(14px, 1vw, 16px);
+  }
+}
+
+/* ── Lámina 05: la hoja que queda debajo del hero ─────────────────── */
+.es-next__panel {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(var(--nav-h) + 16px);
+  bottom: 28px;
+  border: 1px solid rgba(22, 21, 19, 0.42);
+  pointer-events: none;
+}
+.es-next__mark--bl {
+  left: 12px;
+  bottom: 18px;
+}
+.es-next__mark--br {
+  right: 12px;
+  bottom: 18px;
+}
+.es-next__body {
+  position: relative;
+  margin-top: calc(var(--nav-h) + 60px);
+}
+/* La sombra que le hacía la hoja de arriba. */
+.es-next__shade {
+  position: absolute;
+  inset: 0;
+  background: #161513;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .es-next__panel {
+    left: 36px;
+    right: 36px;
+    top: calc(var(--nav-h) + 22px);
+    bottom: 36px;
+  }
+  .es-next__mark--bl,
+  .es-next__mark--br {
+    bottom: 26px;
   }
 }
 

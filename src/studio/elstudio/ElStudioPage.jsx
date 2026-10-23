@@ -8,6 +8,7 @@ import Loader from './Loader'
 import Cursor from './Cursor'
 import Nav from './Nav'
 import Hero from './Hero'
+import Estudio from './Estudio'
 import { FONTS_HREF, SITE } from './brand'
 
 const FONT_WAIT_MS = 4000
@@ -93,6 +94,7 @@ export default function ElStudioPage() {
         <Nav logoRef={navLogoRef} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
           <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} />
+          <Estudio calm={calm} />
         </main>
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}
