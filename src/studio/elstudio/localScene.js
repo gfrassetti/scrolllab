@@ -402,7 +402,7 @@ const sketchFragment = /* glsl */ `
 
   // El boceto a lápiz (imagen), como tinta sobre el papel de la página. Se dibuja desde el centro:
   // primero los trazos fuertes, después los tonos suaves y el sombreado.
-  vec4 sketchAt(float reveal, float zoom) {
+  vec4 sketchAt(float reveal, float zoom, float designed) {
     vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
     vec2 puv = (fuv - vec2(0.5, 0.48)) / zoom + vec2(0.5, 0.48);
     float inside = step(0.0, fuv.x) * step(fuv.x, 1.0) * step(0.0, fuv.y) * step(fuv.y, 1.0);
@@ -412,7 +412,9 @@ const sketchFragment = /* glsl */ `
     vec2 px = vUv * uRes / uDpr;
     // El diseño: sobre el local vacío, cada mueble se dibuja en su rectángulo, primero los trazos
     // más fuertes y después el resto, con el borde de cada trazo irregular.
-    if (uHasEmpty > 0.5) {
+    // Sin diseñar (el arrastre): el local vacío, tal cual.
+    if (uHasEmpty > 0.5 && designed < 0.5) c = texture2D(tSketchEmpty, cuv).rgb;
+    else if (uHasEmpty > 0.5) {
       vec3 e = texture2D(tSketchEmpty, cuv).rgb;
       float strongFull = smoothstep(0.35, 0.75, 1.0 - lum(c));
       float d = 0.0;
@@ -442,7 +444,7 @@ const sketchFragment = /* glsl */ `
   void main() {
     // El boceto va encima del 3D: mientras el local sube desde el dibujo, el trazo se apaga.
     vec4 a = layer(tColor, tNormal, 0.0, 1.0) * uA;
-    vec4 sk = (uSketchImg > 0.5 ? sketchAt(uReveal, uPhotoZoom) : layer(tColorB, tNormalB, 1.0, uReveal)) * uSketch;
+    vec4 sk = (uSketchImg > 0.5 ? sketchAt(uReveal, uPhotoZoom, 1.0) : layer(tColorB, tNormalB, 1.0, uReveal)) * uSketch;
     // La foto se pinta sobre la maqueta: un trazo ancho que barre de izquierda a derecha, con borde
     // de pincel (ruido estirado a lo largo, como cerdas). El mismo trazo borra la maqueta.
     float m = 0.0;
@@ -464,7 +466,7 @@ const sketchFragment = /* glsl */ `
     if (uSplitOn > 0.001) {
       vec4 o = layer(tColorO, tNormalO, uSketchO, 1.0);
       if (uSketchO < 0.5 && uPhoto > 0.5) o = photoAt(uPhotoZoom, 1.0);
-      if (uSketchO > 0.5 && uSketchImg > 0.5) o = sketchAt(1.0, uPhotoZoom);
+      if (uSketchO > 0.5 && uSketchImg > 0.5) o = sketchAt(1.0, uPhotoZoom, 0.0);
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
       float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
