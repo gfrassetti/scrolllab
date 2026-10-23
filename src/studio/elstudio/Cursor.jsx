@@ -93,7 +93,8 @@ export default function Cursor() {
         coords.current.dataset.flipX = x < rect.left + 110 ? '1' : '0'
         coords.current.dataset.flipY = y > rect.bottom - 50 ? '1' : '0'
         // El cartel junto a la mira (al estilo de un plano anotado), si lo que está debajo lo pide.
-        const text = tipEl?.getAttribute('data-cursor-tip') || ''
+        // Se lee en cada cuadro: el cartel puede aparecer o irse sin que el mouse cambie de elemento.
+        const text = tipEl?.closest('[data-cursor-tip]')?.getAttribute('data-cursor-tip') || ''
         if (text !== tipShown) {
           tipShown = text
           if (text) tip.textContent = text
@@ -122,7 +123,7 @@ export default function Cursor() {
       const target = e.target instanceof Element ? e.target : null
       const interactive = !!target?.closest(INTERACTIVE)
       overLink = interactive
-      tipEl = target?.closest('[data-cursor-tip]') || null
+      tipEl = target
       gsap.to(plusEl, { rotation: interactive ? 45 : 0, scale: interactive ? 1.3 : 1, duration: 0.4, ease: 'expo.out' })
       const tagged = target?.closest('[data-cursor]')
       if (tagged) return setDot('label', tagged.getAttribute('data-cursor'))

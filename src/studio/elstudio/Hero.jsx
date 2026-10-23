@@ -31,9 +31,9 @@ import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
  * Todo pasa sobre la misma toma (boceto y foto alineados): las líneas no se corren nunca. El 3D
  * queda debajo solo para medir (la mira lee metros del piso).
  *
- * Con el mouse: al entrar al hero aparecen las líneas de construcción (guías punteadas y una regla
- * en óxido alrededor del cuadrante) y, al hacer clic y arrastrar sobre el dibujo, se ve el otro
- * estado del lado izquierdo del cursor (la foto sobre el boceto, o el boceto sobre la foto).
+ * Con el mouse: al entrar al dibujo aparecen las líneas de construcción (guías punteadas y una regla
+ * en óxido alrededor del cuadrante). En la última hoja, con el local terminado, se habilita el clic y
+ * arrastre: del lado izquierdo del cursor se ve el boceto del local vacío (el antes).
  *
  * Con «reducir movimiento»: la lámina quieta, con la foto.
  */
@@ -95,7 +95,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
   const sceneRef = useRef(null)
   const [stage, setStage] = useState(calm ? 3 : 0)
   const [cols, setCols] = useState(8)
-  const [tip, setTip] = useState('final')
 
   // El loader aterriza en el logo del nav.
   useEffect(() => {
@@ -161,6 +160,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
         })
 
     let shownStage = -1
+    let canDrag = false
+    let release = () => {}
     let frame = null
     const apply = (p) => {
       if (!lastKey) {
@@ -190,13 +191,13 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       if (s !== shownStage) {
         shownStage = s
         setStage(s)
-        setTip(scene.splitShows())
+        // El arrastre (antes / después) se habilita recién en la última hoja, con el local terminado.
+        canDrag = s === 3
+        if (!canDrag) release()
       }
     }
     apply(current)
     if (calm) scene.setReveal(1)
-    // Mientras se arrastra, el cartel dice qué se ve del otro lado.
-    const refreshTip = () => setTip(scene.splitShows())
 
     const tick = (_t, deltaMs) => {
       current += (target - current) * (1 - Math.exp(-deltaMs / 110))
@@ -223,11 +224,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
     const split = { on: 0 }
     let dragging = false
     const onDown = (e) => {
-      if (!fine || e.pointerType === 'touch' || e.button !== 0) return
+      if (!canDrag || !fine || e.pointerType === 'touch' || e.button !== 0) return
       dragging = true
       canvas.setPointerCapture?.(e.pointerId)
       scene.setSplit(e.clientX / stageEl.clientWidth)
-      refreshTip()
       gsap.to(split, { on: 1, duration: 0.45, ease: 'expo.out', overwrite: true, onUpdate: () => scene.setSplitOn(split.on) })
     }
     const onMove = (e) => {
@@ -238,6 +238,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       dragging = false
       gsap.to(split, { on: 0, duration: 0.55, ease: 'expo.out', overwrite: true, onUpdate: () => scene.setSplitOn(split.on) })
     }
+    release = onUp
     // Las líneas de construcción: aparecen al entrar al dibujo con el mouse (el canvas solo recibe el
     // puntero dentro del cuadrante, por su clip-path).
     const onEnter = (e) => e.pointerType !== 'touch' && stageEl.classList.add('is-hover')
@@ -331,7 +332,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           className="absolute inset-0 block h-full w-full"
           role="img"
           aria-label="Alzado de un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
-          data-cursor-tip={tip === 'sketch' ? 'Clic y arrastre · el local vacío' : 'Clic y arrastre · la foto'}
+          data-cursor-tip={stage === 3 ? 'Clic y arrastre · el local vacío' : undefined}
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
