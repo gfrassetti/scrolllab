@@ -21,12 +21,12 @@ import photoSmall from './assets/foto-local-1200.webp'
  * Con «reducir movimiento»: la tarjeta ya tiene su foto y la ficha está a la vista.
  */
 
-// Ficha de muestra: reemplazar por los datos del proyecto real.
+// Ficha de muestra: va a ser un proyecto real del cliente (fotos y datos los pide el estudio).
 const PROJECT = {
   n: '01',
-  name: 'Olivo',
-  kind: 'Café · Local comercial',
-  place: 'San Carlos de Bariloche',
+  name: 'Proyecto 1',
+  kind: 'Local comercial',
+  place: 'Lugar X',
   year: '2025',
   area: '68 m²',
 }
