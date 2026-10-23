@@ -580,6 +580,18 @@
   color: #3b3833;
   min-width: 0;
 }
+.es-info__step {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--es-rust);
+}
+.es-info__copy {
+  margin: 0;
+  max-width: 38ch;
+}
 .es-info__cta {
   position: relative;
   display: flex;

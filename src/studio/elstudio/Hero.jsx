@@ -40,11 +40,15 @@ import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
 
 const REVEAL_SECONDS = 3.8
 
+// Lo que dice la celda de la derecha en cada hoja del plano (la primera es también el subtítulo fijo,
+// para los buscadores: ABOUT).
+const ABOUT =
+  'Estudio multidisciplinario de diseño e interiorismo, enfocado en la experiencia de usuario. Desde la Patagonia y Buenos Aires, para cualquier lugar.'
 const STAGES = [
-  { n: '01', title: 'El espacio', text: 'Un local vacío: muros, luz y proporciones.' },
-  { n: '02', title: 'Diseño', text: 'Cada pieza se dibuja pensando en quien va a usar el espacio.' },
-  { n: '03', title: 'Materia y luz', text: 'Materiales, luz y color: el espacio como se va a vivir.' },
-  { n: '04', title: 'Experiencia', text: 'Un lugar listo para vivirse.' },
+  { n: '01', title: 'El espacio', text: ABOUT },
+  { n: '02', title: 'Diseño', text: 'Te ayudamos a darle identidad a tu marca, pieza por pieza.' },
+  { n: '03', title: 'Materia y luz', text: 'De tu idea a lo concreto: materiales, luz y color pensados para cómo se va a vivir.' },
+  { n: '04', title: 'Experiencia', text: 'Tu proyecto, con cara propia: un espacio listo para recibir a tu gente.' },
 ]
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
@@ -382,10 +386,15 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           </div>
 
           <div className="es-info__side">
-            <p data-paint className="es-paint es-info__lede">
-              Estudio multidisciplinario de diseño e interiorismo, enfocado en la experiencia de usuario. Desde la Patagonia y Buenos
-              Aires, para cualquier lugar.
-            </p>
+            <h2 className="sr-only">{ABOUT}</h2>
+            <div className="es-info__lede" aria-live="polite">
+              <span data-paint data-paint-stage className="es-paint es-info__step" style={LABEL}>
+                {st.n} / 04 — {st.title}
+              </span>
+              <p data-paint data-paint-stage className="es-paint es-info__copy">
+                {st.text}
+              </p>
+            </div>
             <a
               href="#proyectos"
               className="es-info__cta"
