@@ -56,6 +56,11 @@ const smooth = (a, b, v) => {
   return t * t * (3 - 2 * t)
 }
 
+/** El acercamiento final sobre la foto (localScene.js: uPhotoZoom con la etapa 04 completa). */
+const PHOTO_END_ZOOM = 1.06
+/** Lo que no es fondo en la foto (el local con su base y su sombra), en fracciones de la imagen. */
+const PHOTO_IN = { x0: 0.025, x1: 0.975, y0: 0.118, y1: 0.9 }
+
 /**
  * Las medidas de la lámina para un escenario de W × H: el cuadrante del dibujo va a todo el ancho,
  * entre el nav y el bloque de texto de abajo (que empieza en `infoTop`).
@@ -88,7 +93,7 @@ function cameraFrame(p) {
   }
 }
 
-export default function Hero({ boarded, calm, bridge, navLogoRef }) {
+export default function Hero({ boarded, calm, bridge, navLogoRef, exit }) {
   const sectionRef = useRef(null)
   const stageRef = useRef(null)
   const canvasRef = useRef(null)
@@ -213,6 +218,31 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
 
     // La mira del cursor pregunta acá en qué punto del alzado está, en metros: a lo largo del muro y
     // de alto desde el piso. Solo dentro del interior del local.
+    // La salida a Proyectos (Proyectos.jsx): dónde está el local en la pantalla ahora (la foto, con el
+    // acercamiento final de la escena, y el recorte del cuadrante) y cómo esconder la del lienzo.
+    if (exit) {
+      exit.current = {
+        place() {
+          if (!frame || !L) return null
+          const r = stageEl.getBoundingClientRect()
+          const P = L.panel
+          const z = PHOTO_END_ZOOM
+          const w = frame.w * z
+          const h = frame.h * z
+          // El acercamiento es sobre el punto (0.5, 0.52) del cuadro (localScene.js, photoAt).
+          const img = { x: r.left + frame.x + frame.w * 0.5 - w * 0.5, y: r.top + frame.y + frame.h * 0.52 - h * 0.52, w, h }
+          const x0 = Math.max(img.x + PHOTO_IN.x0 * w, r.left + P.x)
+          const y0 = Math.max(img.y + PHOTO_IN.y0 * h, r.top + P.y)
+          const x1 = Math.min(img.x + PHOTO_IN.x1 * w, r.left + P.x + P.w)
+          const y1 = Math.min(img.y + PHOTO_IN.y1 * h, r.top + P.y + P.h)
+          return { img, clip: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } }
+        },
+        hidePhoto(hidden) {
+          canvas.style.visibility = hidden ? 'hidden' : ''
+        },
+      }
+    }
+
     setPlanProbe((x, y) => {
       if (!frame) return null
       const c = canvas.getBoundingClientRect()
@@ -266,10 +296,12 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
       canvas.removeEventListener('pointerenter', onEnter)
       canvas.removeEventListener('pointerleave', onLeave)
       setPlanProbe(null)
+      if (exit) exit.current = null
+      canvas.style.visibility = ''
       scene.dispose()
       sceneRef.current = null
     }
-  }, [calm])
+  }, [calm, exit])
 
   // Al cambiar de etapa, lo que cambia se vuelve a pintar (el título, el texto, el estado y la lámina).
   const firstStage = useRef(true)

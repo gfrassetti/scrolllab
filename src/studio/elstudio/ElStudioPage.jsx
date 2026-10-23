@@ -9,9 +9,17 @@ import Cursor from './Cursor'
 import Nav from './Nav'
 import Hero from './Hero'
 import Estudio from './Estudio'
+import Proyectos from './Proyectos'
 import { FONTS_HREF, SITE } from './brand'
 
 const FONT_WAIT_MS = 4000
+
+/**
+ * Cómo se sale del hero (dos pruebas):
+ *   'proyecto'  la foto del local se despega de la lámina y aterriza en la tarjeta 01 de Proyectos.
+ *   'lamina'    cambio de lámina: la hoja del hero se levanta y debajo está la de Estudio.
+ */
+const SALIDA = 'proyecto'
 
 // Siempre se arranca arriba: al recargar, el navegador devolvía la página a donde estaba y el
 // loader (que viaja hacia el encabezado) quedaba descolocado.
@@ -41,6 +49,7 @@ export default function ElStudioPage() {
   const [calm] = useState(() => prefersReducedMotion())
   const bridge = useRef({})
   const navLogoRef = useRef(null)
+  const heroExit = useRef(null)
   const [fontsReady, setFontsReady] = useState(false)
   const [boarded, setBoarded] = useState(false)
 
@@ -93,8 +102,8 @@ export default function ElStudioPage() {
         <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav logoRef={navLogoRef} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
-          <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} />
-          <Estudio calm={calm} />
+          <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} />
+          {SALIDA === 'lamina' ? <Estudio calm={calm} /> : <Proyectos calm={calm} exit={heroExit} />}
         </main>
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}

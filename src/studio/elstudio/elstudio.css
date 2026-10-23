@@ -673,6 +673,133 @@
   }
 }
 
+/* ── Proyectos: la tarjeta donde aterriza el local del hero ─────────── */
+.es-proj {
+  padding: calc(var(--nav-h) + 22px) 16px 0;
+}
+.es-proj__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.es-proj__title {
+  margin: 0;
+  font-family: var(--es-font-display);
+  font-size: clamp(30px, 8.6vw, 44px);
+  font-weight: var(--es-title-weight);
+  line-height: 0.9;
+  letter-spacing: var(--es-title-tracking);
+  text-transform: uppercase;
+}
+.es-proj__label {
+  padding-bottom: 4px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6d675c;
+}
+.es-proj__item {
+  display: grid;
+  gap: 16px;
+}
+.es-proj__card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+.es-proj__img {
+  position: absolute;
+  max-width: none;
+  display: block;
+}
+/* El lugar vacío de la tarjeta, mientras la foto viene en camino. */
+.es-proj__slot {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed rgba(22, 21, 19, 0.35);
+}
+.es-proj__ficha {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #3b3833;
+}
+.es-proj__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+.es-proj__row dt {
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6d675c;
+}
+.es-proj__row dd {
+  margin: 0;
+  text-align: right;
+}
+.es-proj__row--name {
+  border-top: 0;
+  padding-top: 0;
+}
+.es-proj__row--name dd {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  text-align: left;
+  font-family: var(--es-font-display);
+  font-size: clamp(24px, 2.3vw, 36px);
+  font-weight: var(--es-title-weight);
+  letter-spacing: -0.02em;
+  color: var(--es-ink);
+}
+.es-proj__n {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--es-rust);
+}
+/* La foto en vuelo: encima de las dos hojas, debajo del nav. */
+.es-proj__fly {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform, width, height;
+}
+.es-proj__fly img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  display: block;
+}
+@media (min-width: 640px) {
+  .es-proj {
+    padding: calc(var(--nav-h) + 28px) 36px 0;
+  }
+  .es-proj__title {
+    font-size: clamp(30px, 3.5vw, 72px);
+  }
+  .es-proj__item {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: end;
+  }
+  .es-proj__card {
+    aspect-ratio: 16 / 10;
+  }
+}
+
 /* ── La señal de scroll: «Scroll» y una flecha de boceto ───────────── */
 .es-scrollcue {
   position: absolute;
