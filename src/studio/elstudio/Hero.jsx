@@ -347,7 +347,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           className="absolute inset-0 block h-full w-full"
           role="img"
           aria-label="Alzado de un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
-          data-cursor-tip={stage === 3 ? 'Clic y arrastre · el local vacío' : undefined}
+          data-cursor-tip={stage === 3 ? 'Clic y arrastre' : undefined}
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
