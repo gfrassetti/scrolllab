@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
-import { scrollToSection } from '../../hooks/useLenis'
 import { C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
@@ -18,9 +17,9 @@ import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
  * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
  *
  * La disposición (como la de un hero de plano): arriba, tres cuartos de la pantalla para el cuadrante
- * del dibujo (un alzado, 21:9), a todo el ancho, con la etapa y la lámina en sus esquinas; abajo, el
- * bloque de texto: el título grande a la izquierda y, a la derecha, la bajada, el botón a proyectos
- * y una cinta con los servicios. El alto de ese bloque es --band-h (elstudio.css).
+ * del dibujo (un alzado, 21:9), a todo el ancho, con la etapa y la lámina en sus esquinas; abajo, una
+ * franja baja como la de heronaiapp.com: el título grande a la izquierda y, a la derecha, una celda
+ * con el texto de cada etapa. El alto de esa franja es --band-h (elstudio.css).
  * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
  * (el hero queda fijo):
  *   01 El espacio   el local vacío, dibujado a lápiz (muros, ventana, nicho, luz).
@@ -69,19 +68,24 @@ function sheetLayout(W, H, infoTop) {
   return { cols, panel: { x: side, y: top, w: W - side * 2, h: Math.max(80, bottom - top) } }
 }
 
-const SERVICES = ['Interiorismo', 'Locales comerciales', 'Mobiliario a medida', 'Vivienda', 'Objetos', 'Dirección de obra']
-
 /**
- * El cuadro del alzado dentro del cuadrante: lo más grande posible sin cortar el local (el papel de
- * arriba y abajo puede quedar afuera). En pantallas angostas se agranda y recorta los costados.
+ * El cuadro del alzado dentro del cuadrante: lo que se encaja es el local (no el papel que lo rodea
+ * en la imagen), lo más grande posible sin cortarlo. En pantallas angostas se agranda y recorta los
+ * costados.
  */
 function cameraFrame(p) {
+  const rw = RI.x1 - RI.x0
+  const rh = RI.y1 - RI.y0
   const aspect = p.w / p.h
-  let fw = Math.min(p.w, p.h * 1.06 * FRAME_ASPECT)
-  const over = Math.min(2.2, Math.max(1, (FRAME_ASPECT / aspect) * 0.86))
-  fw *= over
+  const over = aspect < 1.5 ? Math.min(2.2, Math.max(1, (FRAME_ASPECT / aspect) * 0.86)) : 1
+  const fw = Math.min(((p.w * 0.97) / rw) * over, ((p.h * 0.94) / rh) * FRAME_ASPECT)
   const fh = fw / FRAME_ASPECT
-  return { x: p.x + (p.w - fw) / 2, y: p.y + (p.h - fh) / 2, w: fw, h: fh }
+  return {
+    x: p.x + p.w / 2 - fw * ((RI.x0 + RI.x1) / 2),
+    y: p.y + p.h / 2 - fh * ((RI.y0 + RI.y1) / 2),
+    w: fw,
+    h: fh,
+  }
 }
 
 export default function Hero({ boarded, calm, bridge, navLogoRef }) {
@@ -362,7 +366,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
           <span className="es-guide es-guide--rust-h" />
         </div>
 
-        {/* El bloque de abajo: el título grande, la bajada, el botón y la cinta de servicios. */}
+        {/* La franja de abajo: el título grande y, a la derecha, el texto de la etapa. */}
         <div ref={infoRef} className="es-info" style={{ color: C.ink }}>
           <h1 className="es-info__title">
             <span className="sr-only">{SITE.name} — </span>
@@ -388,44 +392,9 @@ export default function Hero({ boarded, calm, bridge, navLogoRef }) {
 
           <div className="es-info__side">
             <h2 className="sr-only">{ABOUT}</h2>
-            <div className="es-info__lede" aria-live="polite">
-              <span data-paint data-paint-stage className="es-paint es-info__step" style={LABEL}>
-                {st.n} / 04 — {st.title}
-              </span>
-              <p data-paint data-paint-stage className="es-paint es-info__copy">
-                {st.text}
-              </p>
-            </div>
-            <a
-              href="#proyectos"
-              className="es-info__cta"
-              style={LABEL}
-              onClick={(e) => {
-                e.preventDefault()
-                scrollToSection('proyectos')
-              }}
-            >
-              <span data-paint className="es-paint">
-                Ver proyectos
-              </span>
-              <span data-paint className="es-paint es-info__arrow" aria-hidden="true">
-                →
-              </span>
-            </a>
-            <div className="es-info__ticker" style={LABEL} aria-label={`Servicios: ${SERVICES.join(', ')}`}>
-              <div data-paint className="es-paint es-info__track" aria-hidden="true">
-                {[0, 1].map((k) => (
-                  <span key={k} className="es-info__run">
-                    {SERVICES.map((t) => (
-                      <span key={t} className="es-info__item">
-                        <span className="es-info__dot" />
-                        {t}
-                      </span>
-                    ))}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <p data-paint data-paint-stage className="es-paint es-info__copy" aria-live="polite">
+              {st.text}
+            </p>
           </div>
         </div>
       </div>

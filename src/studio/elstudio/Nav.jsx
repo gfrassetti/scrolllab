@@ -111,18 +111,17 @@ export default function Nav({ logoRef, open, calm }) {
               key={l.id}
               href={`#${l.id}`}
               onClick={go(l.id)}
-              className="es-cell pointer-events-auto relative hidden w-40 items-start px-4 pt-3 text-[12px] tracking-[0.1em] uppercase md:flex lg:w-48"
+              className="es-cell pointer-events-auto relative hidden w-40 items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex lg:w-48"
               style={LABEL}
             >
               <span data-divider className="es-cell__divider" aria-hidden="true" />
               <span data-in className="es-paint">{l.label}</span>
-              <span data-in className="es-paint es-cell__corner" aria-hidden="true" />
             </a>
           ))}
           <a
             href="#contacto"
             onClick={go('contacto')}
-            className="es-cell pointer-events-auto relative flex w-36 items-start px-4 pt-3 text-[12px] tracking-[0.1em] uppercase sm:w-44 lg:w-48"
+            className="es-cell pointer-events-auto relative flex w-36 items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:w-44 lg:w-48"
             style={{ ...LABEL, color: C.rust }}
             data-cursor="Escribinos"
           >

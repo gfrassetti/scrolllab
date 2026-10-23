@@ -228,14 +228,14 @@
 /* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
 .es-root {
   --nav-h: 60px;
-  /* El bloque de texto de abajo del hero (título, bajada, botón y cinta). */
-  --band-h: max(250px, 36svh);
+  /* La franja de abajo del hero (título y texto de la etapa), baja como la de heronaiapp.com. */
+  --band-h: max(210px, 28svh);
   --line: rgba(22, 21, 19, 0.5);
 }
 @media (min-width: 640px) {
   .es-root {
     --nav-h: 72px;
-    --band-h: max(210px, 26svh);
+    --band-h: max(150px, 17svh);
   }
 }
 .es-frame__nav {
@@ -288,16 +288,6 @@
   width: 1px;
   background: var(--line);
   transform-origin: top center;
-}
-.es-cell__corner {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 6px;
-  height: 6px;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  opacity: 0.5;
 }
 /* Cruces de registro en las esquinas del cuadro. */
 .es-frame__mark {
@@ -600,124 +590,36 @@
   margin-top: -0.16em;
 }
 .es-info__side {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: minmax(0, 1fr) auto;
   border-top: 1px solid var(--line);
   min-height: 0;
-}
-.es-info__lede {
-  margin: 0;
-  padding: 12px 16px;
-  font-size: 13.5px;
-  line-height: 1.4;
-  color: #3b3833;
   min-width: 0;
-}
-.es-info__step {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--es-rust);
 }
 .es-info__copy {
   margin: 0;
-  max-width: 38ch;
-  font-size: calc(1em * var(--es-body-scale));
-  line-height: calc(1.4 / var(--es-body-scale) + 0.2);
-}
-.es-info__cta {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-width: 128px;
-  padding: 12px 14px;
-  border-left: 1px solid var(--line);
-  color: var(--es-rust);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: background-color 0.3s var(--es-ease);
-}
-.es-info__arrow {
-  align-self: flex-end;
-  font-size: 16px;
-  transition: transform 0.4s var(--es-ease);
-}
-@media (hover: hover) {
-  .es-info__cta:hover {
-    background: rgba(196, 68, 31, 0.06);
-  }
-  .es-info__cta:hover .es-info__arrow {
-    transform: translateX(4px);
-  }
-}
-.es-info__ticker {
-  grid-column: 1 / -1;
-  overflow: hidden;
-  border-top: 1px solid var(--line);
-  padding: 11px 0 12px;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #5a564e;
-}
-.es-info__track {
-  display: flex;
-  width: max-content;
-  animation: es-ticker 38s linear infinite;
-}
-.es-info__run {
-  display: flex;
-}
-.es-info__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding-right: 26px;
-  white-space: nowrap;
-}
-.es-info__dot {
-  width: 7px;
-  height: 7px;
-  border: 1px solid currentColor;
-  transform: rotate(45deg);
-}
-@keyframes es-ticker {
-  to {
-    transform: translateX(-50%);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  :where(:root:not([data-motion='full'])) .es-info__track {
-    animation: none;
-  }
+  padding: 12px 16px;
+  max-width: 44ch;
+  font-size: calc(13.5px * var(--es-body-scale));
+  line-height: 1.4;
+  color: #3b3833;
 }
 @media (min-width: 640px) {
   .es-info {
     grid-template-rows: none;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 3fr);
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     padding-left: 36px;
   }
   .es-info__title {
-    padding: 0 24px 26px 0;
-    font-size: clamp(34px, 4.15vw, 86px);
+    padding: 0 24px 22px 0;
+    font-size: clamp(30px, 3.5vw, 72px);
     white-space: nowrap;
   }
   .es-info__side {
     border-top: 0;
     border-left: 1px solid var(--line);
   }
-  .es-info__lede {
-    padding: 18px 20px;
-    font-size: clamp(14px, 1.05vw, 17px);
-  }
-  .es-info__cta {
-    min-width: clamp(140px, 11vw, 190px);
-    padding: 16px 18px;
+  .es-info__copy {
+    padding: 16px 20px;
+    font-size: clamp(14px, 1vw, 16px);
   }
 }
 
@@ -752,12 +654,12 @@
 .es-scrollcue__s1 {
   stroke-width: 1.6;
 }
-/* En pantallas anchas va al pie de la columna del título, a la derecha. */
-@media (min-width: 640px) {
+/* En pantallas anchas va al pie de la columna del título, contra la celda de texto. */
+@media (min-width: 1024px) {
   .es-scrollcue {
     display: flex;
-    bottom: 28px;
-    left: calc((100% - 36px) * 5 / 8 - 96px);
+    bottom: 22px;
+    left: calc(36px + (100% - 36px) * 0.6 - 124px);
   }
   .es-scrollcue__arrow {
     width: 34px;
