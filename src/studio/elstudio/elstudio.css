@@ -7,13 +7,13 @@
  */
 
 .es-root {
-  /* Inter Tight: neo-grotesca precisa y apretada; Arial solo si la fuente no carga. */
-  --es-font-body: 'Inter Tight', Arial, sans-serif;
+  /* Poppins: geométrica redonda y abierta (la más cercana a Cera Pro); Arial solo si la fuente no carga. */
+  --es-font-body: 'Poppins', Arial, sans-serif;
   --es-font-display: var(--es-font-body);
   --es-font-label: var(--es-font-body);
-  --es-title-weight: 500;
-  --es-title-tracking: -0.035em;
-  --es-body-scale: 1;
+  --es-title-weight: 600;
+  --es-title-tracking: -0.025em;
+  --es-body-scale: 0.92;
   /*
    * La hoja: papel casi blanco con un grano apenas perceptible, que se repite y se mueve con la página.
    */
@@ -710,11 +710,11 @@
   padding: 18px 16px 14px;
   align-self: end;
   font-family: var(--es-font-display);
-  font-size: clamp(30px, 8.6vw, 44px);
+  font-size: clamp(22px, 7.2vw, 40px);
   font-weight: var(--es-title-weight);
-  line-height: 0.9;
+  line-height: 1.04;
   letter-spacing: var(--es-title-tracking);
-  text-transform: uppercase;
+  text-transform: none;
   text-wrap: balance;
 }
 .es-info__line {
@@ -760,7 +760,7 @@
   }
   .es-info__title {
     padding: 0 24px 22px 0;
-    font-size: clamp(30px, 3.5vw, 72px);
+    font-size: clamp(24px, 3.7vw, 66px);
     white-space: nowrap;
   }
   .es-info__side {
@@ -838,11 +838,11 @@
 .es-proj__title {
   margin: 0;
   font-family: var(--es-font-display);
-  font-size: clamp(30px, 8.6vw, 44px);
+  font-size: clamp(24px, 7.2vw, 40px);
   font-weight: var(--es-title-weight);
-  line-height: 0.9;
+  line-height: 1.04;
   letter-spacing: var(--es-title-tracking);
-  text-transform: uppercase;
+  text-transform: none;
 }
 .es-proj__label {
   padding-bottom: 4px;
@@ -948,7 +948,7 @@
     padding: calc(var(--nav-h) + 28px) 36px 0;
   }
   .es-proj__title {
-    font-size: clamp(30px, 3.5vw, 72px);
+    font-size: clamp(26px, 3.7vw, 66px);
   }
   .es-proj__item {
     gap: 24px;
@@ -1053,11 +1053,11 @@
   padding: 18px 0 16px;
   border-bottom: 1px solid var(--line);
   font-family: var(--es-font-display);
-  font-size: clamp(34px, 11vw, 56px);
+  font-size: clamp(28px, 9vw, 46px);
   font-weight: var(--es-title-weight);
-  line-height: 0.9;
+  line-height: 1.04;
   letter-spacing: var(--es-title-tracking);
-  text-transform: uppercase;
+  text-transform: none;
   opacity: 0;
   transform: translate3d(0, 14px, 0);
   transition:
@@ -1140,7 +1140,7 @@
 /* ── Tablet en vertical: el título del hero más grande (hay alto de sobra) ── */
 @media (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
   .es-info__title {
-    font-size: clamp(30px, 4.6vw, 52px);
+    font-size: clamp(24px, 3.9vw, 44px);
   }
 }
 

@@ -3,8 +3,8 @@
  *
  * Papel, tinta y un solo color: el óxido de la «tapa de mesa» de su logo.
  * El logo va en una geométrica (Jost, la más cercana a la de su isotipo); los
- * titulares, el texto y los rótulos, en Inter Tight (libre, Google Fonts): una neo-grotesca precisa y
- * apretada. Si el cliente compra la licencia web de otra, se declara el @font-face y queda primera en elstudio.css.
+ * titulares, el texto y los rótulos, en Poppins (libre, Google Fonts): una geométrica redonda y abierta, la más
+ * cercana a Cera Pro. Si el cliente compra la licencia web de otra, se declara el @font-face y queda primera en elstudio.css.
  */
 
 export const C = {
@@ -16,10 +16,10 @@ export const C = {
 }
 
 export const FONTS_HREF =
-  'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Jost:ital,wght@0,400;0,500;0,600;1,200;1,300&display=swap'
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Jost:ital,wght@0,400;0,500;0,600;1,200;1,300&display=swap'
 
 export const LOGO_FONT = { fontFamily: "'Jost', 'Futura', 'Century Gothic', sans-serif" }
-// Inter Tight (Google Fonts, libre) para todo menos el logo (Jost). Si el cliente compra una licencia web
+// Poppins (Google Fonts, libre) para todo menos el logo (Jost). Si el cliente compra una licencia web
 // de otra fuente, se declara un @font-face con el archivo y se pone primero en elstudio.css (--es-font-body).
 /** La letra de los rótulos técnicos: angosta, en mayúsculas, con números tabulares. */
 export const LABEL = { fontFamily: 'var(--es-font-label)', fontWeight: 500 }
