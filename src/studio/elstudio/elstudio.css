@@ -1277,8 +1277,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 28px;
-  min-height: 56svh;
+  gap: 18px;
+  min-height: 42svh;
   padding: 18px var(--pad) 22px;
   background: var(--es-rust);
   color: var(--es-paper);
@@ -1333,8 +1333,7 @@
   color: var(--es-paper);
 }
 .es-pd-p--hero {
-  order: -1;
-  height: 62svh;
+  height: 58svh;
 }
 
 /* La descripción */
