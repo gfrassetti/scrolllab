@@ -59,3 +59,13 @@ arrastrar la carpeta `dist-elstudio`.
 - Dominio propio: en el proyecto de Pages → **Custom domains**.
 - Que se indexe: sacar el `<meta name="robots" …>` de `elstudio.html` y, en
   `vite.elstudio.config.js`, la línea `X-Robots-Tag` de `_headers` y el `robots.txt` cerrado.
+
+## Opción 4 — Worker de assets con wrangler (la que usa el sitio en `*.workers.dev`)
+
+El uploader del panel de Workers acepta solo «static assets» y puede trabarse; con wrangler se sube igual
+y `wrangler.elstudio.jsonc` ya trae el `single-page-application`:
+
+```bash
+npx wrangler login
+npm run elstudio:deploy:workers
+```

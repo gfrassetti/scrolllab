@@ -62,7 +62,8 @@
     "test": "node scripts/run-tests.mjs",
     "fold:reel": "node scripts/fold-reel.mjs",
     "fold:phone": "node scripts/fold-phone-tier.mjs",
-    "fold:deploy": "wrangler deploy --config wrangler.fold.jsonc"
+    "fold:deploy": "wrangler deploy --config wrangler.fold.jsonc",
+    "elstudio:deploy:workers": "npm run build:elstudio && npx wrangler deploy -c wrangler.elstudio.jsonc"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
