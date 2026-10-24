@@ -20,8 +20,9 @@ const finish = {
     const out = abs('./dist-elstudio')
     fs.renameSync(`${out}/elstudio.html`, `${out}/index.html`)
     fs.writeFileSync(`${out}/robots.txt`, 'User-agent: *\nDisallow: /\n')
-    // Las páginas de los proyectos (/proyectos/<slug>) son del mismo index.html: cualquier ruta devuelve la página.
-    fs.writeFileSync(`${out}/_redirects`, '/* /index.html 200\n')
+    // Sin _redirects a propósito: las Workers de Cloudflare no aceptan una regla `/* /index.html 200` y el deploy falla. Las
+    // páginas de los proyectos (/proyectos/<slug>) son del mismo index.html: con «Not found handling» en
+    // single-page-application (Workers) o sin 404.html (Pages), cualquier ruta devuelve la página.
     // Cabeceras de Cloudflare Pages: la demo no se indexa; los archivos de /assets llevan hash en el
     // nombre (cambian con cada build), así que se guardan en caché un año.
     fs.writeFileSync(

@@ -13,8 +13,12 @@ publica. No usa la API ni la base del market.
 | Framework preset | Ninguno |
 
 `_headers` (lo escribe `vite.elstudio.config.js`): `noindex` en todo el sitio mientras sea una demo
-y caché de un año para `/assets/*`, que cambian de nombre en cada build. Al no haber `404.html`,
-Pages devuelve la página para cualquier ruta.
+y caché de un año para `/assets/*`, que cambian de nombre en cada build.
+
+**Las páginas de proyecto** (`/proyectos/proyecto-1`) son del mismo `index.html`: hay que devolverlo para cualquier
+ruta. En **Pages**, sin `404.html` lo hace solo. En **Workers (static assets)**, en «Advanced settings» elegir
+**Not found handling = `single-page-application`** (o `not_found_handling` en `wrangler`). No se usa un archivo
+`_redirects` con `/* /index.html 200`: las Workers lo rechazan y el deploy no avanza.
 
 ## Opción 1 — Conectar el repo (se publica solo con cada push)
 
