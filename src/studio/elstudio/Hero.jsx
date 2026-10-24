@@ -20,10 +20,10 @@ import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
  * del dibujo (un alzado, 21:9), a todo el ancho, con la etapa y la lámina en sus esquinas; abajo, una
  * franja baja como la de heronaiapp.com: el título grande a la izquierda y, a la derecha, una celda
  * con el texto de cada etapa. El alto de esa franja es --band-h (elstudio.css).
- * Al terminar el loader, un local (café / showroom) se dibuja a lápiz y carbonilla. Al scrollear
+ * Al terminar el loader, un local (café / showroom, minimal cálido) se dibuja a lápiz. Al scrollear
  * (el hero queda fijo):
  *   01 El espacio   el local vacío, dibujado a lápiz (muros, ventana, nicho, luz).
- *   02 Diseño       cada mueble se dibuja en su lugar, uno por uno (designPieces.js): barra, estantes, banco, mesa, guardado, pedestales, olivo.
+ *   02 Diseño       cada mueble se dibuja en su lugar, uno por uno (designPieces.js): barra, repisa, banco, mesa, nicho, pedestal, árbol.
  *   03 Materia y luz la luz y la sombra se pintan debajo de los trazos, entra el color y los
  *                   trazos se van: queda la foto del local.
  *   04 Experiencia  la cámara se acerca sobre la foto.
@@ -66,7 +66,7 @@ const smooth = (a, b, v) => {
 /** El acercamiento final sobre la foto (localScene.js: uPhotoZoom con la etapa 04 completa). */
 const PHOTO_END_ZOOM = 1.06
 /** Lo que no es fondo en la foto (el local con su base y su sombra), en fracciones de la imagen. */
-const PHOTO_IN = { x0: 0.025, x1: 0.975, y0: 0.118, y1: 0.9 }
+const PHOTO_IN = { x0: 0.03, x1: 0.97, y0: 0.085, y1: 0.87 }
 
 /**
  * Las medidas de la lámina para un escenario de W × H: el cuadrante del dibujo va a todo el ancho,

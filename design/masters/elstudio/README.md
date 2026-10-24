@@ -37,3 +37,15 @@ paleta que el hero, generado con Higgsfield (GPT Image 2.5, texto → imagen, 3:
 muestra hasta tener las fotos de un proyecto real del cliente. En el sitio:
 `src/studio/elstudio/assets/proyecto-1.webp` (1800 px) y `proyecto-1-900.webp`. La otra variante
 (`proyecto1-4eefdd63-….png`) quedó descartada.
+
+## Minimal cálido (desde 2026-10-24, el hero usa estas)
+
+El cliente eligió una versión más moderna del local. `moderno-a-foto.png` (Higgsfield, texto → imagen,
+21:9) y, sobre esa, `moderno-a2-foto-2.png` (edición: más plantas) es la foto. `moderno-a2-boceto.png`
+(boceto en lápiz duro, edición de la foto) y `moderno-a2-vacio.png` (vacío, edición del boceto). El
+boceto no calzaba del todo con la foto: se le aplicó una homografía (`moderno-a2-boceto-al.png.npy`,
+la misma para el vacío); quedan desvíos de ~10 px (en 2688) en la planta grande, el nicho y la barra.
+Escaladas a 2400×1029: la foto con el fondo a #efebe3; los bocetos con el papel a blanco, en grises y
+con más contraste en el trazo (el 2H se perdía en pantalla). Los rectángulos de cada mueble y el
+interior en metros: `designPieces.js`. Las opciones descartadas (`moderno-b-*`, el alzado rústico)
+quedan en esta carpeta.
