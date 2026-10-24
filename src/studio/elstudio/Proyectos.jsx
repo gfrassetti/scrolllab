@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { LABEL } from './brand'
 import { ROOM_IN_IMAGE as RI } from './designPieces'
+import { PROJECTS } from './projects'
+import { hrefOf, navigate } from './router'
 import photoFull from './assets/foto-local.webp'
 import photoSmall from './assets/foto-local-1200.webp'
 import project1 from './assets/proyecto-1.webp'
@@ -23,14 +25,13 @@ import project1Small from './assets/proyecto-1-900.webp'
  * Con «reducir movimiento»: la tarjeta ya tiene su foto y la ficha está a la vista.
  */
 
-// Ficha de muestra: va a ser un proyecto real del cliente (fotos y datos los pide el estudio).
-const PROJECT = {
-  n: '01',
-  name: 'Proyecto 1',
-  kind: 'Local comercial',
-  place: 'Lugar X',
-  year: '2025',
-  area: '68 m²',
+// El proyecto de muestra (projects.js): va a ser uno real del cliente (fotos y datos los pide el estudio).
+const PROJECT = { ...PROJECTS[0], area: `${PROJECTS[0].area} m²` }
+const TO_PROJECT = { name: 'project', slug: PROJECT.slug }
+const open = (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+  e.preventDefault()
+  navigate(TO_PROJECT)
 }
 
 const A = 2400 / 1029 // la proporción de la foto
@@ -92,7 +93,7 @@ function ProyectosBody({ refs, src, titleId, own }) {
       </header>
 
       <article className="es-proj__item">
-        <div ref={cardRef} className="es-proj__card">
+        <a ref={cardRef} className="es-proj__card" href={hrefOf(TO_PROJECT)} onClick={open} data-cursor="Ver proyecto" aria-label={`Ver el proyecto ${PROJECT.name}`}>
           <img
             ref={refs?.img}
             src={own ? project1 : src}
@@ -105,7 +106,7 @@ function ProyectosBody({ refs, src, titleId, own }) {
           />
           {/* El lugar vacío donde aterriza la foto en vuelo (solo con esa salida). */}
           {!own && <span className="es-proj__slot" aria-hidden="true" />}
-        </div>
+        </a>
         <dl ref={refs?.ficha} className="es-proj__ficha">
           <div className="es-proj__row es-proj__row--name">
             <dt className="sr-only">Proyecto</dt>
@@ -113,7 +114,9 @@ function ProyectosBody({ refs, src, titleId, own }) {
               <span className="es-proj__n" style={LABEL}>
                 {PROJECT.n}
               </span>
-              {PROJECT.name}
+              <a href={hrefOf(TO_PROJECT)} onClick={open} className="es-proj__name">
+                {PROJECT.name}
+              </a>
             </dd>
           </div>
           {[

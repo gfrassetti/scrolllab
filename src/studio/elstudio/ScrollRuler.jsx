@@ -44,7 +44,7 @@ export default function ScrollRuler({ on }) {
     const measure = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight
       if (max <= 0) return
-      const sections = [...document.querySelectorAll('main > section')]
+      const sections = [...document.querySelectorAll('main > section, main > .es-pd > section')]
       const next = sections.map((el, i) => ({ n: String(i + 1).padStart(2, '0'), y: el.offsetTop, f: Math.min(1, el.offsetTop / max) }))
       marksRef.current = next
       setMarks((prev) => (prev.length === next.length && prev.every((m, i) => Math.abs(m.f - next[i].f) < 0.0005) ? prev : next))

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
 import { getLenis, scrollToSection } from '../../hooks/useLenis'
+import { getRoute, navigate } from './router'
 import { hidePaint } from './paint'
 import { C, LABEL, OPEN_DELAY, OPEN_T as T, SITE } from './brand'
 import Logo from './Logo'
@@ -98,7 +99,9 @@ export default function Nav({ logoRef, open, calm }) {
     e.preventDefault()
     setMenu(false)
     getLenis()?.start()
-    scrollToSection(id)
+    // Desde la página de un proyecto, las secciones están en la portada.
+    if (getRoute().name !== 'home') navigate({ name: 'home' }, { section: id })
+    else scrollToSection(id)
   }
 
   // El menú del teléfono: mientras está abierto la página no se mueve; Escape lo cierra.
