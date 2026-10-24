@@ -229,7 +229,7 @@
 .es-root {
   --nav-h: 60px;
   /* La franja de abajo del hero (título y texto de la etapa), baja como la de heronaiapp.com. */
-  --band-h: max(210px, 28svh);
+  --band-h: max(282px, 34svh);
   --line: rgba(22, 21, 19, 0.5);
 }
 @media (min-width: 640px) {
@@ -600,6 +600,9 @@
   border-top: 1px solid var(--line);
   min-height: 0;
   min-width: 0;
+  /* El número arriba y el texto abajo, apoyado en la línea del título. */
+  display: flex;
+  flex-direction: column;
 }
 .es-info__step {
   display: block;
@@ -611,11 +614,14 @@
 }
 .es-info__copy {
   margin: 0;
-  padding: 6px 16px 12px;
-  max-width: 44ch;
-  font-size: calc(13.5px * var(--es-body-scale));
-  line-height: 1.4;
-  color: #3b3833;
+  padding: 8px 16px 16px;
+  max-width: 40ch;
+  font-size: calc(16px * var(--es-body-scale));
+  font-weight: 400;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
+  color: var(--es-ink);
+  text-wrap: pretty;
 }
 @media (min-width: 640px) {
   .es-info {
@@ -635,9 +641,12 @@
   .es-info__step {
     padding: 16px 20px 0;
   }
+  /* El pie del texto cae sobre la línea de base de la última línea del título (su padding de abajo). */
   .es-info__copy {
-    padding: 8px 20px 16px;
-    font-size: clamp(14px, 1vw, 16px);
+    margin-top: auto;
+    padding: 8px 24px 22px 20px;
+    max-width: 48ch;
+    font-size: clamp(16px, 1.35vw, 23px);
   }
 }
 
@@ -868,7 +877,7 @@
   color: color-mix(in srgb, var(--es-rust), #8a857b calc(var(--sk) * 100%));
 }
 .es-sk .es-info__copy {
-  color: color-mix(in srgb, #3b3833, #8a857b calc(var(--sk) * 100%));
+  color: color-mix(in srgb, var(--es-ink), #8a857b calc(var(--sk) * 100%));
 }
 /* El temblor del lápiz (filtro #es-pencil, Boceto.jsx), solo mientras hay boceto. */
 .es-sk.is-sketch .es-info__side,
