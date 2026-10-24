@@ -6,39 +6,13 @@
  * que ocultar.
  */
 
-/*
- * «ES Helvetica»: la Helvetica instalada de verdad (Mac, iOS), por nombre exacto. En Windows el
- * nombre «Helvetica» se redirige a Arial y en Linux a otra sans: local() no cae en esos alias, así
- * que ahí falla y la pila sigue con Schibsted Grotesk.
- */
-@font-face {
-  font-family: 'ES Helvetica';
-  font-weight: 300;
-  src: local('Helvetica Neue Light'), local('HelveticaNeue-Light');
-}
-@font-face {
-  font-family: 'ES Helvetica';
-  font-weight: 400;
-  src: local('Helvetica Neue'), local('HelveticaNeue'), local('Helvetica');
-}
-@font-face {
-  font-family: 'ES Helvetica';
-  font-weight: 500;
-  src: local('Helvetica Neue Medium'), local('HelveticaNeue-Medium');
-}
-@font-face {
-  font-family: 'ES Helvetica';
-  font-weight: 600 700;
-  src: local('Helvetica Neue Bold'), local('HelveticaNeue-Bold'), local('Helvetica Bold'), local('Helvetica-Bold');
-}
-
 .es-root {
-  /* Helvetica, como santalarch; donde no está instalada, Schibsted Grotesk (no Arial). */
-  --es-font-body: 'ES Helvetica', 'Schibsted Grotesk', Arial, sans-serif;
+  /* Inter Tight: neo-grotesca precisa y apretada; Arial solo si la fuente no carga. */
+  --es-font-body: 'Inter Tight', Arial, sans-serif;
   --es-font-display: var(--es-font-body);
   --es-font-label: var(--es-font-body);
   --es-title-weight: 500;
-  --es-title-tracking: -0.045em;
+  --es-title-tracking: -0.035em;
   --es-body-scale: 1;
   /*
    * La hoja: papel casi blanco con un grano apenas perceptible, que se repite y se mueve con la página.
@@ -364,7 +338,7 @@
 .es-root {
   --nav-h: 54px;
   /* La franja de abajo del hero (título y texto de la etapa), baja como la de heronaiapp.com. */
-  --band-h: max(282px, 34svh);
+  --band-h: max(250px, 30svh);
   --line: rgba(22, 21, 19, 0.5);
 }
 @media (min-width: 640px) {
