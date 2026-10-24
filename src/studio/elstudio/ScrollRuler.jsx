@@ -4,15 +4,16 @@ import { getLenis } from '../../hooks/useLenis'
 import { HERO_VH, LABEL, STAGE_AT } from './brand'
 
 const FINE_POINTER = '(hover: hover) and (pointer: fine)'
-const ACTIVE_MS = 1400
+/** Cuánto quedan a la vista los números después del último movimiento (ms): un destello, no un cartel. */
+const ACTIVE_MS = 600
 
 /**
  * La barra de scroll de elStudio: una regla vertical, la hermana de la que cae bajo el nav.
  *
  * Sobre el borde derecho, marcas finas cada 8 px y una más larga cada 80. Un cursor de óxido marca dónde
  * está la página; las marcas de alrededor se agrandan un poco, como bajo una lupa. Las hojas del sitio
- * (01–04 del hero y 05, Proyectos) están marcadas con una línea más larga, y mientras se scrollea o se pasa
- * el mouse aparece el número de la hoja en la que se está.
+ * (01–04 del hero y 05, Proyectos) están marcadas con una línea más larga, y mientras se scrollea (y un
+ * instante después) aparece el número de la hoja en la que se está; quieta la página, la regla queda sola.
  *
  * Reemplaza a la barra nativa (clase `hide-native-scrollbar` en <html>, src/index.css). Con mouse o
  * trackpad se clickea y se arrastra como una barra normal; en el teléfono es solo indicador (una franja
@@ -92,7 +93,7 @@ export default function ScrollRuler({ on, calm }) {
       ruler.classList.add('is-active')
       window.clearTimeout(timer.current)
       timer.current = window.setTimeout(() => {
-        if (!ruler.matches(':hover') && !ruler.dataset.dragging) ruler.classList.remove('is-active')
+        if (!ruler.dataset.dragging) ruler.classList.remove('is-active')
       }, ACTIVE_MS)
     }
     const trigger = ScrollTrigger.create({

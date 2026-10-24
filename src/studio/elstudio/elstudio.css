@@ -156,7 +156,7 @@
   letter-spacing: 0.12em;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.35s var(--es-ease);
+  transition: opacity 0.28s var(--es-ease);
 }
 .es-ruler__wpn {
   color: #6d675c;
