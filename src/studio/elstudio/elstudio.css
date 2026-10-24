@@ -727,12 +727,22 @@
   margin-top: -0.16em;
 }
 .es-info__side {
+  position: relative;
   border-top: 1px solid var(--line);
   min-height: 0;
   min-width: 0;
   /* El número arriba y el texto abajo, apoyado en la línea del título. */
   display: flex;
   flex-direction: column;
+}
+/* En el teléfono el texto va debajo del titular: la separación es la línea de arriba (border-top). */
+.es-info__vline {
+  display: none;
+}
+@media (min-width: 640px) {
+  .es-info__vline {
+    display: block;
+  }
 }
 .es-info__step {
   display: block;
@@ -768,7 +778,15 @@
   }
   .es-info__side {
     border-top: 0;
-    border-left: 1px solid var(--line);
+  }
+  .es-info__vline {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line);
+    transform-origin: top center;
   }
   .es-info__step {
     padding: 16px 20px 0;

@@ -435,6 +435,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
     const q = gsap.utils.selector(stageRef.current)
     const ctx = gsap.context(() => {
       gsap.set(q('[data-col]'), { scaleY: 0 })
+      gsap.set(q('[data-vline]'), { scaleY: 0 })
       gsap.set(q('[data-panel-edge]'), { scale: 0 })
       // La línea de abajo del marco nace en el centro de la pantalla, con la del nav (Nav.jsx).
       const mid = window.innerHeight / 2
@@ -464,6 +465,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       .to(q('[data-frame-line]'), { y: 0, duration: 1 * T, ease: 'expo.inOut' }, OPEN_DELAY + 0.75 * T)
       .to(q('[data-frame-mark]'), { autoAlpha: 1, scale: 1, duration: 0.5 * T, ease: 'back.out(2)', stagger: 0.05 * T }, OPEN_DELAY + 2.1 * T)
       .to(q('[data-col]'), { scaleY: 1, duration: 1.1 * T, ease: 'expo.out', stagger: 0.06 * T }, OPEN_DELAY + 0.8 * T)
+      // La línea del texto arranca con las dos horizontales y es más lenta que ellas (a las dos les lleva 1,75 T).
+      .to(q('[data-vline]'), { scaleY: 1, duration: 2.6 * T, ease: 'power2.inOut' }, OPEN_DELAY)
       .add(() => paint(q('[data-paint]'), { stagger: 0.05 * T, duration: 0.85 * T }), OPEN_DELAY + 0.6 * T)
       .add(() => cueRef.current?.classList.add('is-on'), OPEN_DELAY + 1.4 * T)
     return () => {
@@ -551,6 +554,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           </div>
 
           <div className="es-info__side">
+            {/* La línea que separa el titular del texto: se traza de arriba abajo al abrir (data-vline). */}
+            <span data-vline className="es-info__vline" aria-hidden="true" />
             <h2 className="sr-only">{ABOUT}</h2>
             {/* El número de la hoja: el mismo de la lámina del cuadrante («Lámina 02 / 04»). */}
             <span data-paint data-paint-stage className="es-paint es-info__step" style={LABEL} aria-hidden="true">
