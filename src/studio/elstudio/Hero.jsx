@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
-import { C, HERO_VH, LABEL, NAV_H, OPEN_DELAY, SITE, STAGE_AT } from './brand'
+import { C, HERO_VH, LABEL, NAV_H, OPEN_DELAY, OPEN_T as T, SITE, STAGE_AT } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT } from './localScene'
@@ -48,7 +48,7 @@ import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
  * Con «reducir movimiento»: la lámina quieta, con la foto.
  */
 
-const REVEAL_SECONDS = 3.8
+const REVEAL_SECONDS = 3.8 * T
 
 // Lo que dice la celda de la derecha en cada hoja del plano (la primera es también el subtítulo fijo,
 // para los buscadores: ABOUT).
@@ -447,14 +447,14 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       if (alive) gsap.to(pen, { v: 1, duration: REVEAL_SECONDS, ease: 'power1.inOut', onUpdate: () => scene.setReveal(pen.v) })
     })
     tl
-      .to(q('[data-panel-edge]'), { scale: 1, duration: 0.9, ease: 'expo.inOut', stagger: 0.05 }, 0.2)
+      .to(q('[data-panel-edge]'), { scale: 1, duration: 0.9 * T, ease: 'expo.inOut', stagger: 0.05 * T }, 0.2 * T)
       // Los mismos tiempos que la línea del nav: se estira en el centro y baja a su lugar.
-      .to(q('[data-frame-line]'), { scaleX: 1, duration: 0.8, ease: 'expo.inOut' }, OPEN_DELAY)
-      .to(q('[data-frame-line]'), { y: 0, duration: 1, ease: 'expo.inOut' }, OPEN_DELAY + 0.75)
-      .to(q('[data-frame-mark]'), { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', stagger: 0.05 }, OPEN_DELAY + 2.1)
-      .to(q('[data-col]'), { scaleY: 1, duration: 1.1, ease: 'expo.out', stagger: 0.06 }, OPEN_DELAY + 0.8)
-      .add(() => paint(q('[data-paint]'), { stagger: 0.05, duration: 0.85 }), OPEN_DELAY + 0.6)
-      .add(() => cueRef.current?.classList.add('is-on'), OPEN_DELAY + 1.4)
+      .to(q('[data-frame-line]'), { scaleX: 1, duration: 0.8 * T, ease: 'expo.inOut' }, OPEN_DELAY)
+      .to(q('[data-frame-line]'), { y: 0, duration: 1 * T, ease: 'expo.inOut' }, OPEN_DELAY + 0.75 * T)
+      .to(q('[data-frame-mark]'), { autoAlpha: 1, scale: 1, duration: 0.5 * T, ease: 'back.out(2)', stagger: 0.05 * T }, OPEN_DELAY + 2.1 * T)
+      .to(q('[data-col]'), { scaleY: 1, duration: 1.1 * T, ease: 'expo.out', stagger: 0.06 * T }, OPEN_DELAY + 0.8 * T)
+      .add(() => paint(q('[data-paint]'), { stagger: 0.05 * T, duration: 0.85 * T }), OPEN_DELAY + 0.6 * T)
+      .add(() => cueRef.current?.classList.add('is-on'), OPEN_DELAY + 1.4 * T)
     return () => {
       alive = false
       tl.kill()

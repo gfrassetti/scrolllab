@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
 import { getLenis, scrollToSection } from '../../hooks/useLenis'
 import { hidePaint } from './paint'
-import { C, LABEL, OPEN_DELAY, SITE } from './brand'
+import { C, LABEL, OPEN_DELAY, OPEN_T as T, SITE } from './brand'
 import Logo from './Logo'
 
 /**
@@ -55,14 +55,14 @@ export default function Nav({ logoRef, open, calm }) {
     const q = gsap.utils.selector(rootRef.current)
     const tl = gsap.timeline({ delay: OPEN_DELAY })
     // Las dos líneas nacen juntas en el centro y se estiran hasta los bordes…
-    tl.to(q('[data-line]'), { scaleX: 1, duration: 0.8, ease: 'expo.inOut' })
+    tl.to(q('[data-line]'), { scaleX: 1, duration: 0.8 * T, ease: 'expo.inOut' })
       // …y se separan: una sube al nav, la otra baja a la franja.
-      .to(q('[data-line]'), { y: 0, duration: 1, ease: 'expo.inOut' }, '-=0.05')
-      .to(q('[data-ruler]'), { scaleX: 1, duration: 0.9, ease: 'expo.out' }, '-=0.25')
+      .to(q('[data-line]'), { y: 0, duration: 1 * T, ease: 'expo.inOut' }, `-=${0.05 * T}`)
+      .to(q('[data-ruler]'), { scaleX: 1, duration: 0.9 * T, ease: 'expo.out' }, `-=${0.25 * T}`)
       // Se trazan las divisiones del nav, de arriba hacia abajo, y los botones se pintan.
-      .to(q('[data-divider]'), { scaleY: 1, duration: 0.55, ease: 'expo.out', stagger: 0.08 }, '-=0.7')
-      .to(q('[data-in]'), { '--paint': 0, duration: 0.8, ease: 'power2.inOut', stagger: 0.07 }, '-=0.45')
-      .to(q('[data-mark]'), { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', stagger: 0.05 }, '-=0.5')
+      .to(q('[data-divider]'), { scaleY: 1, duration: 0.55 * T, ease: 'expo.out', stagger: 0.08 * T }, `-=${0.7 * T}`)
+      .to(q('[data-in]'), { '--paint': 0, duration: 0.8 * T, ease: 'power2.inOut', stagger: 0.07 * T }, `-=${0.45 * T}`)
+      .to(q('[data-mark]'), { autoAlpha: 1, scale: 1, duration: 0.5 * T, ease: 'back.out(2)', stagger: 0.05 * T }, `-=${0.5 * T}`)
     return () => tl.kill()
   }, [open, calm])
 

@@ -30,8 +30,10 @@ export const DISPLAY = { fontFamily: 'var(--es-font-body)' }
 /** Alto del nav y de la franja de abajo del marco (px), en el teléfono y desde 640 px (elstudio.css lo repite). */
 export const NAV_H = { phone: 54, desk: 64 }
 export const BAND_H = { phone: 56, desk: 64 }
-/** Cuándo se abre el marco después del loader (s): el boceto ya va bastante pintado. */
-export const OPEN_DELAY = 1.7
+/** Cuándo se abre el marco después del loader (s). */
+export const OPEN_DELAY = 0.4
+/** La apertura (líneas, regla, textos, columnas y boceto) corre a esta fracción del tiempo original. */
+export const OPEN_T = 0.55
 
 /**
  * El hero fijo dura HERO_VH pantallas de scroll (las cuatro etapas y la vuelta a boceto, en Boceto.jsx) y
