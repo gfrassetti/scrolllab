@@ -362,14 +362,14 @@
 
 /* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
 .es-root {
-  --nav-h: 60px;
+  --nav-h: 54px;
   /* La franja de abajo del hero (título y texto de la etapa), baja como la de heronaiapp.com. */
   --band-h: max(282px, 34svh);
   --line: rgba(22, 21, 19, 0.5);
 }
 @media (min-width: 640px) {
   .es-root {
-    --nav-h: 72px;
+    --nav-h: 64px;
     --band-h: max(150px, 17svh);
   }
 }
