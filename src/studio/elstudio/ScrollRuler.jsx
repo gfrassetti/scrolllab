@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ScrollTrigger } from '../../lib/gsap'
 import { getLenis } from '../../hooks/useLenis'
-import { HERO_VH, LABEL, STAGE_AT } from './brand'
+import { LABEL } from './brand'
 
 const FINE_POINTER = '(hover: hover) and (pointer: fine)'
 /** Cuánto quedan a la vista los números después del último movimiento (ms): un destello, no un cartel. */
@@ -11,9 +11,11 @@ const ACTIVE_MS = 600
  * La barra de scroll de elStudio: una regla vertical, la hermana de la que cae bajo el nav.
  *
  * Sobre el borde derecho, marcas finas cada 8 px y una más larga cada 80. Un cursor de óxido marca dónde
- * está la página; las marcas de alrededor se agrandan un poco, como bajo una lupa. Las hojas del sitio
- * (01–04 del hero y 05, Proyectos) están marcadas con una línea más larga, y mientras se scrollea (y un
- * instante después) aparece el número de la hoja en la que se está; quieta la página, la regla queda sola.
+ * está la página; las marcas de alrededor se agrandan un poco, como bajo una lupa. Las secciones de la página
+ * (cada `<section>` de <main>, numeradas en orden: hoy Inicio y Proyectos; las que se sumen entran solas)
+ * están marcadas con una línea más larga, y mientras se scrollea (y un instante después) aparece el número de
+ * la sección en la que se está; quieta la página, la regla queda sola. Las etapas del hero no tienen marca:
+ * son parte del recorrido de la sección 01.
  *
  * Reemplaza a la barra nativa (clase `hide-native-scrollbar` en <html>, src/index.css). Con mouse o
  * trackpad se clickea y se arrastra como una barra normal; en el teléfono es solo indicador (una franja
@@ -21,7 +23,7 @@ const ACTIVE_MS = 600
  *
  * Solo se mueven transformaciones y una variable de CSS del cursor; no hay nada que redibujar por cuadro.
  */
-export default function ScrollRuler({ on, calm }) {
+export default function ScrollRuler({ on }) {
   const [fine, setFine] = useState(() => typeof window !== 'undefined' && window.matchMedia(FINE_POINTER).matches)
   const [marks, setMarks] = useState([])
   const rulerRef = useRef(null)
@@ -37,22 +39,13 @@ export default function ScrollRuler({ on, calm }) {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  // Dónde está cada hoja en la página (en fracción del recorrido). Se mide al cargar y al cambiar de tamaño.
+  // Dónde empieza cada sección (en fracción del recorrido). Se mide al cargar y al cambiar de tamaño.
   useEffect(() => {
     const measure = () => {
-      const H = window.innerHeight
-      const max = document.documentElement.scrollHeight - H
+      const max = document.documentElement.scrollHeight - window.innerHeight
       if (max <= 0) return
-      const hero = document.getElementById('inicio')
-      const proy = document.getElementById('proyectos')
-      const list = []
-      if (hero) {
-        const top = hero.offsetTop
-        if (calm) list.push({ y: top })
-        else STAGE_AT.forEach((p) => list.push({ y: top + p * HERO_VH * H }))
-      }
-      if (proy) list.push({ y: proy.offsetTop })
-      const next = list.map((m, i) => ({ n: String(i + 1).padStart(2, '0'), y: m.y, f: Math.min(1, m.y / max) }))
+      const sections = [...document.querySelectorAll('main > section')]
+      const next = sections.map((el, i) => ({ n: String(i + 1).padStart(2, '0'), y: el.offsetTop, f: Math.min(1, el.offsetTop / max) }))
       marksRef.current = next
       setMarks((prev) => (prev.length === next.length && prev.every((m, i) => Math.abs(m.f - next[i].f) < 0.0005) ? prev : next))
     }
@@ -66,7 +59,7 @@ export default function ScrollRuler({ on, calm }) {
       window.removeEventListener('load', measure)
       ScrollTrigger.removeEventListener('refresh', measure)
     }
-  }, [calm])
+  }, [])
 
   // El cursor sigue la página; el número de la hoja se enciende mientras se scrollea.
   useEffect(() => {
@@ -85,7 +78,8 @@ export default function ScrollRuler({ on, calm }) {
       mark.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`
       ruler.style.setProperty('--y', `${y.toFixed(1)}px`)
       let n = '01'
-      for (const m of marksRef.current) if (scroll + 2 >= m.y) n = m.n
+      // Una sección cuenta cuando ya ocupa la parte de arriba de la pantalla (no recién cuando llega al tope).
+      for (const m of marksRef.current) if (scroll + window.innerHeight * 0.6 >= m.y) n = m.n
       if (n !== lastTag) {
         lastTag = n
         tag.textContent = n

@@ -145,7 +145,7 @@ export default function ElStudioPage() {
         </main>
         {/* La barra de scroll propia: una regla vertical (reemplaza a la nativa desde que se monta). Entra con el
             sitio, al terminar el loader. */}
-        <ScrollRuler on={boarded} calm={calm} />
+        <ScrollRuler on={boarded} />
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}
       </div>
