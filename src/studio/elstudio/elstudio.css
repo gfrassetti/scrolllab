@@ -76,6 +76,24 @@
   outline-offset: 4px;
 }
 
+/* ── Scroll ─────────────────────────────────────────────────────────── */
+/* Con Lenis (la rueda y los links del nav) el scroll es suave por JS y Lenis apaga esta propiedad; la
+   regla vale para lo demás: cuando Lenis no corre (saltos del teclado, un navegador que lo frena) y
+   salvo para quien pide menos movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+/* La barra propia entra con el sitio. */
+.es-rail {
+  opacity: 0;
+  transition: opacity 0.8s var(--es-ease) 0.2s;
+}
+.es-rail[data-on] {
+  opacity: 1;
+}
+
 /* ── Cursor ─────────────────────────────────────────────────────────── */
 .es-cursor {
   position: fixed;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
+import ScrollRail from '../../components/ScrollRail'
 import { prefersReducedMotion } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
 import { ScrollTrigger } from '../../lib/gsap'
@@ -35,13 +36,14 @@ function startAtTop() {
   } catch {
     // En un iframe con sandbox, history puede no estar disponible: alcanza con subir.
   }
-  window.scrollTo(0, 0)
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 }
 startAtTop()
 
 /** Arriba de todo, también para Lenis (que lleva su propia posición) y para los ScrollTrigger. */
 function toTop() {
-  window.scrollTo(0, 0)
+  // «instant»: con scroll-behavior suave (elstudio.css) un scrollTo común subiría animado.
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   getLenis()?.scrollTo(0, { immediate: true, force: true })
   ScrollTrigger.update()
 }
@@ -141,6 +143,11 @@ export default function ElStudioPage() {
           {SALIDA === 'boceto' && <Boceto calm={calm} exit={heroExit} />}
           {SALIDA === 'lamina' ? <Estudio calm={calm} /> : <Proyectos calm={calm} exit={heroExit} mode={SALIDA} />}
         </main>
+        {/* La barra de scroll propia (reemplaza a la nativa desde que se monta): un hilo de tinta que se llena de
+            óxido con el avance de la página. Entra con el sitio, al terminar el loader. */}
+        <div className="es-rail" data-on={boarded ? '' : undefined}>
+          <ScrollRail trackClassName="bg-[rgba(22,21,19,0.12)]" fillClassName="bg-[var(--es-rust)]" />
+        </div>
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}
       </div>
