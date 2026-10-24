@@ -85,13 +85,130 @@
     scroll-behavior: smooth;
   }
 }
-/* La barra propia entra con el sitio. */
-.es-rail {
+/* ── La regla de scroll (ScrollRuler.jsx) ───────────────────────────── */
+/* La hermana vertical de la regla que cae bajo el nav: arranca donde ella termina y comparte su medida
+   (una marca cada 8 px, una larga cada 80). */
+.es-ruler {
+  --y: 0px;
+  position: fixed;
+  z-index: 60;
+  top: calc(var(--nav-h) + 9px);
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.8s var(--es-ease) 0.2s;
 }
-.es-rail[data-on] {
+.es-ruler[data-on] {
   opacity: 1;
+}
+.es-ruler[data-fine] {
+  width: 34px;
+  pointer-events: auto;
+}
+.es-ruler__ticks,
+.es-ruler__lens {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  background-position: right top;
+}
+.es-ruler__ticks {
+  width: 10px;
+  background-image:
+    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.4) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.2) 0 1px, transparent 1px 8px);
+  background-size:
+    10px 100%,
+    5px 100%;
+}
+/* La lupa: las mismas marcas, más largas y más oscuras, que solo se ven alrededor del cursor. */
+.es-ruler__lens {
+  width: 18px;
+  background-image:
+    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.75) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.5) 0 1px, transparent 1px 8px);
+  background-size:
+    18px 100%,
+    10px 100%;
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--y) - 64px), #000 var(--y), transparent calc(var(--y) + 64px));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--y) - 64px), #000 var(--y), transparent calc(var(--y) + 64px));
+}
+/* Una hoja del sitio: una línea larga sobre la regla, con su número. */
+.es-ruler__wp {
+  position: absolute;
+  right: 0;
+  width: 16px;
+  height: 1px;
+  background: rgba(22, 21, 19, 0.6);
+}
+.es-ruler__wpn,
+.es-ruler__tag {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.35s var(--es-ease);
+}
+.es-ruler__wpn {
+  color: #6d675c;
+}
+/* El cursor: una línea de óxido, más larga que cualquier marca, y el número de la hoja en la que se está. */
+.es-ruler__mark {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 24px;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--es-rust);
+  will-change: transform;
+}
+.es-ruler__tag {
+  right: 30px;
+  padding: 3px 5px 2px;
+  background: var(--es-paper);
+  color: var(--es-rust);
+}
+.es-ruler.is-active .es-ruler__wpn {
+  opacity: 0.85;
+}
+.es-ruler.is-active .es-ruler__tag {
+  opacity: 1;
+}
+.es-ruler[data-dragging] .es-ruler__mark {
+  height: 3px;
+  margin-top: -1.5px;
+}
+/* En el teléfono: solo indicador, más angosta y sin números (el piso es 11 px y no hay lugar). */
+@media (max-width: 639px) {
+  .es-ruler__wpn,
+  .es-ruler__tag {
+    display: none;
+  }
+  .es-ruler__mark {
+    width: 16px;
+  }
+  .es-ruler__lens {
+    width: 12px;
+    background-size:
+      12px 100%,
+      7px 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .es-ruler__wpn,
+  :where(:root:not([data-motion='full'])) .es-ruler__tag {
+    transition: none;
+  }
 }
 
 /* ── Cursor ─────────────────────────────────────────────────────────── */

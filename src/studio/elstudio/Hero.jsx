@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { createFrameBudget } from '../../lib/motion'
-import { C, LABEL, NAV_H, OPEN_DELAY, SITE } from './brand'
+import { C, HERO_VH, LABEL, NAV_H, OPEN_DELAY, SITE, STAGE_AT } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT } from './localScene'
@@ -181,7 +181,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           trigger: sectionRef.current,
           start: 'top top',
           // Con `boceto`, después de las cuatro etapas sigue la vuelta a boceto (Boceto.jsx): 100vh más.
-          end: boceto ? () => `+=${window.innerHeight * 3.8}` : 'bottom bottom',
+          end: boceto ? () => `+=${window.innerHeight * HERO_VH}` : 'bottom bottom',
           onUpdate: (self) => {
             target = self.progress
           },
@@ -246,7 +246,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p) * (1 - back))
       scene.setSat(calm ? 1 : smooth(0.62, 0.78, p))
       scene.setSketch(calm ? 0 : Math.max(1 - smooth(0.62, 0.8, p), back))
-      const s = calm ? 3 : p < 0.06 ? 0 : p < 0.52 ? 1 : p < 0.84 ? 2 : 3
+      const s = calm ? 3 : p < STAGE_AT[1] ? 0 : p < STAGE_AT[2] ? 1 : p < STAGE_AT[3] ? 2 : 3
       if (s !== shownStage) {
         shownStage = s
         setStage(s)

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SmoothScrollProvider from '../../components/SmoothScrollProvider'
-import ScrollRail from '../../components/ScrollRail'
 import { prefersReducedMotion } from '../../lib/motion'
 import { getLenis } from '../../hooks/useLenis'
 import { ScrollTrigger } from '../../lib/gsap'
 import './elstudio.css'
 import Loader from './Loader'
 import Cursor from './Cursor'
+import ScrollRuler from './ScrollRuler'
 import Nav from './Nav'
 import Hero from './Hero'
 import Estudio from './Estudio'
@@ -143,11 +143,9 @@ export default function ElStudioPage() {
           {SALIDA === 'boceto' && <Boceto calm={calm} exit={heroExit} />}
           {SALIDA === 'lamina' ? <Estudio calm={calm} /> : <Proyectos calm={calm} exit={heroExit} mode={SALIDA} />}
         </main>
-        {/* La barra de scroll propia (reemplaza a la nativa desde que se monta): un hilo de tinta que se llena de
-            óxido con el avance de la página. Entra con el sitio, al terminar el loader. */}
-        <div className="es-rail" data-on={boarded ? '' : undefined}>
-          <ScrollRail trackClassName="bg-[rgba(22,21,19,0.12)]" fillClassName="bg-[var(--es-rust)]" />
-        </div>
+        {/* La barra de scroll propia: una regla vertical (reemplaza a la nativa desde que se monta). Entra con el
+            sitio, al terminar el loader. */}
+        <ScrollRuler on={boarded} calm={calm} />
         {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
         {boarded && <Cursor />}
       </div>

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
+import { HERO_VH } from './brand'
 
 /**
  * La salida del hero: al terminar sus cuatro etapas, todo (menos el nav) vuelve a ser una hoja en
@@ -32,8 +33,8 @@ export default function Boceto({ calm, exit }) {
     }
 
     const st = ScrollTrigger.create({
-      start: () => hero.offsetTop + window.innerHeight * 3.8,
-      end: () => hero.offsetTop + window.innerHeight * 4.8,
+      start: () => hero.offsetTop + window.innerHeight * HERO_VH,
+      end: () => hero.offsetTop + window.innerHeight * (HERO_VH + 1),
       onUpdate: (self) => {
         u = self.progress
         needs = true

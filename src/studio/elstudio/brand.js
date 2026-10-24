@@ -33,6 +33,14 @@ export const BAND_H = { phone: 56, desk: 64 }
 /** Cuándo se abre el marco después del loader (s): el boceto ya va bastante pintado. */
 export const OPEN_DELAY = 1.7
 
+/**
+ * El hero fijo dura HERO_VH pantallas de scroll (las cuatro etapas y la vuelta a boceto, en Boceto.jsx) y
+ * las etapas cambian en estos avances del hero (0 → 1 en las primeras HERO_VH pantallas). La regla de scroll
+ * (ScrollRuler.jsx) marca esas hojas.
+ */
+export const HERO_VH = 3.8
+export const STAGE_AT = [0, 0.06, 0.52, 0.84]
+
 export const SITE = {
   name: 'elStudio',
   tagline: 'Diseño e Interiorismo',
