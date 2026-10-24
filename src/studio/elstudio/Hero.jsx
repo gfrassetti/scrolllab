@@ -11,7 +11,7 @@ import sketchFull from './assets/boceto-local.webp'
 import sketchSmall from './assets/boceto-local-1200.webp'
 import emptyFull from './assets/boceto-vacio.webp'
 import emptySmall from './assets/boceto-vacio-1200.webp'
-import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
+import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
 
 /**
  * El hero: del boceto a la foto del local, sobre una lámina con la grilla a la vista.
@@ -27,6 +27,9 @@ import { DESIGN_PIECES, ROOM_IN_IMAGE as RI } from './designPieces'
  *   03 Materia y luz la luz y la sombra se pintan debajo de los trazos, entra el color y los
  *                   trazos se van: queda la foto del local.
  *   04 Experiencia  la cámara se acerca sobre la foto.
+ * En pantallas angostas (teléfono, tablet en vertical) el local no entra entero: el dibujo queda
+ * grande y la cámara lo recorre, de izquierda a derecha, siguiendo cada mueble mientras se dibuja;
+ * para la luz, el color y la foto vuelve al centro.
  * Todo pasa sobre la misma toma (boceto y foto alineados): las líneas no se corren nunca. El 3D
  * queda debajo solo para medir (la mira lee metros del piso).
  *
@@ -177,14 +180,42 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
     let canDrag = false
     let release = () => {}
     let frame = null
-    // La vuelta a boceto al salir (0 → 1, la maneja Plano.jsx): la foto se despinta y vuelven los trazos.
+    // Cuando el local no entra entero en el cuadrante (teléfono, tablet en vertical), la cámara lo
+    // recorre: los muebles se dibujan de izquierda a derecha y el cuadro sigue al que se está dibujando.
+    let base = null
+    let pan = false
+    let order = DESIGN_PIECES.map((_, i) => i)
+    let slot = order
+    const centerOf = (i) => (DESIGN_PIECES[i].rect[0] + DESIGN_PIECES[i].rect[2]) / 2 / IMG.w
+    // La vuelta a boceto al salir (0 → 1, la maneja Boceto.jsx): la foto se despinta y vuelven los trazos.
     let back = 0
+    // El recorrido: arranca a la izquierda, pasa por cada mueble mientras se dibuja y, para la luz, el
+    // color y la foto, vuelve al centro. El cuadro nunca muestra más allá de los muros.
+    const panTo = (p) => {
+      const P = L.panel
+      const at = (k) => 0.06 + k * 0.058 + 0.04
+      const n = order.length
+      let fx = centerOf(order[0])
+      for (let k = 0; k < n - 1; k += 1) if (p > at(k)) fx = centerOf(order[k]) + (centerOf(order[k + 1]) - centerOf(order[k])) * smooth(at(k), at(k + 1), p)
+      if (p > at(n - 1)) fx = centerOf(order[n - 1]) + (0.5 - centerOf(order[n - 1])) * smooth(0.52, 0.8, p)
+      const lo = P.x + P.w - RI.x1 * base.w
+      const hi = P.x - RI.x0 * base.w
+      const x = Math.min(hi, Math.max(lo, P.x + P.w / 2 - fx * base.w))
+      if (Math.abs(x - frame.x) < 0.3) return
+      frame = { ...base, x }
+      scene.setFrame(frame.x, frame.y, frame.w, frame.h)
+    }
     const apply = (p) => {
       if (!lastKey) {
         lastKey = 'set'
         const P = L.panel
         const f = cameraFrame(P)
+        base = f
         frame = f
+        pan = !calm && f.w * (RI.x1 - RI.x0) > P.w + 2
+        order = DESIGN_PIECES.map((_, i) => i)
+        if (pan) order.sort((a, b) => centerOf(a) - centerOf(b))
+        slot = DESIGN_PIECES.map((_, i) => order.indexOf(i))
         scene.setFrame(f.x, f.y, f.w, f.h)
         canvas.style.clipPath = `inset(${P.y}px ${stageEl.clientWidth - P.x - P.w}px ${stageEl.clientHeight - P.y - P.h}px ${P.x}px)`
         Object.assign(panel.style, { left: `${P.x}px`, top: `${P.y}px`, width: `${P.w}px`, height: `${P.h}px` })
@@ -197,7 +228,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       if (cueRef.current) cueRef.current.style.opacity = String(calm ? 0 : 1 - smooth(0.004, 0.035, p))
       // El espacio → el diseño, mueble por mueble → luz y sombra, color (los trazos se van) → la cámara se acerca.
       scene.setRise(0)
-      const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(0.06 + i * 0.058, 0.06 + i * 0.058 + 0.1, p)))
+      const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(0.06 + slot[i] * 0.058, 0.06 + slot[i] * 0.058 + 0.1, p)))
+      if (pan) panTo(p)
       scene.setDesign(pieces)
       scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p) * (1 - back))
       scene.setSat(calm ? 1 : smooth(0.62, 0.78, p))
