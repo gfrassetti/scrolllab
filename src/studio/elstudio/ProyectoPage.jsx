@@ -11,8 +11,8 @@ import { hrefOf, navigate } from './router'
  * izquierda y van entrando los demás paneles (la descripción, las fotos con su texto, el cierre).
  *
  *   0 portada      el panel de color (la mitad izquierda)           1 foto       la primera foto (la mitad derecha)
- *   2 descripción  la frase, los servicios y la superficie          3 – 7 fotos  el ventanal, el nicho, el oficio…
- *   8 cierre       la frase del estudio y el paso al siguiente
+ *   2 descripción  la frase, los servicios y la superficie          3 – 6 fotos  el ventanal, el nicho, el oficio…
+ *   cierre         la frase del estudio y el paso al siguiente: va DEBAJO de la tira, la página sigue hacia abajo
  *
  * Movimiento (todo atado al scroll de la tira, con `containerAnimation`):
  *   - parallax: cada foto se mueve dentro de su marco más lenta que la tira (`data-px`) y su texto va a otra
@@ -168,6 +168,16 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
         })
       })
 
+      // El cierre está debajo de la tira: entra con el scroll vertical normal.
+      q('[data-vpanel]').forEach((el) => {
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 78%',
+          once: true,
+          onEnter: () => paint(el.querySelectorAll('[data-sweep]'), { duration: 1.3, stagger: 0.16 }),
+        })
+      })
+
       // La apertura (portada y primera foto): arranca cuando la cortina se va; ver el efecto de `boarded`.
       const first = q('[data-first]')
       const intro = gsap.timeline({ paused: true })
@@ -308,23 +318,26 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
             <Photo photo={ph.cover} px={1.2} sizes="(min-width: 768px) 38vw, 100vw" />
           </div>
 
-          {/* 7. El cierre: la frase y el paso al siguiente. */}
-          <div className="es-pd-p es-pd-p--end" data-panel data-spot>
-            <p data-sweep className="es-paint es-pd-end__quote">
-              {project.quote}
-            </p>
-            <a href={hrefOf(toNext)} onClick={goNext} className="es-pd-end__next" data-cursor={next ? 'Siguiente' : 'Volver'}>
-              <span data-sweep className="es-paint" style={LABEL}>
-                {next ? 'Siguiente proyecto' : 'Todos los proyectos'}
-              </span>
-              <span data-sweep className="es-paint es-pd-end__name">
-                {next ? next.name : 'Proyectos'} <span aria-hidden="true">→</span>
-              </span>
-            </a>
-            <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-pd-end__ig" style={LABEL}>
-              {SITE.instagram.handle}
-            </a>
-          </div>
+        </div>
+      </section>
+
+      {/* 7. El cierre: desde acá la página sigue hacia abajo (la tira horizontal terminó en la foto anterior). */}
+      <section className="es-pd-end" data-vpanel data-spot aria-label="Siguiente">
+        <p data-sweep className="es-paint es-pd-end__quote">
+          {project.quote}
+        </p>
+        <div className="es-pd-end__foot">
+          <a href={hrefOf(toNext)} onClick={goNext} className="es-pd-end__next" data-cursor={next ? 'Siguiente' : 'Volver'}>
+            <span data-sweep className="es-paint" style={LABEL}>
+              {next ? 'Siguiente proyecto' : 'Todos los proyectos'}
+            </span>
+            <span data-sweep className="es-paint es-pd-end__name">
+              {next ? next.name : 'Proyectos'} <span aria-hidden="true">→</span>
+            </span>
+          </a>
+          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-pd-end__ig" style={LABEL}>
+            {SITE.instagram.handle}
+          </a>
         </div>
       </section>
     </div>

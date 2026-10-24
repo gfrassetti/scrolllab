@@ -56,7 +56,10 @@ export default function ScrollRuler({ on }) {
         const track = document.querySelector('[data-pd-track]')
         const run = Math.max(1, track.scrollWidth - window.innerWidth)
         const start = Math.max(0, pin.start)
-        spots = marked.map((el) => start + Math.min(1, Math.max(0, el.offsetLeft / run)) * dist)
+        // Los de la tira, según cuánto scroll lleva cada uno; los de abajo (el cierre), donde empiezan.
+        spots = marked.map((el) =>
+          track.contains(el) ? start + Math.min(1, Math.max(0, el.offsetLeft / run)) * dist : el.getBoundingClientRect().top + window.scrollY,
+        )
       } else if (marked.length) {
         spots = marked.map((el) => el.getBoundingClientRect().top + window.scrollY)
       } else {

@@ -1432,14 +1432,23 @@
   margin: clamp(48px, 8vw, 90px) var(--pad) 0 auto;
 }
 
-/* El cierre */
-.es-pd-p--end {
-  padding: clamp(96px, 14vw, 160px) var(--pad) 40px;
+/* El cierre: una sección debajo de la tira, con scroll vertical normal. */
+.es-pd-end {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(64px, 12vw, 140px);
+  min-height: 100svh;
+  padding: clamp(72px, 12vw, 140px) var(--pad) 32px;
+}
+.es-pd-end__foot {
+  display: flex;
+  flex-direction: column;
 }
 .es-pd-end__quote {
-  max-width: 22ch;
-  margin: 0 0 clamp(64px, 10vw, 120px);
-  font-size: clamp(26px, 3.6vw, 48px);
+  max-width: 20ch;
+  margin: 0;
+  font-size: clamp(30px, 5vw, 84px);
   font-weight: 500;
   line-height: 1.12;
   letter-spacing: -0.025em;
@@ -1567,16 +1576,6 @@
   .es-pd:not(.es-pd--v) .es-pd-p--small .es-px {
     height: 62%;
     aspect-ratio: auto !important;
-  }
-  .es-pd:not(.es-pd--v) .es-pd-p--end {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: clamp(560px, 50vw, 900px);
-    padding: 56px 36px 28px 60px;
-  }
-  .es-pd:not(.es-pd--v) .es-pd-end__quote {
-    margin-bottom: 0;
   }
 }
 
