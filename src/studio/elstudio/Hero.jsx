@@ -67,8 +67,9 @@ const smooth = (a, b, v) => {
   return t * t * (3 - 2 * t)
 }
 
-/** El acercamiento final sobre la foto (localScene.js: uPhotoZoom con la etapa 04 completa). */
-const PHOTO_END_ZOOM = 1.06
+/** El acercamiento sobre la foto al final del hero (localScene.js: uPhotoZoom). Sin acercamiento: la foto se queda
+ *  como está en la etapa 04, para que el arrastre y la vuelta a boceto no se muevan. */
+const PHOTO_END_ZOOM = 1
 // La etapa 02: las piezas (obra y equipamiento) se dibujan una tras otra entre 0.06 y 0.52 del hero.
 const PIECE_DUR = 0.09
 const pieceAt = (k) => 0.06 + (k * (0.52 - 0.06 - PIECE_DUR)) / Math.max(1, DESIGN_PIECES.length - 1)
@@ -245,7 +246,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p) * (1 - back))
       scene.setSat(calm ? 1 : smooth(0.62, 0.78, p))
       scene.setSketch(calm ? 0 : Math.max(1 - smooth(0.62, 0.8, p), back))
-      scene.setZoom(calm ? 0 : smooth(0.84, 1, p) * (1 - back))
       const s = calm ? 3 : p < 0.06 ? 0 : p < 0.52 ? 1 : p < 0.84 ? 2 : 3
       if (s !== shownStage) {
         shownStage = s
