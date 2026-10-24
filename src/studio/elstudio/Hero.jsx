@@ -65,6 +65,8 @@ const smooth = (a, b, v) => {
 
 /** El acercamiento final sobre la foto (localScene.js: uPhotoZoom con la etapa 04 completa). */
 const PHOTO_END_ZOOM = 1.06
+/** El cartel del cursor en la última etapa, cuando se puede arrastrar. */
+const DRAG_TIP = 'Clic y arrastre'
 /** Lo que no es fondo en la foto (el local con su base y su sombra), en fracciones de la imagen. */
 const PHOTO_IN = { x0: 0.03, x1: 0.97, y0: 0.085, y1: 0.87 }
 
@@ -286,6 +288,9 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           stageEl.classList.toggle('is-sketch', v > 0.001)
           canDrag = shownStage === 3 && v === 0
           if (v > 0) release()
+          // Mientras todo vuelve a boceto no hay arrastre: tampoco el cartel que lo ofrece.
+          if (v > 0) canvas.removeAttribute('data-cursor-tip')
+          else if (shownStage === 3) canvas.setAttribute('data-cursor-tip', DRAG_TIP)
         },
         hidePhoto(hidden) {
           if (hidden === parked) return
@@ -430,7 +435,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           className="absolute inset-0 block h-full w-full"
           role="img"
           aria-label="Alzado de un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
-          data-cursor-tip={stage === 3 ? 'Clic y arrastre' : undefined}
+          data-cursor-tip={stage === 3 ? DRAG_TIP : undefined}
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
