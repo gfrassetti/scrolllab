@@ -24,14 +24,27 @@ const FONT_WAIT_MS = 4000
  */
 const SALIDA = 'boceto'
 
-// Siempre se arranca arriba: al recargar, el navegador devolvía la página a donde estaba y el
-// loader (que viaja hacia el encabezado) quedaba descolocado.
+// Siempre se arranca arriba, en la etapa 01 del hero: al recargar, el navegador devolvía la página a
+// donde estaba (o a la sección de la dirección, #proyectos) y el hero aparecía en su última etapa.
 function startAtTop() {
   if (typeof window === 'undefined') return
-  if ('scrollRestoration' in window.history) ScrollTrigger.clearScrollMemory('manual')
+  try {
+    if ('scrollRestoration' in window.history) ScrollTrigger.clearScrollMemory('manual')
+    // Sin la sección en la dirección: si no, el navegador salta ahí al cargar.
+    if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search)
+  } catch {
+    // En un iframe con sandbox, history puede no estar disponible: alcanza con subir.
+  }
   window.scrollTo(0, 0)
 }
 startAtTop()
+
+/** Arriba de todo, también para Lenis (que lleva su propia posición) y para los ScrollTrigger. */
+function toTop() {
+  window.scrollTo(0, 0)
+  getLenis()?.scrollTo(0, { immediate: true, force: true })
+  ScrollTrigger.update()
+}
 
 /*
 THESIS: una hoja de papel de dibujante. El estudio hace diseño e interiorismo: la página es el
@@ -82,11 +95,30 @@ export default function ElStudioPage() {
 
   const ready = fontsReady
 
-  // Hasta que termina el loader, la página no se mueve.
+  // Arriba también si el navegador restaura la posición tarde: al terminar de cargar, al volver con
+  // «atrás» (la página sale de la caché) y, antes de irse, se sube para que no guarde otra posición.
+  useEffect(() => {
+    const onLoad = () => toTop()
+    const onShow = (e) => e.persisted && toTop()
+    const onLeave = () => window.scrollTo(0, 0)
+    window.addEventListener('load', onLoad)
+    window.addEventListener('pageshow', onShow)
+    window.addEventListener('beforeunload', onLeave)
+    toTop()
+    return () => {
+      window.removeEventListener('load', onLoad)
+      window.removeEventListener('pageshow', onShow)
+      window.removeEventListener('beforeunload', onLeave)
+    }
+  }, [])
+
+  // Hasta que termina el loader, la página no se mueve (y arranca arriba, en la etapa 01).
   useEffect(() => {
     const lenis = getLenis()
-    if (boarded) lenis?.start()
-    else lenis?.stop()
+    if (boarded) {
+      toTop()
+      lenis?.start()
+    } else lenis?.stop()
   }, [boarded])
   const onDone = useCallback(() => setBoarded(true), [])
 
