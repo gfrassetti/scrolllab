@@ -70,16 +70,14 @@ const smooth = (a, b, v) => {
 /** El acercamiento sobre la foto al final del hero (localScene.js: uPhotoZoom). Sin acercamiento: la foto se queda
  *  como está en la etapa 04, para que el arrastre y la vuelta a boceto no se muevan. */
 /**
- * El título se escribe por partes con los primeros tics de la rueda (avance del hero, de → a): «Diseño» ya está
- * y cada tic suma la siguiente parte, entintada con un barrido. Lo que todavía no llegó no se ve. No espera a las
- * etapas: a la altura de la etapa 02 ya está completo (un tic de rueda es ~0,03 del avance).
+ * El título se escribe por partes con los primeros tics de la rueda: «Diseño» ya está y, al pasar por cada avance
+ * del hero, la siguiente parte aparece con un fundido lento (sube apenas y se desenfoca un poco al llegar). Cada
+ * parte tiene su propio tiempo: no depende de qué tan rápido se gire la rueda. Lo que todavía no llegó no se ve.
  */
-const TITLE_AT = [
-  [0, 0],
-  [0.008, 0.045],
-  [0.04, 0.08],
-  [0.075, 0.115],
-]
+const TITLE_AT = [0, 0.012, 0.04, 0.07]
+/** Cómo entra y sale cada parte del título y del texto de la etapa (s). */
+const SOFT_IN = 1.25
+const SOFT_OUT = 0.45
 
 const PHOTO_END_ZOOM = 1
 // La etapa 02: las piezas (obra y equipamiento) se dibujan una tras otra entre 0.06 y 0.52 del hero.
@@ -125,13 +123,15 @@ function cameraFrame(p) {
 }
 
 /**
- * Una parte del título: la tinta, que un barrido ligado al scroll va descubriendo (--paint). Hasta que le toca,
- * no se ve, pero ocupa su lugar (el título no se acomoda al llegar cada parte). Ver TITLE_AT.
+ * Una parte del título. Hasta que le toca no se ve, pero ocupa su lugar (el título no se acomoda al llegar cada
+ * parte). Ver TITLE_AT.
  */
-function Chunk({ text }) {
+function Chunk({ text, hidden }) {
   return (
     <span data-chunk className="es-chunk">
-      <span className="es-paint es-chunk__ink">{text}</span>
+      <span className="es-chunk__ink" style={hidden ? { opacity: 0, visibility: 'hidden' } : undefined}>
+        {text}
+      </span>
     </span>
   )
 }
@@ -243,7 +243,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       scene.setFrame(frame.x, frame.y, frame.w, frame.h)
     }
     // Las partes del título: la tinta se descubre con el scroll (solo se escribe lo que cambió).
-    const chunks = [...stageEl.querySelectorAll('[data-chunk]')].map((el) => ({ el, ink: el.querySelector('.es-chunk__ink'), k: calm ? 1 : -1 }))
+    const chunks = [...stageEl.querySelectorAll('[data-chunk]')].map((el, i) => ({ ink: el.querySelector('.es-chunk__ink'), on: calm || i === 0 }))
     const apply = (p) => {
       if (!lastKey) {
         lastKey = 'set'
@@ -266,11 +266,15 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       }
       if (!calm) {
         chunks.forEach((c, i) => {
-          const [a, b] = TITLE_AT[i]
-          const k = i === 0 ? 1 : smooth(a, b, p)
-          if (k === c.k || (Math.abs(k - c.k) < 0.002 && k !== 0 && k !== 1)) return
-          c.k = k
-          c.ink.style.setProperty('--paint', ((1 - k) * 100).toFixed(1))
+          const on = p >= TITLE_AT[i]
+          if (on === c.on) return
+          c.on = on
+          gsap.to(
+            c.ink,
+            on
+              ? { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: SOFT_IN, ease: 'power2.out', overwrite: 'auto', clearProps: 'filter' }
+              : { autoAlpha: 0, y: 12, filter: 'blur(3px)', duration: SOFT_OUT, ease: 'power2.out', overwrite: 'auto' },
+          )
         })
       }
       // La señal de scroll se va apenas se empieza a bajar.
@@ -408,15 +412,20 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
     }
   }, [calm, exit, boceto])
 
-  // Al cambiar de etapa, lo que cambia se vuelve a pintar (el título, el texto, el estado y la lámina).
+  // Al cambiar de etapa, lo que cambia entra con un fundido lento: sube apenas y se desenfoca un poco al llegar
+  // (el texto, el número y los rótulos del cuadrante, uno tras otro). Antes de pintar, para que no se vea de golpe.
   const firstStage = useRef(true)
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (firstStage.current) {
       firstStage.current = false
       return undefined
     }
     if (calm) return undefined
-    const tween = paint(stageRef.current.querySelectorAll('[data-paint-stage]'), { stagger: 0.06, duration: 0.75 })
+    const tween = gsap.fromTo(
+      stageRef.current.querySelectorAll('[data-paint-stage]'),
+      { autoAlpha: 0, y: 10, filter: 'blur(3px)' },
+      { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: SOFT_IN, stagger: 0.12, ease: 'power2.out', overwrite: 'auto', clearProps: 'filter,transform' },
+    )
     return () => tween.kill()
   }, [stage, calm])
 
@@ -522,10 +531,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           <h1 className="es-info__title">
             <span className="sr-only">{SITE.name} — </span>
             <span data-paint className="es-paint es-info__line">
-              <Chunk text="Diseño" /> <Chunk text="e interiorismo" />
+              <Chunk text="Diseño" /> <Chunk text="e interiorismo" hidden={!calm} />
             </span>
             <span data-paint className="es-paint es-info__line">
-              <Chunk text="para quien" /> <Chunk text="lo vive" />
+              <Chunk text="para quien" hidden={!calm} /> <Chunk text="lo vive" hidden={!calm} />
             </span>
           </h1>
           {/* La señal de scroll: la palabra y una flecha dibujada a mano que se traza una y otra vez. */}

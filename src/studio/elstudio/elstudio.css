@@ -685,17 +685,13 @@
   mask-position: calc(var(--paint) * 1%) 0;
 }
 
-/* El título por partes: la tinta, con la máscara del pintado que el scroll corre (--paint: 100 escondida, 0 entera).
-   Lo que todavía no llegó no se ve, pero ocupa su lugar. */
+/* El título por partes: cada una aparece con un fundido (Hero.jsx). Lo que todavía no llegó no se ve, pero ocupa su lugar. */
 .es-chunk {
   position: relative;
   display: inline-block;
 }
 .es-chunk__ink {
   display: block;
-  /* El aire de arriba evita que la máscara corte la tilde de la Ñ. */
-  padding-top: 0.16em;
-  margin-top: -0.16em;
 }
 
 /* ── El bloque de abajo del hero ───────────────────────────────────── */
