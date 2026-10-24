@@ -97,7 +97,8 @@ function sheetLayout(W, H, infoTop) {
   // Una línea de columna por cada módulo desde el borde derecho (las divisiones del nav, hacia abajo).
   const mod = W >= 1024 ? 192 : 128
   const cols = Math.max(1, Math.ceil(W / mod) - 1)
-  const top = (W >= 640 ? NAV_H.desk : NAV_H.phone) + (W >= 640 ? 22 : 16)
+  // Entre el lomo del nav (opaco hasta --nav-h + 9) y el cuadrante queda la franja de los rótulos.
+  const top = (W >= 640 ? NAV_H.desk : NAV_H.phone) + (W >= 640 ? 34 : 28)
   const bottom = infoTop - (W >= 640 ? 18 : 12)
   return { cols, panel: { x: side, y: top, w: W - side * 2, h: Math.max(80, bottom - top) } }
 }

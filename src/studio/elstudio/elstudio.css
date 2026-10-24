@@ -523,18 +523,34 @@
   transform-origin: center bottom;
 }
 .es-panel__label {
+  /* Sobre el borde de arriba, centrado en la franja entre el lomo del nav y el cuadrante: no pisa el dibujo. */
   position: absolute;
-  top: 10px;
+  bottom: calc(100% + 4px);
+  line-height: 1.4;
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--es-rust);
 }
+/* En el teléfono la franja es más baja: el rótulo baja a 11 px. */
+@media (max-width: 639px) {
+  .es-panel__label {
+    bottom: calc(100% + 2px);
+    line-height: 1.3;
+    font-size: 11px;
+  }
+}
 .es-panel__label--tl {
-  left: 12px;
+  left: 0;
+}
+@media (max-width: 639px) {
+  /* La cruz de registro de la esquina cae sobre el borde: el rótulo arranca después de ella. */
+  .es-panel__label--tl {
+    left: 14px;
+  }
 }
 .es-panel__label--tr {
-  right: 12px;
+  right: 0;
 }
 .es-panel__sub {
   display: block;
