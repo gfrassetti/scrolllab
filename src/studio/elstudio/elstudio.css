@@ -336,10 +336,18 @@
 
 /* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
 .es-root {
+  /* El módulo: lo que miden las celdas del nav. Las líneas de la página se miden desde el borde derecho en
+     múltiplos de él, así las divisiones del nav, las marcas de la regla y las columnas coinciden siempre. */
+  --mod: 128px;
   --nav-h: 54px;
   /* La franja de abajo del hero (título y texto de la etapa), baja como la de heronaiapp.com. */
   --band-h: max(250px, 30svh);
   --line: rgba(22, 21, 19, 0.5);
+}
+@media (min-width: 1024px) {
+  .es-root {
+    --mod: 192px;
+  }
 }
 @media (min-width: 640px) {
   .es-root {
@@ -381,14 +389,21 @@
   right: 0;
   top: calc(var(--nav-h) + 1px);
   height: 8px;
+  /* Una marca cada 8 px y una larga cada 64 (un tercio / la mitad de una celda del nav), contadas desde el borde
+     derecho: las largas caen sobre las divisiones del nav. */
   background-image:
-    repeating-linear-gradient(to right, rgba(22, 21, 19, 0.38) 0 1px, transparent 1px 80px),
-    repeating-linear-gradient(to right, rgba(22, 21, 19, 0.22) 0 1px, transparent 1px 8px);
+    repeating-linear-gradient(to left, transparent 0 63px, rgba(22, 21, 19, 0.38) 63px 64px),
+    repeating-linear-gradient(to left, transparent 0 7px, rgba(22, 21, 19, 0.22) 7px 8px);
   background-size: 100% 8px, 100% 4px;
   background-repeat: no-repeat;
-  transform-origin: left center;
+  transform-origin: right center;
+  /* Solo se ve con el mouse sobre el dibujo (junto con las guías punteadas): son muchas líneas para tenerlas siempre. */
+  opacity: 0;
+  transition: opacity 0.4s var(--es-ease);
 }
-.es-cell {
+.es-root:has(.es-lamina.is-hover) .es-frame__ruler {
+  opacity: 1;
+}.es-cell {
   transition: background-color 0.3s var(--es-ease);
 }
 @media (hover: hover) {
@@ -448,29 +463,23 @@
 
 /* ── La lámina del hero ─────────────────────────────────────────────── */
 /* La grilla de columnas, entre el nav y la franja de abajo. */
+/* Las columnas: la continuación de las divisiones del nav, una por módulo desde el borde derecho. */
 .es-cols {
   position: absolute;
-  left: 16px;
-  right: 16px;
-  top: calc(var(--nav-h) + 9px);
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) + 1px);
   bottom: var(--band-h);
-  display: grid;
-  grid-template-columns: repeat(var(--cols), 1fr);
-  column-gap: 16px;
   pointer-events: none;
 }
-@media (min-width: 640px) {
-  .es-cols {
-    left: 36px;
-    right: 36px;
-  }
-}
 .es-cols > span {
-  border-left: 1px solid rgba(22, 21, 19, 0.075);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(var(--i) * var(--mod) - 1px);
+  width: 1px;
+  background: rgba(22, 21, 19, 0.085);
   transform-origin: top center;
-}
-.es-cols > span:last-child {
-  border-right: 1px solid rgba(22, 21, 19, 0.075);
 }
 
 /* El cuadrante del dibujo: cuatro bordes y sus rótulos. */
@@ -749,6 +758,8 @@
   .es-info {
     grid-template-rows: none;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    /* El borde de la celda de texto cae sobre una línea de columna (un múltiplo del módulo desde la derecha). */
+    grid-template-columns: minmax(0, 1fr) round(down, 40vw, var(--mod));
     padding-left: 36px;
   }
   .es-info__title {
@@ -1173,7 +1184,8 @@
   .es-scrollcue {
     display: flex;
     bottom: 22px;
-    left: calc(36px + (100% - 36px) * 0.6 - 124px);
+    left: auto;
+    right: calc(round(down, 40vw, var(--mod)) + 24px);
   }
   .es-scrollcue__arrow {
     width: 34px;

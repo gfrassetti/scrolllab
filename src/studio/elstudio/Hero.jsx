@@ -96,7 +96,9 @@ const PHOTO_IN = { x0: 0.03, x1: 0.97, y0: 0.085, y1: 0.87 }
  */
 function sheetLayout(W, H, infoTop) {
   const side = W >= 640 ? 36 : 16
-  const cols = W >= 640 ? 8 : 4
+  // Una línea de columna por cada módulo desde el borde derecho (las divisiones del nav, hacia abajo).
+  const mod = W >= 1024 ? 192 : 128
+  const cols = Math.max(1, Math.ceil(W / mod) - 1)
   const top = (W >= 640 ? NAV_H.desk : NAV_H.phone) + (W >= 640 ? 22 : 16)
   const bottom = infoTop - (W >= 640 ? 18 : 12)
   return { cols, panel: { x: side, y: top, w: W - side * 2, h: Math.max(80, bottom - top) } }
@@ -470,7 +472,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
         {/* La grilla de columnas, a la vista. */}
         <div ref={colsRef} className="es-cols" aria-hidden="true" style={{ '--cols': cols }}>
           {Array.from({ length: cols }, (_, i) => (
-            <span key={i} data-col />
+            <span key={i} data-col style={{ '--i': i + 1 }} />
           ))}
         </div>
 

@@ -19,6 +19,10 @@ import Logo from './Logo'
  * Al pasar el mouse, el logo se vuelve a escribir: de la «e» a la «O», cada letra trazada en óxido y
  * después rellena, y al final cae la tapa de la T.
  *
+ * Todas las celdas miden lo mismo (--mod, elstudio.css) y las líneas de la regla, las columnas del hero y el
+ * borde de su celda de texto se miden desde el borde derecho en múltiplos de ese módulo: las divisiones del nav
+ * son el principio de las líneas que bajan por la página.
+ *
  * Por ancho: en el teléfono, el logo y «Menú» (que abre las secciones y el contacto en una hoja
  * debajo del nav); desde 640, también «Contacto»; desde 768, las secciones en el nav, sin menú.
  */
@@ -145,7 +149,7 @@ export default function Nav({ logoRef, open, calm }) {
               key={l.id}
               href={`#${l.id}`}
               onClick={go(l.id)}
-              className="es-cell pointer-events-auto relative hidden w-32 items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex lg:w-48"
+              className="es-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex"
               style={LABEL}
             >
               <span data-divider className="es-cell__divider" aria-hidden="true" />
@@ -158,7 +162,7 @@ export default function Nav({ logoRef, open, calm }) {
             onClick={() => setMenu((v) => !v)}
             aria-expanded={menu}
             aria-controls="es-menu"
-            className="es-cell pointer-events-auto relative flex w-28 items-center px-4 text-[12px] tracking-[0.1em] uppercase md:hidden"
+            className="es-cell pointer-events-auto relative flex w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:hidden"
             style={LABEL}
           >
             <span data-divider className="es-cell__divider" aria-hidden="true" />
@@ -168,7 +172,7 @@ export default function Nav({ logoRef, open, calm }) {
           <a
             href="#contacto"
             onClick={go('contacto')}
-            className="es-cell pointer-events-auto relative hidden w-36 items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:flex sm:w-44 md:w-36 lg:w-48"
+            className="es-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:flex"
             style={{ ...LABEL, color: C.rust }}
             data-cursor="Escribinos"
           >
