@@ -1,37 +1,43 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { LABEL, SITE } from './brand'
+import { hidePaint, paint } from './paint'
 import { PROJECTS, projectBySlug } from './projects'
 import { hrefOf, navigate } from './router'
 
 /**
- * La página de un proyecto (`/proyectos/<slug>`), con la estructura de las de los estudios de referencia:
- *   1. apertura   un panel de color con el título grande y, a la derecha, una foto a todo el alto.
- *   2. intro      la descripción y los servicios numerados.
- *   3. dato       la superficie en grande y la ficha.
- *   4. galería    las fotos a todo ancho, cada una con su texto.
- *   5. cierre     la frase del estudio y el paso al siguiente proyecto.
+ * La página de un proyecto (`/proyectos/<slug>`): una tira horizontal. Al empezar, mitad y mitad: a la izquierda
+ * el panel de color con el título y, a la derecha, la primera foto; el scroll vertical corre la tira hacia la
+ * izquierda y van entrando los demás paneles (la descripción, las fotos con su texto, el cierre).
  *
- * Parallax: cada foto se mueve dentro de su marco (más lento que la página) y su texto se mueve a otra velocidad:
- * a medida que se scrollea, la foto y el texto se desfasan. Todo con transformaciones atadas al scroll
- * (`data-px` en la foto, `data-pt` en el texto, el número es la velocidad: positivo se atrasa respecto de la página y
- * negativo se adelanta; la foto siempre se atrasa y el texto se adelanta, así se separan). Con «reducir movimiento», quietos.
+ *   0 portada      el panel de color (la mitad izquierda)           1 foto       la primera foto (la mitad derecha)
+ *   2 descripción  la frase, los servicios y la superficie          3 – 7 fotos  el ventanal, el nicho, el oficio…
+ *   8 cierre       la frase del estudio y el paso al siguiente
  *
- * Los `<section>` son hijos directos de <main>: la regla de scroll los cuenta como secciones.
+ * Movimiento (todo atado al scroll de la tira, con `containerAnimation`):
+ *   - parallax: cada foto se mueve dentro de su marco más lenta que la tira (`data-px`) y su texto va a otra
+ *     velocidad (`data-pt`): se desfasan al pasar;
+ *   - las fotos emergen desde abajo al entrar (el marco se abre de abajo hacia arriba);
+ *   - la superficie sube desde abajo y el resto del texto se despliega de izquierda a derecha (el pincel de paint.js).
+ *
+ * En el teléfono (< 768 px) y con «reducir movimiento» no hay tira: los paneles van uno debajo del otro, con los
+ * mismos fundidos al llegar (y quietos con «reducir movimiento»).
+ *
+ * El grano de película cubre toda la vista (`.es-pd-grain`).
  */
 
 const TO_HOME = { name: 'home' }
+const NAV_CLEAR = 'calc(var(--nav-h) + 9px)'
 
-function Photo({ photo, px = 1, sizes = '100vw', priority = false, className = '' }) {
+function Photo({ photo, px = 1, sizes = '100vw', className = '' }) {
   return (
-    <span className={`es-px ${className}`} style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
+    <span className={`es-px ${className}`} data-reveal style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
       <img
         data-px={px}
         src={photo.src}
         srcSet={`${photo.small} 750w, ${photo.src} 1500w`}
         sizes={sizes}
         alt={photo.alt}
-        loading={priority ? 'eager' : 'lazy'}
         decoding="async"
         width={photo.w}
         height={photo.h}
@@ -40,22 +46,25 @@ function Photo({ photo, px = 1, sizes = '100vw', priority = false, className = '
   )
 }
 
-/** Un texto que entra con un fundido al aparecer. El de afuera se mueve con el scroll (data-pt) y el de adentro se revela. */
+/** Una nota: la tarjeta de papel que acompaña a la foto. La de afuera se mueve con el scroll y la de adentro se despliega. */
 function Note({ label, text, speed, className = '' }) {
   return (
     <div data-pt={speed} className={`es-pd-note ${className}`}>
-      <div data-rv>
-        <span className="es-pd-note__label" style={LABEL}>
-          {label}
-        </span>
-        <p className="es-pd-note__text">{text}</p>
-      </div>
+      <span data-sweep className="es-paint es-pd-note__label" style={LABEL}>
+        {label}
+      </span>
+      <p data-sweep className="es-paint es-pd-note__text">
+        {text}
+      </p>
     </div>
   )
 }
 
-export default function ProyectoPage({ slug, calm }) {
+export default function ProyectoPage({ slug, calm, boarded = true }) {
   const rootRef = useRef(null)
+  const wrapRef = useRef(null)
+  const trackRef = useRef(null)
+  const introRef = useRef(null)
   const project = projectBySlug(slug)
 
   // El título de la pestaña.
@@ -75,51 +84,116 @@ export default function ProyectoPage({ slug, calm }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // El parallax: las fotos y los textos, atados al scroll.
+  // El movimiento: la tira horizontal (≥ 768 px), el parallax y las entradas.
   useLayoutEffect(() => {
     if (calm || !project) return undefined
-    const ctx = gsap.context(() => {
-      const root = rootRef.current
-      gsap.utils.toArray('[data-px]', root).forEach((img) => {
+    const root = rootRef.current
+    const track = trackRef.current
+    const wrap = wrapRef.current
+    const mm = gsap.matchMedia()
+
+    mm.add({ wide: '(min-width: 768px)', narrow: '(max-width: 767px)' }, (ctx) => {
+      const { wide } = ctx.conditions
+      const q = (sel) => gsap.utils.toArray(sel, root)
+
+      // Lo que todavía no llegó está escondido (antes de pintar).
+      gsap.set(q('[data-reveal]'), { clipPath: 'inset(100% 0% 0% 0%)' })
+      gsap.set(q('[data-rise]'), { yPercent: 112 })
+      hidePaint(q('[data-sweep]'))
+
+      // La tira: el scroll vertical la corre hacia la izquierda mientras la sección queda fija.
+      let move = null
+      if (wide) {
+        const dist = () => Math.max(0, track.scrollWidth - window.innerWidth)
+        move = gsap.to(track, {
+          x: () => -dist(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrap,
+            start: 'top top',
+            end: () => `+=${dist()}`,
+            pin: true,
+            scrub: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        })
+      }
+
+      // Las posiciones de un disparador: en la tira, el borde izquierdo del panel; en vertical, su borde de arriba.
+      const at = wide ? { start: 'left 90%', end: 'right left' } : { start: 'top 88%', end: 'bottom top' }
+      const trig = (el, extra) => ({ trigger: el, ...(move ? { containerAnimation: move } : {}), ...extra })
+      const panelOf = (el) => el.closest('[data-panel]') || el
+
+      // El parallax de las fotos: se mueven dentro de su marco, más lentas que la tira.
+      q('[data-px]').forEach((img) => {
         const k = Number(img.dataset.px) || 1
+        const frame = panelOf(img)
         gsap.fromTo(
           img,
-          { yPercent: -8 * k },
+          wide ? { xPercent: -8 * k } : { yPercent: -8 * k },
           {
-            yPercent: 8 * k,
+            ...(wide ? { xPercent: 8 * k } : { yPercent: 8 * k }),
             ease: 'none',
-            scrollTrigger: { trigger: img.parentElement, start: 'top bottom', end: 'bottom top', scrub: true },
+            scrollTrigger: trig(frame, { start: wide ? 'left right' : 'top bottom', end: wide ? 'right left' : 'bottom top', scrub: true }),
           },
         )
       })
-      gsap.utils.toArray('[data-pt]', root).forEach((el) => {
+      // El parallax de los textos: van a otra velocidad (el signo decide si se adelantan o se atrasan).
+      q('[data-pt]').forEach((el) => {
         const k = Number(el.dataset.pt) || 1
         gsap.fromTo(
           el,
-          { y: -70 * k },
+          wide ? { x: -80 * k } : { y: -50 * k },
           {
-            y: 70 * k,
+            ...(wide ? { x: 80 * k } : { y: 50 * k }),
             ease: 'none',
-            scrollTrigger: { trigger: el.closest('[data-pfig]') || el, start: 'top bottom', end: 'bottom top', scrub: true },
+            scrollTrigger: trig(panelOf(el), { start: wide ? 'left right' : 'top bottom', end: wide ? 'right left' : 'bottom top', scrub: true }),
           },
         )
       })
-      // Los textos y los datos se revelan con un fundido lento al llegar.
-      gsap.utils.toArray('[data-rv]', root).forEach((el) => {
-        gsap.from(el, {
-          autoAlpha: 0,
-          y: 26,
-          filter: 'blur(3px)',
-          duration: 1.25,
-          ease: 'power2.out',
-          clearProps: 'filter,transform',
-          scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+
+      // Las entradas (la primera pantalla entra con la apertura, abajo): cada panel al llegar.
+      const entering = (el) => !(wide && el.closest('[data-first]'))
+      const onceAt = (el, fn) => ScrollTrigger.create(trig(el, { start: at.start, once: true, onEnter: fn }))
+      q('[data-panel]').forEach((panel) => {
+        if (!entering(panel)) return
+        onceAt(panel, () => {
+          // Las fotos emergen desde abajo.
+          gsap.to(panel.querySelectorAll('[data-reveal]'), { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power3.inOut', stagger: 0.12 })
+          // La superficie sube desde abajo.
+          gsap.to(panel.querySelectorAll('[data-rise]'), { yPercent: 0, duration: 1.4, ease: 'power3.out', delay: 0.15 })
+          // El resto del texto se despliega de izquierda a derecha.
+          paint(panel.querySelectorAll('[data-sweep]'), { duration: 1.3, stagger: 0.14, delay: 0.25 })
         })
       })
+
+      // La apertura (portada y primera foto): arranca cuando la cortina se va; ver el efecto de `boarded`.
+      const first = q('[data-first]')
+      const intro = gsap.timeline({ paused: true })
+      first.forEach((p) => {
+        intro.to(p.querySelectorAll('[data-reveal]'), { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'power3.inOut' }, 0)
+        intro.add(() => paint(p.querySelectorAll('[data-sweep]'), { duration: 1.3, stagger: 0.12 }), 0.45)
+      })
+      if (!wide) {
+        // En vertical la apertura es lo primero de la página; el resto entra al scrollear (arriba, [data-panel]).
+      }
+      introRef.current = intro
+
       ScrollTrigger.refresh()
-    }, rootRef)
-    return () => ctx.revert()
+      return () => {
+        introRef.current = null
+      }
+    })
+    return () => mm.revert()
   }, [calm, project])
+
+  // La apertura corre al terminar el loader o la cortina.
+  useEffect(() => {
+    if (calm || !boarded) return undefined
+    const t = setTimeout(() => introRef.current?.play(), 450)
+    return () => clearTimeout(t)
+  }, [calm, boarded, project])
 
   if (!project) {
     return (
@@ -144,112 +218,114 @@ export default function ProyectoPage({ slug, calm }) {
     e.preventDefault()
     navigate(toNext, next ? {} : { section: 'proyectos' })
   }
+  const ratio = (p) => p.w / p.h
 
   return (
-    <div ref={rootRef} className="es-pd">
-      {/* 1. La apertura: el panel de color con el título y la foto a todo el alto. */}
-      <section className="es-pd-hero" aria-labelledby="pd-title">
-        <div className="es-pd-hero__panel">
-          <div className="es-pd-hero__top" style={LABEL}>
-            <a href={hrefOf(TO_HOME)} onClick={goBack} className="es-pd-hero__back" data-cursor="Volver">
-              ← Proyectos
-            </a>
-            <span>
-              {project.n} / {String(PROJECTS.length).padStart(2, '0')}
-            </span>
+    <div ref={rootRef} className={`es-pd${calm ? ' es-pd--v' : ''}`} style={{ '--clear': NAV_CLEAR }}>
+      {/* El grano de película, sobre toda la vista. */}
+      <div className="es-pd-grain" aria-hidden="true" />
+
+      <section ref={wrapRef} className="es-pd-h" aria-labelledby="pd-title">
+        <div ref={trackRef} className="es-pd-track" data-pd-track>
+          {/* 0. La portada: la mitad izquierda, el panel de color. */}
+          <div className="es-pd-p es-pd-p--cover" data-panel data-first data-spot>
+            <div className="es-pd-hero__top" style={LABEL}>
+              <a href={hrefOf(TO_HOME)} onClick={goBack} className="es-pd-hero__back" data-cursor="Volver">
+                ← Proyectos
+              </a>
+              <span>
+                {project.n} / {String(PROJECTS.length).padStart(2, '0')}
+              </span>
+            </div>
+            <div className="es-pd-hero__mid">
+              <span className="es-pd-hero__thumb" data-reveal>
+                <img src={ph.thumb.src} srcSet={`${ph.thumb.small} 640w, ${ph.thumb.src} 1200w`} sizes="160px" alt={ph.thumb.alt} decoding="async" />
+              </span>
+              <p data-sweep className="es-paint es-pd-hero__kind" style={LABEL}>
+                {project.kind}
+              </p>
+            </div>
+            <div className="es-pd-hero__bottom">
+              <span data-sweep className="es-paint es-pd-hero__meta" style={LABEL}>
+                {project.place} · {project.year}
+              </span>
+              <h1 id="pd-title" className="es-pd-title">
+                <span data-sweep className="es-paint">
+                  {project.name}
+                </span>
+              </h1>
+            </div>
           </div>
-          <div className="es-pd-hero__mid">
-            <span className="es-pd-hero__thumb">
-              <img src={ph.thumb.src} srcSet={`${ph.thumb.small} 640w, ${ph.thumb.src} 1200w`} sizes="160px" alt={ph.thumb.alt} decoding="async" />
-            </span>
-            <p className="es-pd-hero__kind" style={LABEL} data-rv>
-              {project.kind}
+
+          {/* 1. La primera foto: la mitad derecha. */}
+          <div className="es-pd-p es-pd-p--hero" data-panel data-first>
+            <Photo photo={ph.hero} px={1} sizes="50vw" className="es-px--fill" />
+          </div>
+
+          {/* 2. La descripción: la frase, los servicios y la superficie. */}
+          <div className="es-pd-p es-pd-p--intro" data-panel data-spot>
+            <p data-sweep className="es-paint es-pd-intro__lede">
+              {project.lede}
+            </p>
+            <ul className="es-pd-services">
+              {project.services.map((s, k) => (
+                <li key={s} data-sweep className="es-paint">
+                  <span>{s}</span>
+                  <span style={LABEL}>{String(k + 1).padStart(2, '0')}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="es-pd-stat__n">
+              <span className="es-pd-stat__mask">
+                <span data-rise>{project.area}</span>
+              </span>
+              <span className="es-pd-stat__mask es-pd-stat__mask--u">
+                <span data-rise>m²</span>
+              </span>
             </p>
           </div>
-          <div className="es-pd-hero__bottom">
-            <span className="es-pd-hero__meta" style={LABEL}>
-              {project.place} · {project.year}
-            </span>
-            <h1 id="pd-title" className="es-pd-title">
-              {project.name}
-            </h1>
+
+          {/* 3. El ventanal. */}
+          <figure className="es-pd-p es-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.ventanal) }}>
+            <Photo photo={ph.ventanal} px={1} sizes="100vw" />
+            <Note label={notes.ventanal[0]} text={notes.ventanal[1]} speed={-1.5} className="es-pd-note--bl" />
+          </figure>
+
+          {/* 4. El nicho. */}
+          <figure className="es-pd-p es-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.nicho) }}>
+            <Photo photo={ph.nicho} px={1.1} sizes="(min-width: 768px) 40vh, 100vw" />
+            <Note label={notes.nicho[0]} text={notes.nicho[1]} speed={-1.3} className="es-pd-note--br" />
+          </figure>
+
+          {/* 5. El oficio. */}
+          <figure className="es-pd-p es-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.prenda) }}>
+            <Photo photo={ph.prenda} px={0.9} sizes="100vw" />
+            <Note label={notes.prenda[0]} text={notes.prenda[1]} speed={-1.2} className="es-pd-note--bl" />
+          </figure>
+
+          {/* 6. La foto del local entero, chica, sobre papel. */}
+          <div className="es-pd-p es-pd-p--small" data-panel>
+            <Photo photo={ph.cover} px={1.2} sizes="(min-width: 768px) 38vw, 100vw" />
+          </div>
+
+          {/* 7. El cierre: la frase y el paso al siguiente. */}
+          <div className="es-pd-p es-pd-p--end" data-panel data-spot>
+            <p data-sweep className="es-paint es-pd-end__quote">
+              {project.quote}
+            </p>
+            <a href={hrefOf(toNext)} onClick={goNext} className="es-pd-end__next" data-cursor={next ? 'Siguiente' : 'Volver'}>
+              <span data-sweep className="es-paint" style={LABEL}>
+                {next ? 'Siguiente proyecto' : 'Todos los proyectos'}
+              </span>
+              <span data-sweep className="es-paint es-pd-end__name">
+                {next ? next.name : 'Proyectos'} <span aria-hidden="true">→</span>
+              </span>
+            </a>
+            <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-pd-end__ig" style={LABEL}>
+              {SITE.instagram.handle}
+            </a>
           </div>
         </div>
-        <div className="es-pd-hero__photo">
-          <Photo photo={ph.hero} px={1} sizes="(min-width: 1024px) 60vw, 100vw" priority className="es-px--fill" />
-        </div>
-      </section>
-
-      {/* 2. La intro: la descripción y los servicios. */}
-      <section className="es-pd-intro" aria-label="Descripción">
-        <p className="es-pd-intro__lede" data-rv>
-          {project.lede}
-        </p>
-        <ul className="es-pd-services" data-rv>
-          {project.services.map((s, k) => (
-            <li key={s}>
-              <span>{s}</span>
-              <span style={LABEL}>{String(k + 1).padStart(2, '0')}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* 3. El dato: la superficie en grande y la ficha. */}
-      <section className="es-pd-stat" aria-label="Ficha">
-        <p className="es-pd-stat__n" data-rv>
-          {project.area}
-          <span>m²</span>
-        </p>
-        <dl className="es-pd-facts" data-rv>
-          {[
-            ['Tipo', project.kind],
-            ['Lugar', project.place],
-            ['Año', project.year],
-          ].map(([k, v]) => (
-            <div key={k}>
-              <dt style={LABEL}>{k}</dt>
-              <dd>{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* 4. La galería: cada foto con su texto, a distinta velocidad. */}
-      <section className="es-pd-gal es-pd-gal--wide" aria-label="Fotos del proyecto" data-pfig>
-        <Photo photo={ph.ventanal} px={1} sizes="100vw" />
-        <Note label={notes.ventanal[0]} text={notes.ventanal[1]} speed={-1.5} className="es-pd-note--right" />
-      </section>
-
-      <section className="es-pd-gal es-pd-gal--split" aria-label="El nicho" data-pfig>
-        <Note label={notes.nicho[0]} text={notes.nicho[1]} speed={-1.3} className="es-pd-note--left" />
-        <Photo photo={ph.nicho} px={1.1} sizes="(min-width: 1024px) 40vw, 100vw" className="es-pd-gal__tall" />
-      </section>
-
-      <section className="es-pd-gal es-pd-gal--pair" aria-label="Oficio" data-pfig>
-        <div className="es-pd-gal__a">
-          <Photo photo={ph.prenda} px={0.9} sizes="(min-width: 1024px) 58vw, 100vw" />
-        </div>
-        <div className="es-pd-gal__b" data-pt={1.1}>
-          <Photo photo={ph.cover} px={1.2} sizes="(min-width: 1024px) 34vw, 70vw" />
-        </div>
-        <Note label={notes.prenda[0]} text={notes.prenda[1]} speed={-1.2} className="es-pd-note--under" />
-      </section>
-
-      {/* 5. El cierre: la frase y el paso al siguiente. */}
-      <section className="es-pd-end" aria-label="Siguiente">
-        <p className="es-pd-end__quote" data-rv>
-          {project.quote}
-        </p>
-        <a href={hrefOf(toNext)} onClick={goNext} className="es-pd-end__next" data-cursor={next ? 'Siguiente' : 'Volver'}>
-          <span style={LABEL}>{next ? 'Siguiente proyecto' : 'Todos los proyectos'}</span>
-          <span className="es-pd-end__name">
-            {next ? next.name : 'Proyectos'} <span aria-hidden="true">→</span>
-          </span>
-        </a>
-        <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-pd-end__ig" style={LABEL}>
-          {SITE.instagram.handle}
-        </a>
       </section>
     </div>
   )

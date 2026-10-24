@@ -204,7 +204,7 @@ export default function ElStudioPage() {
         <Nav logoRef={navLogoRef} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
           {route.name === 'project' ? (
-            <ProyectoPage key={route.slug} slug={route.slug} calm={calm} />
+            <ProyectoPage key={route.slug} slug={route.slug} calm={calm} boarded={boarded} />
           ) : (
             <>
               <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} boceto={SALIDA === 'boceto'} />

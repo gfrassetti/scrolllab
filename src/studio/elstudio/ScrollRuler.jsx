@@ -44,8 +44,25 @@ export default function ScrollRuler({ on }) {
     const measure = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight
       if (max <= 0) return
-      const sections = [...document.querySelectorAll('main > section, main > .es-pd > section')]
-      const next = sections.map((el, i) => ({ n: String(i + 1).padStart(2, '0'), y: el.offsetTop, f: Math.min(1, el.offsetTop / max) }))
+      // La página de un proyecto marca sus paneles (data-spot): en la tira horizontal, según cuánto scroll lleva
+      // cada uno; en vertical, donde empieza cada uno. La portada y la de un solo scroll, sus secciones.
+      const marked = [...document.querySelectorAll('[data-spot]')]
+      const wrap = document.querySelector('.es-pd-h')
+      // La tira horizontal (ProyectoPage): su disparador da dónde empieza y cuánto dura (se lee en vivo, no una copia).
+      const pin = wrap ? ScrollTrigger.getAll().find((t) => t.pin === wrap) : null
+      const dist = pin ? pin.end - pin.start : 0
+      let spots
+      if (marked.length && dist > 0) {
+        const track = document.querySelector('[data-pd-track]')
+        const run = Math.max(1, track.scrollWidth - window.innerWidth)
+        const start = Math.max(0, pin.start)
+        spots = marked.map((el) => start + Math.min(1, Math.max(0, el.offsetLeft / run)) * dist)
+      } else if (marked.length) {
+        spots = marked.map((el) => el.getBoundingClientRect().top + window.scrollY)
+      } else {
+        spots = [...document.querySelectorAll('main > section')].map((el) => el.offsetTop)
+      }
+      const next = spots.map((y, i) => ({ n: String(i + 1).padStart(2, '0'), y, f: Math.min(1, y / max) }))
       marksRef.current = next
       setMarks((prev) => (prev.length === next.length && prev.every((m, i) => Math.abs(m.f - next[i].f) < 0.0005) ? prev : next))
     }

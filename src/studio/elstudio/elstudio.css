@@ -882,8 +882,7 @@
   aspect-ratio: 4 / 3;
 }
 /* El grano va encima de la foto (no la toca): se mezcla en «superposición», así solo mueve los tonos de la foto. */
-.es-proj__card::after,
-.es-px::after {
+.es-proj__card::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -1202,16 +1201,54 @@
 }
 
 /* ── La página de un proyecto (ProyectoPage.jsx) ───────────────────── */
+/* Una tira horizontal (≥ 768 px, salvo con «reducir movimiento»): el scroll vertical la corre hacia la izquierda.
+   Debajo de 768 px y con «reducir movimiento» (.es-pd--v) los paneles van uno debajo del otro. */
 .es-pd {
   --pad: 16px;
-  padding-top: calc(var(--nav-h) + 9px);
+  --ph: calc(100svh - var(--nav-h) - 9px);
 }
 @media (min-width: 640px) {
   .es-pd {
     --pad: 36px;
   }
 }
-/* Las fotos: un marco que recorta, con la foto 24 % más alta adentro (el parallax la mueve) y el grano de película. */
+/* El grano de película, sobre toda la vista: uno que se mezcla con las fotos y otro de puntos finos para el papel. */
+.es-pd-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  background-image: var(--es-film);
+  background-size: 300px 300px;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+.es-pd-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='s' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='6 0 0 0 -3  6 0 0 0 -3  6 0 0 0 -3  0 0 0 0 0.09'/></filter><rect width='100%' height='100%' filter='url(%23s)'/></svg>");
+  background-size: 260px 260px;
+}
+.es-pd-h {
+  padding-top: calc(var(--nav-h) + 9px);
+}
+.es-pd-track {
+  display: flex;
+  flex-direction: column;
+}
+.es-pd-p {
+  position: relative;
+}
+.es-pd-title {
+  margin: 0;
+  font-family: var(--es-font-display);
+  font-size: clamp(34px, 9vw, 64px);
+  font-weight: var(--es-title-weight);
+  line-height: 1.04;
+  letter-spacing: var(--es-title-tracking);
+}
+/* Las fotos: un marco que recorta, con la foto 24 % más grande adentro (el parallax la mueve). */
 .es-px {
   position: relative;
   display: block;
@@ -1234,26 +1271,9 @@
   height: 100%;
   aspect-ratio: auto !important;
 }
-.es-pd-title {
-  margin: 0;
-  font-family: var(--es-font-display);
-  font-size: clamp(42px, 7.2vw, 124px);
-  font-weight: var(--es-title-weight);
-  line-height: 1;
-  letter-spacing: var(--es-title-tracking);
-}
 
-/* 1. La apertura */
-.es-pd-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-}
-.es-pd-hero__photo {
-  position: relative;
-  order: -1;
-  height: 62svh;
-}
-.es-pd-hero__panel {
+/* La portada: el panel de color */
+.es-pd-p--cover {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1296,57 +1316,40 @@
   height: 100%;
   object-fit: cover;
 }
-.es-pd-hero__kind {
+.es-pd-hero__kind,
+.es-pd-hero__meta {
   margin: 0;
   font-size: 11.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  opacity: 0.85;
+  opacity: 0.88;
 }
 .es-pd-hero__bottom {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.es-pd-hero__meta {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.85;
-}
-.es-pd-hero .es-pd-title {
+.es-pd-p--cover .es-pd-title {
   color: var(--es-paper);
 }
-@media (min-width: 768px) {
-  .es-pd-hero {
-    /* La foto ocupa un múltiplo del módulo desde la derecha: su borde cae sobre una línea del nav. */
-    grid-template-columns: minmax(0, 1fr) round(down, 66vw, var(--mod));
-    height: calc(100svh - var(--nav-h) - 9px);
-    min-height: 520px;
-  }
-  .es-pd-hero__photo {
-    order: 0;
-    height: auto;
-  }
-  .es-pd-hero__panel {
-    min-height: 0;
-    padding: 22px var(--pad) 28px;
-  }
+.es-pd-p--hero {
+  order: -1;
+  height: 62svh;
 }
 
-/* 2. La intro */
-.es-pd-intro,
-.es-pd-stat {
-  display: grid;
+/* La descripción */
+.es-pd-p--intro {
+  display: flex;
+  flex-direction: column;
   gap: 40px;
-  padding: clamp(64px, 11vw, 150px) var(--pad) 0;
+  padding: clamp(56px, 11vw, 96px) var(--pad) 0;
 }
 .es-pd-intro__lede {
   margin: 0;
-  max-width: 24ch;
-  font-size: clamp(24px, 2.6vw, 42px);
+  max-width: 26ch;
+  font-size: clamp(22px, 2.4vw, 34px);
   font-weight: 500;
-  line-height: 1.16;
+  line-height: 1.18;
   letter-spacing: -0.02em;
 }
 .es-pd-services {
@@ -1371,62 +1374,41 @@
   letter-spacing: 0.12em;
   color: #6d675c;
 }
-
-/* 3. El dato */
 .es-pd-stat__n {
   display: flex;
   align-items: flex-start;
-  gap: 0.08em;
+  gap: 0.06em;
   margin: 0;
-  font-size: clamp(110px, 24vw, 280px);
+  font-size: clamp(96px, 30vw, 150px);
   font-weight: var(--es-title-weight);
-  line-height: 0.82;
+  line-height: 0.9;
   letter-spacing: -0.06em;
 }
-.es-pd-stat__n span {
+.es-pd-stat__mask {
+  display: block;
+  overflow: hidden;
+  padding: 0.04em 0.02em 0.06em;
+  margin: -0.04em -0.02em -0.06em;
+}
+.es-pd-stat__mask > span {
+  display: block;
+}
+.es-pd-stat__mask--u {
   margin-top: 0.1em;
   font-size: 0.17em;
   letter-spacing: -0.02em;
 }
-.es-pd-facts {
-  margin: 0;
-  font-size: 15px;
-  align-self: end;
-}
-.es-pd-facts > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-.es-pd-facts dt {
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #6d675c;
-}
-.es-pd-facts dd {
-  margin: 0;
-  text-align: right;
-}
-@media (min-width: 1024px) {
-  .es-pd-intro,
-  .es-pd-stat {
-    grid-template-columns: minmax(0, 1fr) round(down, 40vw, var(--mod));
-    gap: 0 clamp(32px, 4vw, 72px);
-  }
-}
 
-/* 4. La galería */
-.es-pd-gal {
-  margin-top: clamp(72px, 12vw, 190px);
+/* Las fotos con su nota */
+.es-pd-p--photo {
+  margin: clamp(56px, 10vw, 110px) 0 0;
   padding: 0 var(--pad);
 }
 .es-pd-note {
   position: relative;
   z-index: 3;
-  width: min(100%, 420px);
+  width: min(100%, 400px);
+  margin: -48px 0 0 auto;
   padding: 20px 22px 22px;
   background-color: var(--es-paper);
   background-image: var(--es-grain);
@@ -1445,71 +1427,19 @@
   font-size: 15px;
   line-height: 1.45;
 }
-.es-pd-gal--wide .es-pd-note {
-  margin: -56px 0 0 auto;
-}
-.es-pd-gal--split {
-  display: grid;
-  gap: 28px;
-  padding-right: 0;
-}
-.es-pd-gal--split .es-pd-note {
-  margin-right: var(--pad);
-}
-.es-pd-gal--pair {
-  display: grid;
-  gap: 24px;
-}
-.es-pd-gal__b {
+.es-pd-p--small {
   width: 72%;
-  margin: -64px 0 0 auto;
-}
-.es-pd-gal--pair .es-pd-note {
-  margin: 0 0 0 0;
-}
-@media (min-width: 1024px) {
-  .es-pd-gal--wide .es-pd-note {
-    margin-right: 6%;
-  }
-  .es-pd-gal--split {
-    grid-template-columns: minmax(0, 1fr) round(down, 40vw, var(--mod));
-    align-items: center;
-    gap: 0;
-  }
-  .es-pd-gal--split .es-pd-note {
-    margin: 0 clamp(32px, 8vw, 160px) 0 auto;
-  }
-  .es-pd-gal--pair {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 24px;
-    row-gap: 0;
-  }
-  .es-pd-gal__a {
-    grid-column: 1 / span 8;
-    grid-row: 1;
-  }
-  .es-pd-gal__b {
-    grid-column: 9 / span 4;
-    grid-row: 1;
-    width: auto;
-    margin: 38% 0 0;
-    z-index: 2;
-  }
-  .es-pd-gal--pair .es-pd-note {
-    grid-column: 2 / span 5;
-    grid-row: 2;
-    margin-top: -48px;
-  }
+  margin: clamp(48px, 8vw, 90px) var(--pad) 0 auto;
 }
 
-/* 5. El cierre */
-.es-pd-end {
-  padding: clamp(96px, 14vw, 200px) var(--pad) 40px;
+/* El cierre */
+.es-pd-p--end {
+  padding: clamp(96px, 14vw, 160px) var(--pad) 40px;
 }
 .es-pd-end__quote {
   max-width: 22ch;
-  margin: 0 0 clamp(64px, 10vw, 140px);
-  font-size: clamp(26px, 3.6vw, 60px);
+  margin: 0 0 clamp(64px, 10vw, 120px);
+  font-size: clamp(26px, 3.6vw, 48px);
   font-weight: 500;
   line-height: 1.12;
   letter-spacing: -0.025em;
@@ -1529,9 +1459,9 @@
   color: #6d675c;
 }
 .es-pd-end__name {
-  font-size: clamp(36px, 8vw, 132px);
+  font-size: clamp(34px, 8vw, 72px);
   font-weight: var(--es-title-weight);
-  line-height: 1;
+  line-height: 1.04;
   letter-spacing: var(--es-title-tracking);
 }
 .es-pd-end__name span {
@@ -1559,6 +1489,95 @@
 .es-pd-back {
   display: inline-block;
   margin-top: 24px;
+}
+
+/* ── La tira horizontal ───────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .es-pd:not(.es-pd--v) .es-pd-h {
+    height: 100svh;
+    overflow: hidden;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-track {
+    flex-direction: row;
+    width: max-content;
+    height: var(--ph);
+    will-change: transform;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p {
+    flex: none;
+    height: 100%;
+    margin: 0;
+  }
+  /* Mitad y mitad: la portada y la primera foto llenan la pantalla. */
+  .es-pd:not(.es-pd--v) .es-pd-p--cover,
+  .es-pd:not(.es-pd--v) .es-pd-p--hero {
+    width: 50vw;
+    order: 0;
+    min-height: 0;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--cover {
+    padding: 22px 36px 28px;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-title {
+    font-size: clamp(34px, 4.4vw, 80px);
+    white-space: nowrap;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--intro {
+    width: clamp(520px, 44vw, 780px);
+    justify-content: space-between;
+    gap: 32px;
+    padding: 56px 36px 28px 40px;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-stat__n {
+    font-size: clamp(110px, 14vw, 230px);
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--photo {
+    width: calc(var(--ph) * var(--r));
+    margin-left: 12px;
+    padding: 0;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--photo .es-px {
+    height: 100%;
+    aspect-ratio: auto !important;
+  }
+  .es-pd:not(.es-pd--v) .es-px img {
+    left: -12%;
+    top: 0;
+    width: 124%;
+    height: 100%;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-note {
+    position: absolute;
+    bottom: 28px;
+    margin: 0;
+    width: min(380px, 80%);
+  }
+  .es-pd:not(.es-pd--v) .es-pd-note--bl {
+    left: 28px;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-note--br {
+    right: 28px;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--small {
+    display: flex;
+    align-items: flex-end;
+    width: calc(var(--ph) * 0.92);
+    padding: 0 clamp(28px, 4vw, 64px) 28px;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--small .es-px {
+    height: 62%;
+    aspect-ratio: auto !important;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-p--end {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: clamp(560px, 50vw, 900px);
+    padding: 56px 36px 28px 60px;
+  }
+  .es-pd:not(.es-pd--v) .es-pd-end__quote {
+    margin-bottom: 0;
+  }
 }
 
 /* La cortina del cambio de página: óxido, sobre todo menos el cursor. */
