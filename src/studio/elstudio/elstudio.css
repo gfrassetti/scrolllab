@@ -702,10 +702,9 @@
   mask-position: calc(var(--paint) * 1%) 0;
 }
 
-/* El título por partes: el trazo fantasma a lápiz y, encima, la tinta (con la máscara del pintado, que el scroll corre).
-   --k: cuánto de la parte está entintado (0–1); sin movimiento queda entintado. */
+/* El título por partes: la tinta, con la máscara del pintado que el scroll corre (--paint: 100 escondida, 0 entera).
+   Lo que todavía no llegó no se ve, pero ocupa su lugar. */
 .es-chunk {
-  --k: 1;
   position: relative;
   display: inline-block;
 }
@@ -714,13 +713,6 @@
   /* El aire de arriba evita que la máscara corte la tilde de la Ñ. */
   padding-top: 0.16em;
   margin-top: -0.16em;
-}
-.es-chunk__ghost {
-  position: absolute;
-  inset: 0;
-  color: rgb(22 21 19 / calc(0.1 * (1 - var(--k))));
-  -webkit-text-stroke: 0.6px rgb(58 55 50 / calc(0.4 * (1 - var(--k))));
-  pointer-events: none;
 }
 
 /* ── El bloque de abajo del hero ───────────────────────────────────── */

@@ -70,15 +70,15 @@ const smooth = (a, b, v) => {
 /** El acercamiento sobre la foto al final del hero (localScene.js: uPhotoZoom). Sin acercamiento: la foto se queda
  *  como está en la etapa 04, para que el arrastre y la vuelta a boceto no se muevan. */
 /**
- * El título se entinta por partes con el diseño del local (avance del hero, de → a): «Diseño» ya está; «e
- * interiorismo» mientras se proyecta el interior; «para quien» con la materia y la luz; «lo vive» al final,
- * con la foto terminada.
+ * El título se escribe por partes con los primeros tics de la rueda (avance del hero, de → a): «Diseño» ya está
+ * y cada tic suma la siguiente parte, entintada con un barrido. Lo que todavía no llegó no se ve. No espera a las
+ * etapas: a la altura de la etapa 02 ya está completo (un tic de rueda es ~0,03 del avance).
  */
 const TITLE_AT = [
   [0, 0],
-  [0.1, 0.22],
-  [STAGE_AT[2], STAGE_AT[2] + 0.12],
-  [STAGE_AT[3], STAGE_AT[3] + 0.12],
+  [0.008, 0.045],
+  [0.04, 0.08],
+  [0.075, 0.115],
 ]
 
 const PHOTO_END_ZOOM = 1
@@ -123,15 +123,12 @@ function cameraFrame(p) {
 }
 
 /**
- * Una parte del título: el trazo fantasma a lápiz (decorativo) y, encima, la tinta, que un barrido ligado al
- * scroll va descubriendo (--paint en la tinta, --k en la parte). Ver TITLE_AT.
+ * Una parte del título: la tinta, que un barrido ligado al scroll va descubriendo (--paint). Hasta que le toca,
+ * no se ve, pero ocupa su lugar (el título no se acomoda al llegar cada parte). Ver TITLE_AT.
  */
 function Chunk({ text }) {
   return (
     <span data-chunk className="es-chunk">
-      <span className="es-chunk__ghost" aria-hidden="true">
-        {text}
-      </span>
       <span className="es-paint es-chunk__ink">{text}</span>
     </span>
   )
@@ -272,7 +269,6 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           if (k === c.k || (Math.abs(k - c.k) < 0.002 && k !== 0 && k !== 1)) return
           c.k = k
           c.ink.style.setProperty('--paint', ((1 - k) * 100).toFixed(1))
-          c.el.style.setProperty('--k', k.toFixed(3))
         })
       }
       // La señal de scroll se va apenas se empieza a bajar.
