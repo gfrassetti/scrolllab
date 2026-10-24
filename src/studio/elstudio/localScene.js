@@ -297,10 +297,13 @@ const sketchFragment = /* glsl */ `
   uniform float uPhotoZoom;   // el acercamiento final sobre la foto (1 = sin zoom)
   uniform float uPhotoSat;    // el color de la foto (0 = en grises: luz y sombra)
   uniform sampler2D tSketchImg; // el boceto dibujado a lápiz (misma toma que la foto)
-  uniform sampler2D tSketchEmpty; // el mismo boceto con el local vacío
+  uniform sampler2D tSketchEmpty; // el mismo boceto con el local vacío (con la arquitectura del estudio)
   uniform float uHasEmpty;
-  uniform vec4 uRegions[7];     // dónde está cada mueble (uv de la imagen, y hacia arriba): x0, y0, x1, y1
-  uniform float uDesign[7];     // cuánto de cada mueble está dibujado
+  uniform sampler2D tSketchRaw; // el local como se recibe, en obra gris (antes de las aberturas, el nicho…)
+  uniform float uHasRaw;
+  uniform vec4 uRegions[${DESIGN_PIECES.length}];   // dónde está cada pieza (uv de la imagen, y hacia arriba): x0, y0, x1, y1
+  uniform float uDesign[${DESIGN_PIECES.length}];   // cuánto de cada pieza está dibujado
+  uniform float uObra[${DESIGN_PIECES.length}];     // 1: pieza de obra (de la obra gris al local vacío); 0: equipamiento
   uniform float uSketchImg;     // 1: el boceto es la imagen; 0: el filtro sobre el 3D
   uniform vec2 uRes;      // px del canvas (con el dpr)
   uniform float uDpr;
@@ -410,22 +413,29 @@ const sketchFragment = /* glsl */ `
     vec2 cuv = clamp(puv, 0.0, 1.0);
     vec3 c = texture2D(tSketchImg, cuv).rgb;
     vec2 px = vUv * uRes / uDpr;
-    // El diseño: sobre el local vacío, cada mueble se dibuja en su rectángulo, primero los trazos
-    // más fuertes y después el resto, con el borde de cada trazo irregular.
-    // Sin diseñar (el arrastre): el local vacío, tal cual.
-    if (uHasEmpty > 0.5 && designed < 0.5) c = texture2D(tSketchEmpty, cuv).rgb;
+    // El diseño, en dos capas: primero la obra (sobre el local en obra gris se dibujan el ventanal,
+    // el nicho y el cielorraso: queda el local vacío) y después el equipamiento (sobre el local vacío,
+    // cada mueble en su rectángulo). En cada pieza, primero los trazos más fuertes y después el resto,
+    // con el borde de cada trazo irregular.
+    // Sin diseñar (el arrastre): el local como se recibió.
+    if (uHasEmpty > 0.5 && designed < 0.5) c = uHasRaw > 0.5 ? texture2D(tSketchRaw, cuv).rgb : texture2D(tSketchEmpty, cuv).rgb;
     else if (uHasEmpty > 0.5) {
       vec3 e = texture2D(tSketchEmpty, cuv).rgb;
       float strongFull = smoothstep(0.35, 0.75, 1.0 - lum(c));
+      float strongEmpty = smoothstep(0.35, 0.75, 1.0 - lum(e));
+      float dObra = 0.0;
       float d = 0.0;
-      for (int i = 0; i < 7; i++) {
+      for (int i = 0; i < ${DESIGN_PIECES.length}; i++) {
         vec4 r = uRegions[i];
         float inR = smoothstep(r.x - 0.008, r.x + 0.004, cuv.x) * smoothstep(r.z + 0.008, r.z - 0.004, cuv.x)
           * smoothstep(r.y - 0.012, r.y + 0.006, cuv.y) * smoothstep(r.w + 0.012, r.w - 0.006, cuv.y);
-        float f = 0.5 * fbm(px * 0.045 + float(i) * 7.3) + 0.5 * (1.0 - strongFull);
-        float drawn = smoothstep(f - 0.07, f + 0.02, uDesign[i] * 1.18);
-        d = max(d, inR * drawn);
+        float strong = mix(strongFull, strongEmpty, uObra[i]);
+        float f = 0.5 * fbm(px * 0.045 + float(i) * 7.3) + 0.5 * (1.0 - strong);
+        float drawn = inR * smoothstep(f - 0.07, f + 0.02, uDesign[i] * 1.18);
+        dObra = max(dObra, drawn * uObra[i]);
+        d = max(d, drawn * (1.0 - uObra[i]));
       }
+      if (uHasRaw > 0.5) e = mix(texture2D(tSketchRaw, cuv).rgb, e, dObra);
       c = mix(e, c, d);
     }
     // Cuánto grafito hay: lo que se aparta del papel del dibujo.
@@ -480,7 +490,7 @@ const sketchFragment = /* glsl */ `
   }
 `
 
-export function createLocalScene({ canvas, phone = false, photo = null, sketch = null, sketchEmpty = null }) {
+export function createLocalScene({ canvas, phone = false, photo = null, sketch = null, sketchEmpty = null, sketchRaw = null }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, premultipliedAlpha: true })
   renderer.setClearColor(0x000000, 0)
   renderer.shadowMap.enabled = true
@@ -597,6 +607,9 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       tSketchImg: { value: null },
       tSketchEmpty: { value: null },
       uHasEmpty: { value: 0 },
+      tSketchRaw: { value: null },
+      uHasRaw: { value: 0 },
+      uObra: { value: DESIGN_PIECES.map((p) => (p.obra ? 1 : 0)) },
       uRegions: { value: DESIGN_PIECES.map(({ rect: [x0, y0, x1, y1] }) => new THREE.Vector4(x0 / IMG.w, 1 - y1 / IMG.h, x1 / IMG.w, 1 - y0 / IMG.h)) },
       uDesign: { value: DESIGN_PIECES.map(() => 0) },
       uSketchImg: { value: 0 },
@@ -630,6 +643,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   // El boceto a lápiz como imagen (misma toma que la foto). Hasta que llega, el filtro sobre el 3D.
   let sketchTex = null
   let emptyTex = null
+  let rawTex = null
   const loadTex = (url) =>
     new Promise((resolve) =>
       new THREE.TextureLoader().load(url, (tex) => {
@@ -648,8 +662,16 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
         dirty = true
       })
     : Promise.resolve()
+  const rawReady = sketchRaw
+    ? loadTex(sketchRaw).then((tex) => {
+        rawTex = tex
+        post.uniforms.tSketchRaw.value = tex
+        post.uniforms.uHasRaw.value = 1
+        dirty = true
+      })
+    : Promise.resolve()
   let sketchLoaded = () => {}
-  const sketchReady = sketch ? Promise.all([new Promise((resolve) => (sketchLoaded = resolve)), emptyReady]) : Promise.resolve()
+  const sketchReady = sketch ? Promise.all([new Promise((resolve) => (sketchLoaded = resolve)), emptyReady, rawReady]) : Promise.resolve()
   if (sketch) {
     new THREE.TextureLoader().load(sketch, (tex) => {
       sketchLoaded()
@@ -797,7 +819,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     }
     u.uA.value = a3d
     // Con boceto en imagen, no se muestra el filtro sobre el 3D mientras carga (no calzaría).
-    u.uSketch.value = sketch && (!sketchTex || (sketchEmpty && !emptyTex)) ? 0 : state.sketch
+    u.uSketch.value = sketch && (!sketchTex || (sketchEmpty && !emptyTex) || (sketchRaw && !rawTex)) ? 0 : state.sketch
     for (let i = 0; i < design.length; i += 1) u.uDesign.value[i] = design[i]
     u.uReveal.value = state.reveal
     renderer.setRenderTarget(null)
@@ -880,6 +902,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       photoTex?.dispose()
       sketchTex?.dispose()
       emptyTex?.dispose()
+      rawTex?.dispose()
       renderer.dispose()
     },
   }

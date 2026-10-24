@@ -1,12 +1,26 @@
 /**
- * Las piezas que se diseñan en el hero, en el orden en que se dibujan. Cada una es el rectángulo del
- * boceto en alzado (en px de la imagen a IMG.w × IMG.h, origen arriba a la izquierda) donde está el
- * mueble: ahí el boceto vacío deja ver el boceto completo. Los rectángulos se pueden pisar: lo que ya
- * dibujó una pieza anterior queda dibujado. Si se regenera el boceto, hay que volver a medirlos.
+ * Las piezas que se diseñan en el hero, en el orden en que se dibujan. Cada una es un rectángulo del
+ * boceto en alzado (en px de la imagen a IMG.w × IMG.h, origen arriba a la izquierda).
+ *
+ * Hay dos capas, como en un proyecto de interiorismo: primero la obra (`obra: true`) y después el
+ * equipamiento. En la obra, sobre el local como se recibió (boceto-obra: ventana chica, paredes con
+ * parches, el caño y la lamparita) se dibuja lo que proyecta el estudio: el ventanal, el nicho, el
+ * cielorraso y los revestimientos, hasta el local vacío (boceto-vacio). En el equipamiento, sobre el
+ * local vacío se dibuja cada mueble hasta el boceto completo. Los rectángulos se pueden pisar: lo que
+ * ya dibujó una pieza anterior queda dibujado. Si se regeneran los bocetos, hay que volver a medirlos.
  */
 export const IMG = { w: 2100, h: 900 }
 
 export const DESIGN_PIECES = [
+  // La obra. El ventanal: la ventana chica de siempre se vuelve un paño de piso a techo.
+  { id: 'window', obra: true, rect: [150, 140, 545, 715] },
+  // El nicho con su estante (donde estaba la lamparita colgando).
+  { id: 'niche', obra: true, rect: [905, 140, 1115, 645] },
+  // El cielorraso: se tapa la losa con el caño a la vista.
+  { id: 'ceiling', obra: true, rect: [118, 108, 1985, 192] },
+  // Los revestimientos: paredes y piso terminados (se van los parches de la obra).
+  { id: 'finishes', obra: true, rect: [118, 120, 1985, 748] },
+  // El equipamiento.
   // La barra de piedra y las tres banquetas.
   { id: 'bar', rect: [1118, 536, 1758, 745] },
   // La repisa negra con sus objetos y la planta que cuelga, la rama sobre la barra y la luz lineal.

@@ -11,6 +11,8 @@ import sketchFull from './assets/boceto-local.webp'
 import sketchSmall from './assets/boceto-local-1200.webp'
 import emptyFull from './assets/boceto-vacio.webp'
 import emptySmall from './assets/boceto-vacio-1200.webp'
+import rawFull from './assets/boceto-obra.webp'
+import rawSmall from './assets/boceto-obra-1200.webp'
 import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
 
 /**
@@ -22,8 +24,10 @@ import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
  * con el texto de cada etapa. El alto de esa franja es --band-h (elstudio.css).
  * Al terminar el loader, un local (café / showroom, minimal cálido) se dibuja a lápiz. Al scrollear
  * (el hero queda fijo):
- *   01 El espacio   el local vacío, dibujado a lápiz (muros, ventana, nicho, luz).
- *   02 Diseño       cada mueble se dibuja en su lugar, uno por uno (designPieces.js): barra, repisa, banco, mesa, nicho, pedestal, árbol.
+ *   01 El espacio   el local como se recibe, en obra gris (ventana chica, parches, el caño y la lamparita).
+ *   02 Diseño       el estudio proyecta todo, pieza por pieza (designPieces.js): primero la obra (ventanal,
+ *                   nicho, cielorraso, revestimientos) y después el equipamiento (barra, repisa, banco,
+ *                   mesa, florero, pedestal, árbol).
  *   03 Materia y luz la luz y la sombra se pintan debajo de los trazos, entra el color y los
  *                   trazos se van: queda la foto del local.
  *   04 Experiencia  la cámara se acerca sobre la foto.
@@ -35,7 +39,7 @@ import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
  *
  * Con el mouse: al entrar al dibujo aparecen las líneas de construcción (guías punteadas y una regla
  * en óxido alrededor del cuadrante). En la última hoja, con el local terminado, se habilita el clic y
- * arrastre: del lado izquierdo del cursor se ve el boceto del local vacío (el antes).
+ * arrastre: del lado izquierdo del cursor se ve el boceto del local como se recibió (el antes).
  *
  * Al salir (con `boceto`, Boceto.jsx): 100vh más de scroll con la lámina fija, en los que todo vuelve
  * a boceto (la foto se despinta y vuelven los trazos; el texto y el marco pasan a lápiz). Después la
@@ -52,7 +56,7 @@ const ABOUT =
   'Estudio multidisciplinario de diseño e interiorismo, enfocado en la experiencia de usuario. Desde la Patagonia y Buenos Aires, para cualquier lugar.'
 const STAGES = [
   { n: '01', title: 'El espacio', text: ABOUT },
-  { n: '02', title: 'Diseño', text: 'Te ayudamos a darle identidad a tu marca, pieza por pieza.' },
+  { n: '02', title: 'Diseño', text: 'Proyectamos el local entero, pieza por pieza: aberturas, cielorraso, revestimientos, carpintería y mobiliario.' },
   { n: '03', title: 'Materia y luz', text: 'De tu idea a lo concreto: materiales, luz y color pensados para cómo se va a vivir.' },
   { n: '04', title: 'Experiencia', text: 'Tu proyecto, con cara propia: un espacio listo para recibir a tu gente.' },
 ]
@@ -65,6 +69,9 @@ const smooth = (a, b, v) => {
 
 /** El acercamiento final sobre la foto (localScene.js: uPhotoZoom con la etapa 04 completa). */
 const PHOTO_END_ZOOM = 1.06
+// La etapa 02: las piezas (obra y equipamiento) se dibujan una tras otra entre 0.06 y 0.52 del hero.
+const PIECE_DUR = 0.09
+const pieceAt = (k) => 0.06 + (k * (0.52 - 0.06 - PIECE_DUR)) / Math.max(1, DESIGN_PIECES.length - 1)
 /** El cartel del cursor en la última etapa, cuando se puede arrastrar. */
 const DRAG_TIP = 'Clic y arrastre'
 /** Lo que no es fondo en la foto (el local con su base y su sombra), en fracciones de la imagen. */
@@ -143,6 +150,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       photo: big ? photoFull : photoSmall,
       sketch: big ? sketchFull : sketchSmall,
       sketchEmpty: big ? emptyFull : emptySmall,
+      sketchRaw: big ? rawFull : rawSmall,
     })
     sceneRef.current = scene
     const dpr = Math.min(window.devicePixelRatio || 1, phone ? 1.75 : 2)
@@ -195,7 +203,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
     // color y la foto, vuelve al centro. El cuadro nunca muestra más allá de los muros.
     const panTo = (p) => {
       const P = L.panel
-      const at = (k) => 0.06 + k * 0.058 + 0.04
+      const at = (k) => pieceAt(k) + PIECE_DUR * 0.4
       const n = order.length
       let fx = centerOf(order[0])
       for (let k = 0; k < n - 1; k += 1) if (p > at(k)) fx = centerOf(order[k]) + (centerOf(order[k + 1]) - centerOf(order[k])) * smooth(at(k), at(k + 1), p)
@@ -216,7 +224,8 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
         frame = f
         pan = !calm && f.w * (RI.x1 - RI.x0) > P.w + 2
         order = DESIGN_PIECES.map((_, i) => i)
-        if (pan) order.sort((a, b) => centerOf(a) - centerOf(b))
+        // Recorriendo: la obra primero y después el equipamiento, cada capa de izquierda a derecha.
+        if (pan) order.sort((a, b) => (DESIGN_PIECES[b].obra ? 1 : 0) - (DESIGN_PIECES[a].obra ? 1 : 0) || centerOf(a) - centerOf(b))
         slot = DESIGN_PIECES.map((_, i) => order.indexOf(i))
         scene.setFrame(f.x, f.y, f.w, f.h)
         canvas.style.clipPath = `inset(${P.y}px ${stageEl.clientWidth - P.x - P.w}px ${stageEl.clientHeight - P.y - P.h}px ${P.x}px)`
@@ -230,7 +239,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       if (cueRef.current) cueRef.current.style.opacity = String(calm ? 0 : 1 - smooth(0.004, 0.035, p))
       // El espacio → el diseño, mueble por mueble → luz y sombra, color (los trazos se van) → la cámara se acerca.
       scene.setRise(0)
-      const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(0.06 + slot[i] * 0.058, 0.06 + slot[i] * 0.058 + 0.1, p)))
+      const pieces = DESIGN_PIECES.map((_, i) => (calm ? 1 : smooth(pieceAt(slot[i]), pieceAt(slot[i]) + PIECE_DUR, p)))
       if (pan) panTo(p)
       scene.setDesign(pieces)
       scene.setPhoto(calm ? 1 : smooth(0.52, 0.64, p) * (1 - back))
@@ -434,7 +443,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           ref={canvasRef}
           className="absolute inset-0 block h-full w-full"
           role="img"
-          aria-label="Alzado de un local vacío dibujado a lápiz que se va diseñando, mueble por mueble, hasta la foto del local terminado"
+          aria-label="Alzado de un local en obra gris dibujado a lápiz que se va proyectando, de las aberturas y los revestimientos a cada mueble, hasta la foto del local terminado"
           data-cursor-tip={stage === 3 ? DRAG_TIP : undefined}
         />
 

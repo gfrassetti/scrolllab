@@ -49,3 +49,9 @@ Escaladas a 2400×1029: la foto con el fondo a #efebe3; los bocetos con el papel
 con más contraste en el trazo (el 2H se perdía en pantalla). Los rectángulos de cada mueble y el
 interior en metros: `designPieces.js`. Las opciones descartadas (`moderno-b-*`, el alzado rústico)
 quedan en esta carpeta.
+
+`moderno-a2-obra-2.png` (2026-10-24): el mismo local como se recibe, en obra gris (edición del boceto
+vacío: ventana chica, paredes con parches, losa con un caño a la vista y una lamparita). Calza con el
+vacío a ±2 px; se le aplica la misma homografía y el mismo tratamiento de grises:
+`src/studio/elstudio/assets/boceto-obra*.webp`. Es la primera capa del diseño (designPieces.js: las
+piezas `obra`). La otra variante (`moderno-a2-obra-1.png`) tenía el piso corrido 10 px.
