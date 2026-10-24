@@ -29,3 +29,11 @@ El hero pasó a un alzado frontal 21:9. `alzado-foto-b.png` (foto, Higgsfield te
 calzan entre sí sin deformar. Se escalaron a 2400×1029; la foto con el fondo llevado a #efebe3 y los
 bocetos con el papel a blanco y en grises. Reemplazan a los WebP de `src/studio/elstudio/assets/`
 (mismos nombres). Rectángulos de cada mueble y el interior en metros: `designPieces.js`.
+
+## Proyecto 1 (tarjeta de Proyectos, desde 2026-10-24)
+
+`proyecto1-7769888c-….png` (no viaja al repo): un local comercial (tienda de concepto) en la misma
+paleta que el hero, generado con Higgsfield (GPT Image 2.5, texto → imagen, 3:2, 2048×1360). Es de
+muestra hasta tener las fotos de un proyecto real del cliente. En el sitio:
+`src/studio/elstudio/assets/proyecto-1.webp` (1800 px) y `proyecto-1-900.webp`. La otra variante
+(`proyecto1-4eefdd63-….png`) quedó descartada.

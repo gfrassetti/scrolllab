@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../lib/gsap'
-import { scrollToSection } from '../../hooks/useLenis'
+import { getLenis, scrollToSection } from '../../hooks/useLenis'
 import { hidePaint } from './paint'
 import { C, LABEL, OPEN_DELAY, SITE } from './brand'
 import Logo from './Logo'
@@ -18,6 +18,9 @@ import Logo from './Logo'
  * El logo chico (`logoRef`) arranca invisible: el loader aterriza ahí y lo enciende (vía el hero).
  * Al pasar el mouse, el logo se vuelve a escribir: de la «e» a la «O», cada letra trazada en óxido y
  * después rellena, y al final cae la tapa de la T.
+ *
+ * Por ancho: en el teléfono, el logo y «Menú» (que abre las secciones y el contacto en una hoja
+ * debajo del nav); desde 640, también «Contacto»; desde 768, las secciones en el nav, sin menú.
  */
 
 const LINKS = [
@@ -25,6 +28,7 @@ const LINKS = [
   { id: 'proyectos', label: 'Proyectos' },
   { id: 'servicios', label: 'Servicios' },
 ]
+const MENU = [...LINKS, { id: 'contacto', label: 'Contacto', accent: true }]
 
 
 export default function Nav({ logoRef, open, calm }) {
@@ -88,8 +92,34 @@ export default function Nav({ logoRef, open, calm }) {
 
   const go = (id) => (e) => {
     e.preventDefault()
+    setMenu(false)
+    getLenis()?.start()
     scrollToSection(id)
   }
+
+  // El menú del teléfono: mientras está abierto la página no se mueve; Escape lo cierra.
+  const [menu, setMenu] = useState(false)
+  const menuRef = useRef(null)
+  const menuBtnRef = useRef(null)
+  useEffect(() => {
+    if (!menu) return undefined
+    const lenis = getLenis()
+    lenis?.stop()
+    menuRef.current?.querySelector('a')?.focus({ preventScroll: true })
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return
+      setMenu(false)
+      menuBtnRef.current?.focus()
+    }
+    const onWide = () => window.innerWidth >= 768 && setMenu(false)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onWide)
+    return () => {
+      lenis?.start()
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onWide)
+    }
+  }, [menu])
 
   return (
     <div ref={rootRef} className="es-frame pointer-events-none fixed inset-0 z-40" style={{ color: C.ink }}>
@@ -115,17 +145,30 @@ export default function Nav({ logoRef, open, calm }) {
               key={l.id}
               href={`#${l.id}`}
               onClick={go(l.id)}
-              className="es-cell pointer-events-auto relative hidden w-40 items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex lg:w-48"
+              className="es-cell pointer-events-auto relative hidden w-32 items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex lg:w-48"
               style={LABEL}
             >
               <span data-divider className="es-cell__divider" aria-hidden="true" />
               <span data-in className="es-paint">{l.label}</span>
             </a>
           ))}
+          <button
+            ref={menuBtnRef}
+            type="button"
+            onClick={() => setMenu((v) => !v)}
+            aria-expanded={menu}
+            aria-controls="es-menu"
+            className="es-cell pointer-events-auto relative flex w-28 items-center px-4 text-[12px] tracking-[0.1em] uppercase md:hidden"
+            style={LABEL}
+          >
+            <span data-divider className="es-cell__divider" aria-hidden="true" />
+            <span data-in className="es-paint">{menu ? 'Cerrar' : 'Menú'}</span>
+            <span data-in className={`es-paint es-menu__burger${menu ? ' is-open' : ''}`} aria-hidden="true" />
+          </button>
           <a
             href="#contacto"
             onClick={go('contacto')}
-            className="es-cell pointer-events-auto relative flex w-36 items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:w-44 lg:w-48"
+            className="es-cell pointer-events-auto relative hidden w-36 items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:flex sm:w-44 md:w-36 lg:w-48"
             style={{ ...LABEL, color: C.rust }}
             data-cursor="Escribinos"
           >
@@ -137,6 +180,35 @@ export default function Nav({ logoRef, open, calm }) {
           </a>
         </nav>
       </header>
+
+      {/* El menú del teléfono: una hoja que baja desde el nav. */}
+      <nav
+        id="es-menu"
+        ref={menuRef}
+        aria-label="Menú"
+        className={`es-menu es-sheet${menu ? ' is-open pointer-events-auto' : ''}`}
+        aria-hidden={!menu}
+        inert={!menu}
+      >
+        <ul className="es-menu__list">
+          {MENU.map((l, i) => (
+            <li key={l.id} style={{ '--i': i }}>
+              <a href={`#${l.id}`} onClick={go(l.id)} className="es-menu__link" style={l.accent ? { color: C.rust } : undefined}>
+                <span className="es-menu__n" style={LABEL}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="es-menu__foot" style={LABEL}>
+          <span>{SITE.places.join(' · ')}</span>
+          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-menu__ig">
+            {SITE.instagram.handle}
+          </a>
+        </div>
+      </nav>
 
       {/* La línea del marco y la regla bajo el nav (la de abajo es de la hoja del hero: se va con ella). */}
       <span data-line="top" className="es-frame__line es-frame__line--top" aria-hidden="true" />

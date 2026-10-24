@@ -716,6 +716,14 @@
   max-width: none;
   display: block;
 }
+/* La foto propia del proyecto: cubre la tarjeta. */
+.es-proj__img--cover {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 55%;
+}
 /* El lugar vacío de la tarjeta, mientras la foto viene en camino. */
 .es-proj__slot {
   position: absolute;
@@ -794,12 +802,35 @@
     font-size: clamp(30px, 3.5vw, 72px);
   }
   .es-proj__item {
+    gap: 24px;
+  }
+  .es-proj__card {
+    aspect-ratio: 16 / 10;
+  }
+  /* En tablet la ficha va debajo, en dos columnas: el nombre y los datos. */
+  .es-proj__ficha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
+  }
+  .es-proj__row--name {
+    grid-row: span 4;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+}
+@media (min-width: 1024px) {
+  .es-proj__item {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 28px;
     align-items: end;
   }
-  .es-proj__card {
-    aspect-ratio: 16 / 10;
+  .es-proj__ficha {
+    display: block;
+  }
+  .es-proj__row--name {
+    border-top: 0;
+    padding-top: 0;
   }
 }
 
@@ -830,6 +861,131 @@
 .es-sk.is-sketch .es-panel,
 .es-sk.is-sketch .es-frame__line {
   filter: url(#es-pencil);
+}
+
+/* ── El menú del teléfono ───────────────────────────────────────────── */
+.es-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) + 9px);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 16px max(20px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transition:
+    clip-path 0.5s var(--es-ease),
+    visibility 0s linear 0.5s;
+}
+.es-menu.is-open {
+  visibility: visible;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.55s var(--es-ease);
+}
+.es-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.es-menu__link {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 18px 0 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--es-font-display);
+  font-size: clamp(34px, 11vw, 56px);
+  font-weight: var(--es-title-weight);
+  line-height: 0.9;
+  letter-spacing: var(--es-title-tracking);
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 0.3s var(--es-ease),
+    transform 0.45s var(--es-ease);
+}
+.es-menu.is-open .es-menu__link {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.12s + var(--i) * 0.05s);
+}
+.es-menu__n {
+  min-width: 2ch;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #6d675c;
+}
+.es-menu__foot {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6d675c;
+}
+.es-menu__ig {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -14px 0;
+  color: var(--es-ink);
+}
+/* El botón: dos rayas que se cruzan en una X al abrir. */
+.es-menu__burger {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 16px;
+  height: 8px;
+  margin-top: -4px;
+}
+.es-menu__burger::before,
+.es-menu__burger::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.35s var(--es-ease);
+}
+.es-menu__burger::before {
+  top: 0;
+}
+.es-menu__burger::after {
+  bottom: 0;
+}
+.es-menu__burger.is-open::before {
+  transform: translateY(3.5px) rotate(45deg);
+}
+.es-menu__burger.is-open::after {
+  transform: translateY(-3.5px) rotate(-45deg);
+}
+@media (min-width: 768px) {
+  .es-menu {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .es-menu,
+  :where(:root:not([data-motion='full'])) .es-menu__link {
+    transition: none;
+  }
+}
+
+/* ── Tablet en vertical: el título del hero más grande (hay alto de sobra) ── */
+@media (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
+  .es-info__title {
+    font-size: clamp(30px, 4.6vw, 52px);
+  }
 }
 
 /* ── La señal de scroll: «Scroll» y una flecha de boceto ───────────── */

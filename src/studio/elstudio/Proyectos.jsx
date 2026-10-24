@@ -4,6 +4,8 @@ import { LABEL } from './brand'
 import { ROOM_IN_IMAGE as RI } from './designPieces'
 import photoFull from './assets/foto-local.webp'
 import photoSmall from './assets/foto-local-1200.webp'
+import project1 from './assets/proyecto-1.webp'
+import project1Small from './assets/proyecto-1-900.webp'
 
 /**
  * Proyectos — por ahora, la tarjeta 01 con su ficha (el resto del contenido es un div de 1vh).
@@ -55,11 +57,13 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v))
 /**
  * El contenido de Proyectos: el título, la tarjeta 01 y su ficha.
  */
-function ProyectosBody({ refs, src, titleId }) {
+function ProyectosBody({ refs, src, titleId, own }) {
   const localCard = useRef(null)
   const cardRef = refs?.card ?? localCard
-  // La foto de la tarjeta (y su boceto), recortada al local (en %, así acompaña los cambios de tamaño).
+  // Con la foto del hero (la del vuelo): recortada al local, en %, así acompaña los cambios de tamaño.
+  // La foto propia del proyecto cubre la tarjeta con object-fit.
   useLayoutEffect(() => {
+    if (own) return undefined
     const card = cardRef.current
     const fit = () => {
       const w = card.clientWidth
@@ -74,7 +78,7 @@ function ProyectosBody({ refs, src, titleId }) {
     const ro = new ResizeObserver(fit)
     ro.observe(card)
     return () => ro.disconnect()
-  }, [cardRef])
+  }, [cardRef, own])
 
   return (
     <>
@@ -91,12 +95,16 @@ function ProyectosBody({ refs, src, titleId }) {
         <div ref={cardRef} className="es-proj__card">
           <img
             ref={refs?.img}
-            src={src}
+            src={own ? project1 : src}
+            srcSet={own ? `${project1Small} 900w, ${project1} 1800w` : undefined}
+            sizes={own ? '(min-width: 1024px) 62vw, 100vw' : undefined}
             alt={titleId ? `${PROJECT.name}, ${PROJECT.kind.toLowerCase()} en ${PROJECT.place}` : ''}
-            className="es-proj__img"
+            className={own ? 'es-proj__img es-proj__img--cover' : 'es-proj__img'}
+            loading={own ? 'lazy' : undefined}
             decoding="async"
           />
-          <span className="es-proj__slot" aria-hidden="true" />
+          {/* El lugar vacío donde aterriza la foto en vuelo (solo con esa salida). */}
+          {!own && <span className="es-proj__slot" aria-hidden="true" />}
         </div>
         <dl ref={refs?.ficha} className="es-proj__ficha">
           <div className="es-proj__row es-proj__row--name">
@@ -235,7 +243,7 @@ export default function Proyectos({ calm, exit, mode = 'proyecto' }) {
       aria-labelledby="proyectos-title"
       className="es-proj relative min-h-svh"
     >
-      <ProyectosBody refs={{ card: cardRef, img: cardImgRef, ficha: fichaRef }} src={src} titleId="proyectos-title" />
+      <ProyectosBody refs={{ card: cardRef, img: cardImgRef, ficha: fichaRef }} src={src} titleId="proyectos-title" own={!flies} />
 
       {/* El resto de la sección (por ahora vacío). */}
       <div style={{ height: '1vh' }} />
