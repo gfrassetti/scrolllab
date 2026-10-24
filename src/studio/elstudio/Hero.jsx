@@ -506,6 +506,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
 
           <div className="es-info__side">
             <h2 className="sr-only">{ABOUT}</h2>
+            {/* El número de la hoja: el mismo de la lámina del cuadrante («Lámina 02 / 04»). */}
+            <span data-paint data-paint-stage className="es-paint es-info__step" style={LABEL} aria-hidden="true">
+              {st.n} / 04
+            </span>
             <p data-paint data-paint-stage className="es-paint es-info__copy" aria-live="polite">
               {st.text}
             </p>
