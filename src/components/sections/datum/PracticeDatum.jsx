@@ -9,11 +9,12 @@ import { createFrameBudget, trackPointer } from '../../../lib/motion'
  * It starts on the black the hero ends with: it overlaps the hero's last screen and only shows once it is
  * pinned, and its first frame has the hero's last word («a wall.») in 3D, exactly where the page left it
  * (it measures a copy of the hero's statement laid out with the same rules). The other two lines come back
- * above it, also in 3D (the pointer moves them): the three sit on the front faces of three cubes one
- * behind the other, seen from a little below, so the nearest reads on top. The camera only climbs: level
- * with them they fall onto each other — no zoom, the front one keeps its size and the others shrink behind
- * it — while the block comes out of the dark across the whole screen, words on its faces, light running
- * along a few edges. On up over the rows (looking a little to the left), rolling, slowly, until it looks
+ * above it, also in 3D (the pointer moves them): «a wall.» on the front face of a cube of the front row,
+ * the other two on the cubes one and two rows behind it, seen from a little above. The camera comes down
+ * towards their line — no zoom, the front word keeps its size — and the two behind slide in over it,
+ * smaller and greyer, each a row back, while the block comes out of the dark across the whole screen: the
+ * front row's words set like the statement and as bright, the rows behind darker (the fog starts at the
+ * block's nearest face), the edges barely there, light running along a few of them. On up over the rows (looking a little to the left), rolling, slowly, until it looks
  * straight down on the block. Then the nine columns around a shaft rise out of the block, faster than the
  * rest, and pass the camera: it is inside the shaft, words on its walls, and the picture at the bottom
  * comes up to fill the screen and carries three states — Weight, Light, Time — with the counter 01 / 03.
@@ -22,7 +23,7 @@ import { createFrameBudget, trackPointer } from '../../../lib/motion'
  * Reduced motion: no canvas and no pin; the three states one under the other.
  */
 const CSS = `
-.dp { position: relative; height: 2000svh; margin-top: -100svh; background: var(--datum-ink); color: var(--datum-paper); }
+.dp { position: relative; height: 1500svh; margin-top: -100svh; background: var(--datum-ink); color: var(--datum-paper); }
 .dp-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--datum-ink); }
 /* until it pins, the hero's last screen is what shows (the same black, the same lines, the same word) */
 .dp:not([data-live]) .dp-stage { visibility: hidden; }
@@ -64,8 +65,10 @@ const CSS = `
 .dp[data-calm] .dp-w { opacity: 1; transform: none; }
 `
 
-// the vocabulary on the faces of the block, and on the four walls of the cube the camera goes into
-const WORDS = ['Line', 'Wall', 'Room', 'Measure', 'Shadow', 'Threshold', 'Section', 'Grain', 'Plane', 'Axis', 'Datum', 'Void']
+// the vocabulary on the faces of the block: long words on the front faces (set like the statement), short ones
+// lying on the tops and standing on the sides; and the four walls of the shaft the camera goes into
+const WORDS = ['Threshold', 'Measure', 'Proportion', 'Structure', 'Material', 'Section', 'Shadow', 'Datum']
+const SMALL = ['Line', 'Axis', 'Plane', 'Grain', 'Void', 'Room']
 const WALLS = ['Weight', 'Light', 'Time', 'Place']
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 const seg = (q, a, b) => clamp01((q - a) / (b - a))
@@ -174,6 +177,7 @@ void main() {
 const GLOW_FRAG = `
 uniform float uTime;
 uniform float uGlow;
+uniform float uNear;
 uniform float uFar;
 uniform vec3 uColor;
 varying float vS;
@@ -183,7 +187,7 @@ void main() {
   float head = fract(uTime * 0.26 + vPhase) * 10.0;
   float d = head - vS;
   float a = d < 0.0 ? 0.0 : exp(-d * 1.5);
-  a *= 1.0 - smoothstep(uFar * 0.55, uFar, vDepth);
+  a *= 1.0 - smoothstep(uNear, uFar, vDepth);
   gl_FragColor = vec4(uColor, min(1.0, a * 1.35) * uGlow);
 }`
 
@@ -233,9 +237,9 @@ export default function PracticeDatum({
       const fg = new THREE.Color(0xefefed)
 
       // --- the block -----------------------------------------------------------------------------------
-      // A wall of packed cubes (they touch): 13 wide, 13 high, only 3 deep, so from the front it fills the
-      // screen up and down, and the cubes behind show greyer through the front ones (no floor running off to a
-      // horizon, nothing empty above). The top layer is y = 0, the front row z = 0. Around the column the camera
+      // A wall of packed cubes (they touch): 13 wide, 13 high, 8 deep, so from the front it fills the screen up
+      // and down and from above it fills it side to side. The cubes are open (edges only, barely there); the
+      // fog starts at the block's nearest face, so the front row reads clearly and every row behind it darker. The top layer is y = 0, the front row z = 0. Around the column the camera
       // ends over stands a 3 × 3 tower, the whole depth of the wall: its middle column is empty all the way down
       // (a shaft, its walls carrying words, the picture far at the bottom); late in the shot the tower rises out
       // of the wall, faster than the rest, and passes the camera.
@@ -243,8 +247,10 @@ export default function PracticeDatum({
       const H2 = S / 2
       const X = [-6, 6]
       const Y = [-12, 0]
-      const Z = [-2, 0]
-      const T = { i: 3, k: -1 } // the shaft
+      // deep enough that from above, over the shaft, it runs past both sides of the screen (from the front the
+      // depth melts into the dark: the fog starts at the block's nearest face, see `depthFog`)
+      const Z = [-7, 0]
+      const T = { i: 3, k: -3 } // the shaft
       const PJ = -6 // the layer of the statement, halfway up the wall
       const yP = PJ * S
       const cellPos = (i, j, k) => new THREE.Vector3(i * S, j * S, k * S)
@@ -252,6 +258,10 @@ export default function PracticeDatum({
       const inTower = (i, k) => Math.abs(i - T.i) <= 1 && Math.abs(k - T.k) <= 1 && !inShaft(i, k)
       const shaftTop = cellPos(T.i, 0, T.k).add(new THREE.Vector3(0, H2, 0))
       const floorY = Y[0] * S - H2
+      const blockBox = new THREE.Box3(
+        new THREE.Vector3(X[0] * S - H2, Y[0] * S - H2, Z[0] * S - H2),
+        new THREE.Vector3(X[1] * S + H2, Y[1] * S + H2, Z[1] * S + H2),
+      )
 
       const still = new THREE.Group() // the block
       const tower = new THREE.Group() // the nine columns that rise
@@ -340,11 +350,14 @@ export default function PracticeDatum({
         [0, 1],
         [0, -1],
       ]
-      for (let n = 0; n < 44; n++) {
+      for (let n = 0; n < 56; n++) {
         const i = Math.round(lerp(X[0], X[1], rnd()))
-        const k = Math.round(lerp(Z[0], Z[1], rnd()))
+        // half on the front row, half on the top layer: the faces the camera sees
+        const front = n % 2 === 0
+        const k = front ? 0 : Math.round(lerp(Z[0], Z[1], rnd()))
+        const j = front ? Math.round(lerp(Y[0] + 2, Y[1], rnd())) : 0
         if (inShaft(i, k) || inTower(i, k)) continue
-        const c = cellPos(i, Math.round(lerp(Y[0] + 2, Y[1], rnd())), k)
+        const c = cellPos(i, j, k)
         const ph = rnd()
         for (let e = 0; e < 6; e++) {
           const a = LOOP[e]
@@ -371,12 +384,13 @@ export default function PracticeDatum({
         fragmentShader: GLOW_FRAG,
         transparent: true,
         depthWrite: false,
-        uniforms: { uTime: { value: 0 }, uGlow: { value: 0 }, uFar: { value: 21 }, uColor: { value: new THREE.Color(0xefefed) } },
+        uniforms: { uTime: { value: 0 }, uGlow: { value: 0 }, uNear: { value: 5 }, uFar: { value: 21 }, uColor: { value: new THREE.Color(0xefefed) } },
       })
       still.add(new THREE.LineSegments(glowGeo, glowMat))
 
-      // words on the faces. Front faces of the first rows of the top layers (rows of words, like the lines of a
-      // drawing), the tops of the top layer, a few sides; the shaft's walls inside the tower.
+      // words on the faces the camera sees: the front faces of the front row (set like the statement, as bright
+      // as it), a few on the row behind (seen through it, darker), the tops of the top layer, short words standing
+      // on the sides; the shaft's walls inside the tower.
       const FACES = {
         front: [new THREE.Vector3(0, 0, 1), new THREE.Euler(0, 0, 0)],
         top: [new THREE.Vector3(0, 1, 0), new THREE.Euler(-Math.PI / 2, 0, 0)],
@@ -392,29 +406,37 @@ export default function PracticeDatum({
             if (inShaft(i, k)) continue
             const list = inTower(i, k) ? towerSpots : stillSpots
             const c = cellPos(i, j, k)
-            const phraseCell = i === 0 && j === PJ
-            // rows of words on the front faces, the front row whitest, the two behind greyer through it
-            if (!inTower(i, k) && !phraseCell && rnd() < (k === 0 ? 0.6 : 0.4)) {
-              list.push({ c, face: 'front', spin: 0, delay: rnd(), tier: k === 0 ? 0.5 + rnd() * 0.5 : 0.18 + rnd() * 0.3 })
+            const phraseCell = i === 0 && j === PJ && k > -3
+            const word = () => Math.floor(rnd() * WORDS.length)
+            const small = () => WORDS.length + Math.floor(rnd() * SMALL.length)
+            if (!inTower(i, k) && !phraseCell && (k === 0 ? rnd() < 0.62 : k === -1 && rnd() < 0.3)) {
+              list.push({ c, face: 'front', spin: 0, delay: rnd(), tier: 0.86 + rnd() * 0.14, k: word() })
             }
-            // smaller words lying on the tops (between the layers), read as the camera climbs over them
-            if (rnd() < (j === 0 ? 0.6 : 0.22)) list.push({ c, face: 'top', spin: rnd() < 0.7 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.5, small: j !== 0 })
-            if (!inTower(i, k) && rnd() < 0.04) list.push({ c, face: rnd() < 0.5 ? 'right' : 'left', spin: Math.PI / 2, delay: rnd(), tier: 0.2 + rnd() * 0.3 })
+            // words lying on the tops of the top layer, read as the camera climbs over them
+            if (j === 0 && rnd() < 0.68) list.push({ c, face: 'top', spin: rnd() < 0.7 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.55 + rnd() * 0.35, k: word(), top: true })
+            // short words standing on the sides (from the front they go by at an angle, from above they are
+            // a hairline along each cube)
+            if (!inTower(i, k) && (j === 0 || k === 0) && rnd() < 0.45) {
+              list.push({ c, face: rnd() < 0.5 ? 'right' : 'left', spin: rnd() < 0.5 ? 0 : Math.PI / 2, delay: rnd(), tier: 0.4 + rnd() * 0.3, k: small(), side: true })
+            }
             // the shaft's walls: the faces of the tower that look into it, one word each, every layer
             if (inTower(i, k)) {
               const di = T.i - i
               const dk = T.k - k
               if (Math.abs(di) + Math.abs(dk) === 1) {
                 const face = di === 1 ? 'right' : di === -1 ? 'left' : dk === 1 ? 'front' : 'back'
-                list.push({ c, face, spin: 0, delay: rnd(), tier: 1, wall: true })
+                list.push({ c, face, spin: 0, delay: rnd(), tier: 1, wall: true, k: WORDS.length + SMALL.length + Math.floor(rnd() * WALLS.length) })
               }
             }
           }
         }
       }
-      ;[...stillSpots, ...towerSpots].forEach((s) => (s.k = s.wall ? WORDS.length + Math.floor(rnd() * WALLS.length) : Math.floor(rnd() * WORDS.length)))
 
-      const allTex = [...WORDS.map((w) => wordTexture(w)), ...WALLS.map((w) => wordTexture(w, { weight: 500, px: 160, track: -0.03 }))]
+      // the cube words are set like the statement (the same weight and tracking), so «a wall.» reads as one of them
+      const allTex = [
+        ...[...WORDS, ...SMALL].map((w) => wordTexture(w, { weight: 400, px: 160, track: -0.035 })),
+        ...WALLS.map((w) => wordTexture(w, { weight: 500, px: 160, track: -0.03 })),
+      ]
       const phraseTex = statement.map((w) => wordTexture(w, { weight: 400, px: 220, track: -0.045 }))
       const plane = new THREE.PlaneGeometry(1, 1)
       const wordMat = (t) => new THREE.MeshBasicMaterial({ map: t.tex, transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: true })
@@ -439,13 +461,15 @@ export default function PracticeDatum({
       phraseMeshes[phraseMeshes.length - 1].renderOrder = 3
 
       const dummy = new THREE.Object3D()
+      // the height of the statement's text box in the world (set by `layout`): the front words are set at it
+      let textH = S * 0.2
       const place = () => {
         for (const g of groups) {
           g.list.forEach((s, i) => {
             const [n, rot] = FACES[s.face]
             // (a wall of the shaft is the face of a tower cube that looks into it: its normal points into the shaft)
-            const big = s.wall ? 0.34 : s.small ? 0.14 : 0.26
-            const h = Math.min(S * big, (S * (s.wall ? 0.9 : 0.86)) / g.t.aspect)
+            const tall = s.wall ? S * 0.34 : textH * g.t.box * (s.side ? 0.42 : s.top ? 0.4 : 1)
+            const h = Math.min(tall, (S * (s.wall ? 0.9 : 0.88)) / g.t.aspect)
             dummy.position.copy(s.c).addScaledVector(n, H2 + 0.004)
             dummy.rotation.copy(rot)
             if (s.spin) dummy.rotateZ(s.spin)
@@ -501,10 +525,17 @@ export default function PracticeDatum({
         const az = lerp(AZ0, 0, smooth(t)) * DEG
         const r = lerp(R0, R1, t)
         pos.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az)).multiplyScalar(r).add(pivot)
+        // it goes round the block's top front edge, never brushing it (a word on a face an inch from the lens)
+        blockBox.clampPoint(pos, clearP)
+        const gap = clearD.subVectors(pos, clearP).length()
+        if (gap < CLEAR) pos.copy(clearP).addScaledVector(gap > 1e-4 ? clearD.normalize() : clearD.set(0, 1, 0), CLEAR)
         // the roll grows with the climb: at the top the world's x points up the screen and the words stand up
         const roll = lerp(0, 90, smooth(t)) * DEG
         quat.copy(look(pos, pivot, new THREE.Vector3(Math.sin(roll), Math.cos(roll), 0)))
       }
+      const CLEAR = 2.6
+      const clearP = new THREE.Vector3()
+      const clearD = new THREE.Vector3()
       const O0 = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() }
       const O1 = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() }
       orbit(0, O0.pos, O0.quat)
@@ -535,9 +566,11 @@ export default function PracticeDatum({
         const tanH = Math.tan((FOV * DEG) / 2)
         const rayAt = (rc, pitch) => ray.set(((rc.x - W / 2) / (H / 2)) * tanH, -((rc.y - H / 2) / (H / 2)) * tanH, -1).applyAxisAngle(XAXIS, pitch)
         const n = statement.length
-        const faceZ = (i) => -i * S + H2 + 0.004
-        const zc = faceZ(0) + 3.4
-        // the pitch at which the first and the last line both land at the height of their faces (y = 0)
+        // the last line (the hero's word) on the front row, the first one two rows back
+        const faceZ = (i) => -(n - 1 - i) * S + H2 + 0.004
+        const zc = faceZ(n - 1) + 3.4
+        // the pitch at which the first and the last line both land at the height of their faces (y = 0): with the
+        // nearest line at the bottom of the screen, the camera is a little above them, looking down
         const miss = (pitch) => {
           const r0 = rayAt(rects[0], pitch).clone()
           const t0 = (faceZ(0) - zc) / r0.z
@@ -546,10 +579,14 @@ export default function PracticeDatum({
           const t2 = (faceZ(n - 1) - zc) / r2.z
           return { y0, err: y0 + t2 * r2.y }
         }
-        let lo = -0.2
-        let hi = 0.8
-        let pitch = 0.16
-        if (Math.sign(miss(lo).err) !== Math.sign(miss(hi).err)) {
+        let lo = -0.9
+        let hi = lo
+        let pitch = -0.16
+        // the first sign change from below
+        while (hi < 0.9 && Math.sign(miss(hi + 0.05).err) === Math.sign(miss(lo).err)) hi += 0.05
+        hi += 0.05
+        lo = hi - 0.05
+        if (hi < 0.95) {
           for (let it = 0; it < 40; it++) {
             const mid = (lo + hi) / 2
             if (Math.sign(miss(mid).err) === Math.sign(miss(lo).err)) lo = mid
@@ -575,21 +612,26 @@ export default function PracticeDatum({
           const h = rects[i].h * phraseTex[i].box * wpp
           scale0[i].set(h * phraseTex[i].aspect, h)
         })
-        // Cm: on the words' line, as far from the hero's word as the first camera was — the word keeps its size
-        // (and, with the camera turned to hold it, its place) while the other two slide onto it
+        // Cm: on the words' line, in front of the hero's word and as far from it as the first camera was — the
+        // word keeps its size (and, with the camera turned to hold it, its place) while the other two slide in
+        // behind it
         const last = n - 1
-        const dir = P[0].clone().sub(P[last]).normalize()
+        const dir = P[last].clone().sub(P[0]).normalize()
         Cm.copy(P[last]).addScaledVector(dir, P[last].distanceTo(C0))
+        // not all the way onto the line: the two behind stay in sight, stacked over it and greyer, each a row back
+        Cm.lerp(C0, 0.74)
         qm = look(Cm, P[last], new THREE.Vector3(0, 1, 0))
         held.copy(P[last]).sub(C0).normalize().applyQuaternion(q0.clone().invert())
         hold(Cm, qm, qmHeld)
-        // the other two end smaller than it on the screen, as words on cubes further off would be
+        // the other two end set at its size on their own cubes: further off, so smaller on the screen. The cube
+        // words take the same text height
+        textH = scale0[last].y / phraseTex[last].box
         statement.forEach((_, i) => {
           if (i === last) return scale1[i].copy(scale0[i])
-          const k = (0.6 * P[i].distanceTo(Cm)) / P[last].distanceTo(Cm)
-          const h = scale0[last].y * k
+          const h = textH * phraseTex[i].box
           scale1[i].set(h * phraseTex[i].aspect, h)
         })
+        place()
         dirty = true
       }
 
@@ -612,9 +654,9 @@ export default function PracticeDatum({
         const come = smooth(seg(q, 0.002, 0.036))
         const merge = smooth(seg(q, 0.03, 0.065))
         phraseMeshes.forEach((m, i) => {
-          // the hero's word stays as it was; the other two come up out of the dark, slowly, then grey as they
-          // slide behind it
-          const k = i === n - 1 ? 1 : lerp(lerp(0, 0.66, come), i === 0 ? 0.3 : 0.4, merge)
+          // the hero's word stays as it was; the other two come up out of the dark, slowly, and end like any word
+          // on the cubes: the depth (the fog) greys them behind it
+          const k = i === n - 1 ? 1 : lerp(lerp(0, 0.66, come), 0.94, merge)
           m.material.color.copy(bg).lerp(fg, k)
           m.visible = k > 0.002
         })
@@ -665,7 +707,8 @@ export default function PracticeDatum({
         tower.position.y = rise
         still.position.y = 0.9 * smooth(seg(q, 0.4, 0.52))
         base.tilt = 1 - seg(q, 0.36, 0.42)
-        lineMat.opacity = seg(q, 0.02, 0.06) * 0.16
+        // the edges are barely there: the cubes read by their words and the light that runs along them
+        lineMat.opacity = seg(q, 0.02, 0.06) * (0.12 + 0.05 * seg(q, 0.24, 0.36))
         glowMat.uniforms.uGlow.value = seg(q, 0.05, 0.09) * (1 - seg(q, 0.52, 0.6))
         level.style.opacity = String(0.6 * (1 - seg(q, 0.002, 0.02)))
         tint(q)
@@ -712,7 +755,24 @@ export default function PracticeDatum({
         canvas.style.opacity = String(1 - open)
       }
 
+      // --- depth: the fog starts at the block's nearest face, wherever the camera is, so the row facing it is
+      // clear and each one behind it darker (the open cubes never pile up into a mesh of lines) ---------
+      const box = new THREE.Box3()
+      const depthFog = () => {
+        box.copy(blockBox).translate(still.position)
+        const near = box.distanceToPoint(camera.position)
+        // about three cubes deep; inside the shaft, its whole height
+        const far = near + S * lerp(3.2, 9, seg(lastQ, 0.38, 0.5))
+        fog.near = near
+        fog.far = far
+        glowMat.uniforms.uNear.value = near
+        glowMat.uniforms.uFar.value = far
+      }
+
       // --- the loop: camera = scroll pose + a little of the pointer; light on the edges ------------------
+      // the shot follows the scroll with a little inertia, so it glides instead of stepping with the wheel
+      let target = 0
+      let cur = 0
       const pointer = trackPointer()
       const sp = { x: 0, y: 0 }
       const euler = new THREE.Euler()
@@ -721,9 +781,16 @@ export default function PracticeDatum({
       let prev = performance.now()
       const loop = (now) => {
         raf = requestAnimationFrame(loop)
-        const dt = now - prev
+        const dt = Math.min(100, now - prev)
         prev = now
-        if (!visible) return
+        if (!visible) {
+          cur = target
+          return
+        }
+        if (Math.abs(target - cur) > 0.00002) {
+          cur += (target - cur) * (1 - Math.exp(-dt / 140))
+          apply(cur)
+        } else if (cur !== target) apply((cur = target))
         sp.x += (pointer.x - sp.x) * 0.05
         sp.y += (pointer.y - sp.y) * 0.05
         const moving = Math.abs(pointer.x - sp.x) + Math.abs(pointer.y - sp.y) > 0.0005
@@ -732,6 +799,7 @@ export default function PracticeDatum({
         euler.set(-sp.y * 0.045 * base.tilt, -sp.x * 0.07 * base.tilt, 0)
         camera.quaternion.copy(base.quat).multiply(tmpQ.setFromEuler(euler))
         camera.updateMatrixWorld()
+        depthFog()
         glowMat.uniforms.uTime.value = now / 1000
         frameWindow()
         if (lastQ < 0.68) {
@@ -768,10 +836,13 @@ export default function PracticeDatum({
         onUpdate: (self) => {
           if (self.progress > 0) el.dataset.live = ''
           else delete el.dataset.live
-          apply(self.progress)
+          target = self.progress
+          // off screen (or on the first frame) it lands at once
+          if (!visible) apply((cur = target))
         },
         onRefresh: (self) => {
           if (self.progress > 0) el.dataset.live = ''
+          target = self.progress
         },
       })
       const ro = new ResizeObserver(refit)
