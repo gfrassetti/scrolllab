@@ -93,11 +93,11 @@ export const LAB_SHOPIFY = {
     },
     {
       q: '¿Y una tienda entera con este diseño?',
-      a: 'Eso es el Builder: el kit de tienda arma catálogo, ficha de producto, carrito y checkout con nuestras secciones y se conecta a tu propia tienda Shopify. Los productos, el stock y el pago salen de Shopify, sin backend. Es código fuente, para quien programa; LAB es sin código.',
+      a: 'Eso es el Builder: el kit de tienda arma catálogo, ficha de producto, carrito y checkout con nuestras secciones y se conecta a tu propia tienda Shopify. Los productos, el stock y el pago salen de Shopify, sin backend. Es código fuente, para quien programa; LAB es sin código. Sin Shopify, el checkout del kit es de ejemplo y no cobra: el cobro lo conectás vos en el código que descargás.',
     },
     {
       q: '¿Cuánto cuesta?',
-      a: 'Empezás gratis con un widget publicado. Los planes pagos suman más widgets y se cobran en pesos (Mercado Pago) o en dólares con tarjeta.',
+      a: 'Empezás gratis con un widget publicado. Los planes pagos suman más widgets y se cobran en pesos (Mercado Pago) o en dólares con Polar.',
     },
   ],
   closingTitle: 'Tu tienda, con movimiento',

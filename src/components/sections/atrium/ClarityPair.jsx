@@ -150,13 +150,13 @@ export default function ClarityPair({
           ) : null}
           <div data-calm-reveal className="relative flex flex-col items-center gap-10 text-center">
             <h2 className="atrium-mid max-w-[15ch] text-balance">{left}</h2>
-            <p className="atrium-note max-w-[34ch] opacity-60">{bodyLeft}</p>
+            <p className="atrium-note max-sm:text-[14px]! max-w-[34ch] opacity-60">{bodyLeft}</p>
           </div>
         </div>
         <div className="relative flex min-h-[70svh] flex-col justify-center bg-atrium-ink px-5 py-24 text-atrium-paper md:px-10">
           <div data-calm-reveal className="flex flex-col items-center gap-10 text-center">
             <h2 className="atrium-mid max-w-[15ch] text-balance">{right}</h2>
-            <p className="atrium-note max-w-[34ch] opacity-60">{bodyRight}</p>
+            <p className="atrium-note max-sm:text-[14px]! max-w-[34ch] opacity-60">{bodyRight}</p>
           </div>
         </div>
       </section>
@@ -181,7 +181,7 @@ export default function ClarityPair({
         </h2>
       </div>
 
-      <div className="atrium-note absolute inset-x-5 bottom-[9svh] grid gap-6 opacity-60 md:inset-x-10 md:grid-cols-2 md:gap-24">
+      <div className="atrium-note max-sm:text-[14px]! absolute inset-x-5 bottom-[9svh] grid gap-6 opacity-60 md:inset-x-10 md:grid-cols-2 md:gap-24">
         <p data-clarity-body className="md:max-w-[34ch]">
           {bodyLeft}
         </p>

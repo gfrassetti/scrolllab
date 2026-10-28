@@ -17,6 +17,8 @@ export const ATELIER_FIELDS = {
     navLinks(),
     { key: 'bg', label: 'Menú del teléfono — color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto (barra sobre fondo claro y menú del teléfono)', type: 'color' },
+    { key: 'barBg', label: 'Barra — color de fondo (vacío: transparente)', type: 'color' },
+    { key: 'barColor', label: 'Barra — color del texto (con fondo)', type: 'color' },
   ],
   'atelier/HeroMeaning': [
     { key: 'intro', label: 'Texto de presentación', type: 'text' },

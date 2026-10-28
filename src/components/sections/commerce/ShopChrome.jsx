@@ -13,7 +13,11 @@ export default function ShopChrome({ buttonLabel = 'Cart', checkoutLinkLabel = '
 
   return (
     <>
-      <div className="fixed right-5 bottom-5 z-40 flex items-center gap-2">
+      {/* `--builder-panel`: en el builder, el ancho del panel de edición abierto. */}
+      <div
+        className="fixed right-5 bottom-5 z-40 flex items-center gap-2"
+        style={{ right: 'calc(1.25rem + var(--builder-panel, 0px))' }}
+      >
         {count > 0 && (
           <Link
             to="/checkout"

@@ -120,6 +120,7 @@ export const COLOR_PROP_KEYS = new Set([
   'errorColor',
   'endBg',
   'barColor',
+  'barBg',
   // Objetos 3D (ATELIER): bloque, anillo, marca y luz.
   'objectColor',
   'ringColor',

@@ -16,7 +16,7 @@ const SHOPIFY_DEMO = {
 const SHOPIFY_HELP = {
   title: 'Cómo conectar una tienda Shopify',
   steps: [
-    'Vacío, la tienda usa los productos de esta sección y el checkout de ejemplo. Con Shopify, los productos, precios, talles, stock y fotos salen de la tienda, y el pago es el checkout de Shopify: la plata va directo a la cuenta de la tienda.',
+    'Apagado, la tienda usa los productos de esta sección y un checkout de ejemplo que no cobra: ScrollLab no ofrece un checkout propio, así que el cobro lo conectás vos en el código que descargás. Con Shopify, los productos, precios, talles, stock y fotos salen de la tienda, y el pago es el checkout de Shopify: la plata va directo a la cuenta de la tienda.',
     'En el panel de Shopify: Configuración → Apps y canales de venta → Shopify App Store. Instalá el canal «Headless» (es gratis).',
     'Dentro del canal: «Crear tienda externa» → «Storefront API». Copiá el «Token de acceso público» (el privado no va acá).',
     'Pegá acá el dominio (tu-tienda.myshopify.com) y el token. Para mostrar una sola colección, su handle va en «Colección».',
@@ -242,7 +242,7 @@ export const COMMERCE_FIELDS = {
  */
 export const PRODUCT_GRID_GROUPS = [
   { id: 'grid', title: 'Grilla', open: true },
-  { id: 'shopify', title: 'Cobrar con Shopify', switch: 'shopifyEnabled', note: 'Los productos, el stock y el pago salen de una tienda Shopify. Apagado, la tienda usa los productos que cargás acá y el checkout de ejemplo.' },
+  { id: 'shopify', title: 'Cobrar con Shopify', switch: 'shopifyEnabled', note: 'Los productos, el stock y el pago salen de tu tienda Shopify. Apagado, el checkout es de ejemplo y no cobra: el cobro lo conectás vos en el código que descargás.' },
   { id: 'products', title: 'Productos' },
   { id: 'cart', title: 'Carrito' },
   { id: 'detail', title: 'Ficha de producto' },

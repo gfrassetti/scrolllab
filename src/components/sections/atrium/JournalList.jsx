@@ -81,7 +81,7 @@ export default function JournalList({
                 {p.img && (
                   <img
                     {...imgAttrs(p.img, variants)}
-                    sizes="(min-width: 768px) 32vw, 90vw"
+                    sizes="(min-width: 768px) 60vw, 169vw"
                     alt=""
                     loading="lazy"
                     decoding="async"

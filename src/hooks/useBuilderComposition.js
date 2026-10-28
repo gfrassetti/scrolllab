@@ -140,15 +140,43 @@ export function useBuilderComposition() {
     [items],
   )
 
+  // El preview tiene su propio lugar en el historial del navegador: «atrás»
+  // vuelve al builder (no a la página de antes) y dentro de la tienda vuelve a
+  // la pantalla anterior (ver CompositionShopShell). `shopDepth` = cuántas
+  // pantallas de la tienda se abrieron desde el inicio del preview.
   const openPreview = useCallback(() => {
     window.scrollTo(0, 0)
+    try {
+      if (!window.history.state?.slPreview) {
+        window.history.pushState({ ...window.history.state, slPreview: true, shopDepth: 0 }, '')
+      }
+    } catch {
+      /* sin historial: el preview igual abre */
+    }
     setPreview(true)
   }, [])
 
   const closePreview = useCallback(() => {
     window.scrollTo(0, 0)
+    const depth = window.history.state?.slPreview ? (window.history.state.shopDepth || 0) : -1
+    if (depth >= 0) {
+      // Deshace la entrada del preview y las pantallas de la tienda: el popstate lo cierra.
+      window.history.go(-(depth + 1))
+      return
+    }
     setPreview(false)
   }, [])
+
+  useEffect(() => {
+    if (!preview) return undefined
+    const onPop = (event) => {
+      if (event.state?.slPreview) return
+      window.scrollTo(0, 0)
+      setPreview(false)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [preview])
 
   return {
     compositionId,

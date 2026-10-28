@@ -71,7 +71,7 @@ export default function ClientVoice({
             <img
               data-voice-img
               {...imgAttrs(img, variants)}
-              sizes="(min-width: 768px) 25vw, 70vw"
+              sizes="(min-width: 768px) 56vw, 158vw"
               alt=""
               loading="lazy"
               decoding="async"

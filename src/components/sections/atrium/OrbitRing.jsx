@@ -166,7 +166,7 @@ export default function OrbitRing({
             <span className="block">{lineOne}</span>
             <span className="block">{lineTwo}</span>
           </h2>
-          <div className="atrium-note mt-[5svh] grid w-full max-w-xl gap-6 text-left text-atrium-paper/65 md:grid-cols-2 md:gap-14">
+          <div className="atrium-note max-sm:text-[14px]! mt-[5svh] grid w-full max-w-xl gap-6 text-left text-atrium-paper/65 md:grid-cols-2 md:gap-14">
             <p>{left}</p>
             <p>{right}</p>
           </div>

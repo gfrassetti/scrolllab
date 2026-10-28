@@ -28,7 +28,7 @@
     "labShort": "widgets"
   },
   "lab": {
-    "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Card payment in US dollars isn’t available yet.",
+    "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Paying with Polar, in US dollars, isn’t available yet.",
     "eyebrow": "Online widgets",
     "body": "Premium animated sections for your site or store, no code. They work on Shopify, WordPress, Webflow, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
@@ -131,7 +131,7 @@
       },
       {
         "q": "Can I sell with my Shopify products?",
-        "a": "Yes, in two ways. With LAB, any widget goes into your Shopify store as one more section, no apps. With the Builder, the shop kit builds the catalog, product page, cart and checkout in our design and connects to your own Shopify store: products, stock and payments come from Shopify, no backend. The Builder is source code, for people who code."
+        "a": "Yes, in two ways. With LAB, any widget goes into your Shopify store as one more section, no apps. With the Builder, the shop kit builds the catalog, product page, cart and checkout in our design and connects to your own Shopify store: products, stock and payments come from Shopify, no backend. The Builder is source code, for people who code. Without Shopify, the kit’s checkout is a sample that takes no payments: wiring your own (Mercado Pago, Stripe…) is up to you in the code you download. ScrollLab does not provide a checkout of its own."
       },
       {
         "q": "Can I build my whole site with widgets?",
@@ -501,13 +501,13 @@
     "step2Title": "Pick or build",
     "step2Body": "A ready-made model or a page you build yourself.",
     "step3Title": "Pay",
-    "step3Body": "Pay with Mercado Pago (pesos) or by card (US dollars). Your order shows up under My purchases.",
+    "step3Body": "Pay with Mercado Pago (pesos) or with Polar (US dollars). Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
     "howHostedNote": "No code? With LAB you add premium widgets to your site — any of our 30+ sections — and edit them online.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
-    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Polar. We never see or store your card details.",
+    "paymentsBody": "Pay with Mercado Pago in pesos, or with Polar in US dollars. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
     "zip1": "The full editable project",
     "zip2": "Sections from the model or what you built",
@@ -592,7 +592,7 @@
     "heroLabBefore": "Already have a site? Add animated sections with ",
     "heroLabName": "LAB",
     "heroLabAfter": ", no code",
-    "builderShop": "With the shop kit your page sells: catalog, cart and checkout connected to your own Shopify store (products, stock and payments come from it), no backend."
+    "builderShop": "With the shop kit your page sells: catalog, cart and checkout connected to your own Shopify store, no backend. Without Shopify, you wire the payments yourself in the code you download."
   },
   "templates": {
     "chapters": {
@@ -789,13 +789,13 @@
     "editing": "Editing",
     "editPanel": "Edit section",
     "noEditableFields": "Nothing to edit here for this section: you tune it in the ZIP's code.",
-    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). To take real payments, connect a Shopify store with two fields (Shopify products, stock and checkout, no backend), or wire your Mercado Pago or Stripe in checkoutAdapter.js. Adding the grid turns on the full kit (+{{price}}).",
+    "commerceHint": "Catalog, product page, cart and checkout. Without Shopify, the checkout is a sample that takes no payments: you wire your own after downloading the code. Adding the shop adds the kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
     "priceNext": "You reached the {{included}} sections the base covers: the next one adds {{next}}.",
     "priceExtras": "You have {{count}} sections ({{included}} covered by the base). The next one adds {{next}}.",
     "priceMax": "{{max}} sections is the cap here. Remove one if you want to swap it.",
-    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. The grid counts as one more section, and its fields connect your Shopify store.",
+    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. Payments go through your Shopify store, linked in the shop’s fields; without it, the checkout is a sample.",
     "commerceIncluded": "+{{price}} Commerce kit (product page, cart and checkout), on top of the section",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",
@@ -1255,8 +1255,8 @@
       },
       "commerce": {
         "ProductGrid": {
-          "name": "Product Grid",
-          "blurb": "Catalog + shop; pick a kit color so it matches the rest of the page"
+          "name": "Full shop",
+          "blurb": "Catalog, product page, cart and checkout; with your Shopify or your own payments"
         }
       },
       "kin": {
@@ -1435,7 +1435,10 @@
       "ok": "The model loaded.",
       "failed": "The model could not be loaded: check the URL and that the server allows CORS. The demo model is shown meanwhile.",
       "pathOnly": "That is a project path: here you see the demo model and, in the ZIP, yours once you copy the file to public/. To see it now, try it from your computer."
-    }
+    },
+    "commerceLead": "Link your Shopify store or use your own payments.",
+    "editShop": "Edit shop",
+    "backToShop": "← Back to the shop"
   },
   "cart": {
     "eyebrow": "Cart",
@@ -1701,7 +1704,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Terms of Service",
-    "effectiveDate": "Effective October 15, 2026",
+    "effectiveDate": "Effective October 28, 2026",
     "intro": "These Terms govern your use of {{site}}. By accessing the site, creating an account, or purchasing a product, you agree to these conditions.",
     "sections": [
       {
@@ -1715,6 +1718,15 @@
       {
         "title": "Products and license",
         "body": "Products are digital source-code downloads: fixed models (CHAPTERS, MONOLITH, FIZZ, ATELIER), builder compositions, and—if you add it—the Commerce kit (catalog, product page, cart, and checkout). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes your license with email and order number."
+      },
+      {
+        "title": "Commerce kit (shop)",
+        "items": [
+          "The Commerce kit is source code: a shop with a catalog, product page, cart and checkout. The checkout it includes is a sample: it does not process payments or charge anything.",
+          "To take payments, you connect your own Shopify store (the shop reads products, stock and prices from Shopify, and payment happens on Shopify’s checkout) or your own payment gateway in the code you download. ScrollLab does not provide, operate or intermediate a checkout or gateway for your store.",
+          "You are the seller to your customers: your store’s prices, taxes, shipping, invoicing, returns and legal compliance are your responsibility. The money from your sales does not go through ScrollLab.",
+          "Shopify is a third-party service: its use, its costs and its conditions are governed by Shopify’s terms. Shopify and its logo are trademarks of Shopify Inc.; ScrollLab is not affiliated with or endorsed by Shopify. Shopify may change its API, so we do not guarantee the connection keeps working without adjustments."
+        ]
       },
       {
         "title": "Prices and payments",
@@ -1758,7 +1770,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, by card in US dollars through Polar, our authorized reseller. It renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, in US dollars through Polar, our authorized reseller. It renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1802,7 +1814,7 @@
         "title": "How to request it",
         "items": [
           "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
-          "If you paid by card, we handle the refund with Polar, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Polar.",
+          "If you paid with Polar, we handle the refund with Polar, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Polar.",
           "Before disputing the charge with your bank, write to us or use the Withdrawal request button: we resolve it faster.",
           "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
         ],
@@ -1909,13 +1921,13 @@
   },
   "pay": {
     "payAr": "Pay with Mercado Pago →",
-    "payIntl": "Pay by card (USD) →",
+    "payIntl": "Pay with Polar (USD) →",
     "methodLegend": "Payment method",
     "methodMp": "Mercado Pago",
     "methodMpNote": "in Argentine pesos",
-    "methodCard": "Card",
-    "methodCardNote": "in US dollars · via Polar",
-    "trustIntl": "Card payment via Polar · license included",
+    "methodCard": "Polar",
+    "methodCardNote": "in US dollars (USD)",
+    "trustIntl": "International payment with Polar · license included",
     "intlTaxNote": "Polar processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
     "confirming": "Confirming your payment…"
   },
@@ -1933,7 +1945,7 @@
   },
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
-    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Polar).",
+    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: with Polar.",
     "theme": "Theme",
     "labelShort": "Preferences ({{current}})"
   }

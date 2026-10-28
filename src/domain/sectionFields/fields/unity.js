@@ -16,6 +16,8 @@ export const UNITY_FIELDS = {
     { key: 'menuLabel', label: 'Menu label', type: 'text' },
     { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
     { key: 'fg', label: 'Menú móvil — color de texto', type: 'color' },
+    { key: 'barBg', label: 'Barra — color de fondo (vacío: transparente)', type: 'color' },
+    { key: 'barColor', label: 'Barra — color del texto (sin fondo, se invierte sobre lo que tenga abajo)', type: 'color' },
   ],
   'unity/HeroTwin': [
     { key: 'body', label: 'Body', type: 'textarea' },
