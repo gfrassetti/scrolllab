@@ -30,7 +30,7 @@
   "lab": {
     "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Card payment in US dollars isn’t available yet.",
     "eyebrow": "Online widgets",
-    "body": "Premium animated sections for your site, no code. They work on WordPress, Webflow, Shopify, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
+    "body": "Premium animated sections for your site or store, no code. They work on Shopify, WordPress, Webflow, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
     "publishedCount": "{{n}} of {{quota}} published on your plan · {{total}} created",
     "publishedCountFrozen": "{{n}} of {{quota}} live on your plan · {{frozen}} frozen · {{total}} created",
@@ -260,16 +260,16 @@
     "platformsNote": "The code is the same everywhere: the one shown on the card of the published widget or pack.",
     "platforms": [
       {
+        "q": "Shopify",
+        "a": "1. Online Store → Themes → Customize.\n2. On the page you want, Add section → «Custom Liquid».\n3. Paste the code and save."
+      },
+      {
         "q": "WordPress",
         "a": "1. Open the page in the block editor.\n2. Add a «Custom HTML» block where you want the widget.\n3. Paste the code and update the page.\nIf you use a builder like Elementor, use its «HTML» widget."
       },
       {
         "q": "Webflow",
         "a": "1. In the Designer, drag a «Code Embed» element where you want the widget.\n2. Paste the code and save.\n3. Publish the site: the widget shows on the published site (it may not show in the Designer)."
-      },
-      {
-        "q": "Shopify",
-        "a": "1. Online Store → Themes → Customize.\n2. On the page you want, Add section → «Custom Liquid».\n3. Paste the code and save."
       },
       {
         "q": "Squarespace",
@@ -411,7 +411,9 @@
       "invalid": "This link is not valid or is no longer active. You can ask whoever shared it for a new one.",
       "suspended": "This widget is suspended and cannot be edited for now.",
       "formNote": "Messages from this form are emailed to whoever created the widget."
-    }
+    },
+    "worksOn": "Works on your site or store:",
+    "worksOnAny": "and any site"
   },
   "common": {
     "loading": "Loading…",

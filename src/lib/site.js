@@ -90,9 +90,9 @@ export const BUILDER_SEO = {
  * en el boot de index.html.
  */
 export const LAB_SEO = {
-  title: 'Scroll Lab — LAB | Online widgets',
+  title: 'Scroll Lab — LAB | Widgets animados para Shopify, WordPress y Webflow',
   description:
-    'Una sección con nuestro nivel de diseño, lista para insertar en cualquier sitio con un script, sin bajar código. La editás desde un panel. Empezá gratis.',
+    'Secciones animadas de nivel award para tu sitio o tu tienda Shopify, WordPress o Webflow: pegás una línea de código y las editás desde un panel, sin programar. Empezá gratis.',
 }
 
 export const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large, noai, noimageai'

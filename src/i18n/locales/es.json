@@ -30,7 +30,7 @@
   "lab": {
     "intlNoSubs": "La suscripción a LAB se paga por ahora solo con Mercado Pago, en pesos. Con tarjeta en dólares todavía no está disponible.",
     "eyebrow": "Online widgets",
-    "body": "Secciones animadas de nivel premium para tu sitio, sin programar. Funcionan en WordPress, Webflow, Shopify, Wix o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
+    "body": "Secciones animadas de nivel premium para tu sitio o tu tienda, sin programar. Funcionan en Shopify, WordPress, Webflow, Wix o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
     "yours": "Tus widgets",
     "publishedCount": "{{n}} de {{quota}} publicados en tu plan · {{total}} creados",
     "publishedCountFrozen": "{{n}} de {{quota}} activos en tu plan · {{frozen}} congelados · {{total}} creados",
@@ -260,16 +260,16 @@
     "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget o del pack publicado.",
     "platforms": [
       {
+        "q": "Shopify",
+        "a": "1. Tienda online → Temas → Personalizar.\n2. En la página que quieras, Agregar sección → «Liquid personalizado».\n3. Pegá el código y guardá."
+      },
+      {
         "q": "WordPress",
         "a": "1. Abrí la página en el editor de bloques.\n2. Agregá un bloque «HTML personalizado» donde quieras el widget.\n3. Pegá el código y actualizá la página.\nSi usás un constructor como Elementor, usá su widget «HTML»."
       },
       {
         "q": "Webflow",
         "a": "1. En el Designer, arrastrá un elemento «Code Embed» donde quieras el widget.\n2. Pegá el código y guardá.\n3. Publicá el sitio: el widget se ve en el sitio publicado (en el Designer puede no aparecer)."
-      },
-      {
-        "q": "Shopify",
-        "a": "1. Tienda online → Temas → Personalizar.\n2. En la página que quieras, Agregar sección → «Liquid personalizado».\n3. Pegá el código y guardá."
       },
       {
         "q": "Squarespace",
@@ -411,7 +411,9 @@
       "invalid": "Este link no es válido o ya no está activo. Se puede pedir uno nuevo a quien lo compartió.",
       "suspended": "Este widget está suspendido y por ahora no se puede editar.",
       "formNote": "Los mensajes de este formulario le llegan por mail a quien creó el widget."
-    }
+    },
+    "worksOn": "Funciona en tu sitio o tu tienda:",
+    "worksOnAny": "y cualquier sitio"
   },
   "common": {
     "loading": "Cargando…",
