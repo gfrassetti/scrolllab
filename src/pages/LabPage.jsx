@@ -821,31 +821,30 @@ export default function LabPage({ qa = false }) {
           )}
         </section>
 
-        {/* Guías por plataforma: dónde se pega el mismo snippet en cada una. */}
-        <section id="ayuda" className="mt-20 scroll-mt-24 border-t border-ink/15 pt-12 md:mt-28">
-          <h2 className="text-center text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
-          <p className="mx-auto mt-2 max-w-[60ch] text-center text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
-          <div className="mt-4 flex justify-center">
-          <Link
-            to="/lab/shopify"
-            className="inline-flex min-h-11 items-center gap-2 text-body-sm font-medium text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
-          >
-            <PlatformLogo id="shopify" className="h-4 w-4" />
-            {t('lab.shopifyGuide')}
-          </Link>
-          </div>
-          <div className="mx-auto mt-6 max-w-[68ch]">
-            <FaqAccordion items={platformList} openIndex={openPlatform} />
-          </div>
-        </section>
+        {/* Ayuda: cómo pegarlo en cada plataforma y las preguntas, lado a lado. */}
+        <div className="mt-20 grid gap-16 border-t border-ink/15 pt-12 md:mt-28 lg:grid-cols-2 lg:gap-0">
+          <section id="ayuda" className="scroll-mt-24 lg:sticky lg:top-28 lg:self-start lg:pr-16">
+            <h2 className="text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
+            <p className="mt-2 max-w-[52ch] text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
+            <Link
+              to="/lab/shopify"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 text-body-sm font-medium text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+            >
+              <PlatformLogo id="shopify" className="h-4 w-4" />
+              {t('lab.shopifyGuide')}
+            </Link>
+            <div className="mt-6">
+              <FaqAccordion items={platformList} openIndex={openPlatform} />
+            </div>
+          </section>
 
-        {/* FAQ. */}
-        <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">
-          <h2 className="text-center text-title-sm font-medium">{t('lab.faqTitle')}</h2>
-          <div className="mx-auto mt-6 max-w-[68ch]">
-            <FaqAccordion items={Array.isArray(faq) ? faq : []} />
-          </div>
-        </section>
+          <section className="lg:border-l lg:border-ink/15 lg:pl-16">
+            <h2 className="text-title-sm font-medium">{t('lab.faqTitle')}</h2>
+            <div className="mt-6">
+              <FaqAccordion items={Array.isArray(faq) ? faq : []} />
+            </div>
+          </section>
+        </div>
 
         <p className={`mt-16 max-w-[56ch] text-body-sm text-ink/60 ${appMode ? 'hidden' : ''}`}>
           {t('lab.footnote')}{' '}
