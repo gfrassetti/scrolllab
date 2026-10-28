@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { DEMO_PRODUCTS } from './products'
 import { catalogFromEdits } from './catalog'
 import { fetchShopifyProducts, normalizeShopifyConfig } from './shopify'
+import { useShopCart } from './cartStore'
 
 const ShopCatalogContext = createContext(DEMO_PRODUCTS)
 const ShopifyContext = createContext(null)
@@ -32,7 +33,12 @@ export function ShopCatalogProvider({ products, currency = '', shopify, children
     let alive = true
     fetchShopifyProducts(config)
       .then((list) => {
-        if (alive && list.length) setRemote(list)
+        if (!alive || !list.length) return
+        setRemote(list)
+        // Un carrito guardado antes (catálogo de ejemplo u otra tienda) no se
+        // puede pagar en esta: quedan solo las variantes de esta tienda.
+        const variantIds = new Set(list.flatMap((p) => Object.values(p.variantIds || {})))
+        useShopCart.getState().keepOnly((line) => variantIds.has(line.merchandiseId))
       })
       .catch((err) => {
         console.warn('[shop] Shopify products could not be loaded:', err?.message || err)

@@ -68,6 +68,13 @@ export const useShopCart = create(
 
       clear: () => set({ lines: [] }),
 
+      /** Deja solo las líneas que cumplen `keep` (ej: las de la tienda Shopify conectada). */
+      keepOnly: (keep) => {
+        const lines = get().lines
+        const next = lines.filter(keep)
+        if (next.length !== lines.length) set({ lines: next })
+      },
+
       count: () => get().lines.reduce((n, l) => n + l.qty, 0),
 
       total: () => get().lines.reduce((n, l) => n + l.price * l.qty, 0),
