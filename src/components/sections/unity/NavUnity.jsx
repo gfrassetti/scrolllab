@@ -1,5 +1,6 @@
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
+import { readableInk } from '../../../lib/themeVars'
 
 /**
  * NavUnity — phrase left · mark center · 3 links right.
@@ -19,12 +20,18 @@ export default function NavUnity({
   /** Menú móvil: fondo y texto. La barra se invierte sola (mix-blend). */
   bg,
   fg,
+  /** La barra: fondo (vacío: transparente, se invierte) y color del texto. */
+  barBg,
+  barColor,
 }) {
   const items = parseNavLinks(links, linksText).slice(0, 3)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-5 py-4 text-white mix-blend-difference md:px-10">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 px-5 py-4 md:px-10 ${barBg ? '' : 'text-white mix-blend-difference'}`}
+      style={barBg ? { backgroundColor: barBg, color: barColor || readableInk(barBg) } : barColor ? { color: barColor } : undefined}
+    >
       <div className="relative flex items-center justify-between gap-3">
         <a
           href="#top"

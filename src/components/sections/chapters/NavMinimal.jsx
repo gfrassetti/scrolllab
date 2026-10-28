@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
+import { readableInk } from '../../../lib/themeVars'
 
 /**
  * NavMinimal — fixed header that inverts itself over any background
@@ -33,6 +34,8 @@ export default function NavMinimal({
   fg,
   /** La barra: se invierte sola sobre lo que tenga abajo (mix-blend). */
   barColor,
+  /** Fondo de la barra. Vacío: transparente y se invierte; con un color es una barra sólida. */
+  barBg,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu({ breakpoint: null })
@@ -41,8 +44,11 @@ export default function NavMinimal({
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-50 text-bone mix-blend-difference"
-        style={barColor ? { color: barColor } : undefined}
+        className={`fixed inset-x-0 top-0 z-50 text-bone ${barBg ? '' : 'mix-blend-difference'}`}
+        style={{
+          ...(barBg ? { backgroundColor: barBg } : {}),
+          ...(barColor || barBg ? { color: barColor || readableInk(barBg) } : {}),
+        }}
       >
         <nav className="flex items-center justify-between px-5 py-5 md:px-10 md:py-7">
           <a href="#top" className="tpl-hit relative text-sm font-medium uppercase tracking-[0.25em]">
