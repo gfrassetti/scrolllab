@@ -1,7 +1,7 @@
 /**
  * /lab/shopify: la guía para usar LAB en una tienda Shopify. Es la página que
  * busca quien quiere «animaciones para Shopify»: en español (lo que se indexa),
- * con capturas reales de una tienda de desarrollo (tema Horizon, 2026-10-27).
+ * con capturas reales de una tienda de desarrollo (tema Horizon, 2026-10-28).
  *
  * La página de React, el HTML que se emite en el build (scripts/gen-share-pages.mjs)
  * y los tests leen este mismo objeto, así no se despegan. Todo lo que dice se
@@ -30,7 +30,7 @@ export const LAB_SHOPIFY = {
     src: '/lab/shopify/store-widget.webp',
     width: 1268,
     height: 772,
-    alt: 'Una tienda Shopify con el tema Horizon: la grilla de productos y, debajo, un widget de LAB a todo el ancho',
+    alt: 'Una tienda de snowboards en Shopify con el tema Horizon: la grilla de tablas y, debajo, un widget de LAB con las cifras de la tienda',
     caption: 'Un widget de LAB en una tienda Shopify con el tema Horizon, debajo de los productos.',
   },
   stepsTitle: 'Cómo se pone en tu tienda',
@@ -50,9 +50,9 @@ export const LAB_SHOPIFY = {
   ],
   editor: {
     src: '/lab/shopify/editor-custom-liquid.webp',
-    width: 972,
-    height: 726,
-    alt: 'El editor de temas de Shopify con la sección «Liquid personalizado» abierta: el código del widget en el cuadro «Código Liquid» y el widget en la vista previa',
+    width: 1568,
+    height: 676,
+    alt: 'El editor de temas de Shopify con la sección «Liquid personalizado» seleccionada: el código del widget en el cuadro «Código Liquid» y el widget en la vista previa',
     caption: 'La sección «Liquid personalizado» con el código del widget, y el widget en la vista previa del editor.',
   },
   whyTitle: 'Por qué así y no con una app',
@@ -66,8 +66,8 @@ export const LAB_SHOPIFY = {
   gridImage: {
     src: '/lab/shopify/store-widget-grid.webp',
     width: 1268,
-    height: 726,
-    alt: 'El mismo widget de LAB dentro de la tienda Shopify: título grande y una grilla de cascos que entran con el scroll',
+    height: 400,
+    alt: 'El widget de LAB dentro de la tienda Shopify: cuatro cifras grandes que cuentan con el scroll, con los textos de la tienda editados desde LAB',
   },
   faqTitle: 'Preguntas',
   faq: [
