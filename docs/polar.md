@@ -53,6 +53,33 @@ formato **Raw**, eventos `order.paid`, `order.updated`, `order.refunded` y (para
 3. Solo: el webhook (`order.refunded` / `order.updated`) corta la orden o da de baja LAB, lo anota en el libro (`/admin`
    → «Reembolsos») y manda «Te devolvimos el dinero».
 
+## Pendiente: renuncia al arrepentimiento de compradores de la UE (consulta a Polar)
+
+Abierto desde el 2026-10-28. La documentación pública de Polar no dice si su checkout recoge la renuncia al derecho de
+arrepentimiento del contenido digital (art. 16(m), Directiva 2011/83/UE: consentimiento explícito y reconocimiento
+antes de la entrega) ni cómo cubre la función de arrepentimiento que exige la UE desde el 19 de junio de 2026
+(Directiva 2023/2673, art. 11a). Mientras tanto vale nuestra política de 14 días sin descarga y el Botón de
+arrepentimiento (devolución automática). Si Polar no recoge la renuncia, hay que pedirla nosotros antes de la descarga
+del ZIP a compradores de la UE.
+
+Mensaje para soporte de Polar (chat o email; **no enviado todavía**):
+
+> Hi, we sell downloadable source-code templates (digital content, delivered as a ZIP after payment) through Polar as
+> merchant of record. A few questions about EU consumers:
+>
+> 1. Does Polar's checkout collect the buyer's explicit consent to waive the 14-day right of withdrawal for digital
+>    content (Art. 16(m), Directive 2011/83/EU) before delivery? If so, where does the buyer see it, and is the consent
+>    recorded per order?
+> 2. As merchant of record, does Polar act as the "trader" for withdrawal requests, or is that on us? How do you handle
+>    the new withdrawal function required from 19 June 2026 (Directive 2023/2673, Art. 11a)?
+> 3. Is there a setting or checkout field we can use to add our own waiver checkbox (or custom text) at checkout?
+> 4. Do you recommend refunding a EU consumer who withdraws after downloading, if the waiver was not collected?
+>
+> Thanks!
+
+Cuando respondan: anotar acá la respuesta y, según lo que digan, ajustar los Términos y el texto del Botón de
+arrepentimiento para compradores del exterior.
+
 ## Probar
 
 - `server/__tests__/polarCheckout.test.js` y `polarLab.test.js` contra un Polar simulado (`helpers/fakePolar.js`).
