@@ -188,7 +188,7 @@ No es un precio plano. `priceCustomRecipeUsd()` (servidor) y
 ```
 base (USD 549, incluye 8 secciones)
 + USD 25 × secciones por encima de 8
-+ USD 59 si la receta trae alguna sección commerce/
++ USD 99 si la receta trae alguna sección commerce/ (59 hasta el 2026-10-28)
 ```
 
 - Constantes: `CUSTOM_BASE_PRICE_USD` / `CUSTOM_BASE_SECTIONS` /

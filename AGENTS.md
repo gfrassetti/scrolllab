@@ -439,7 +439,7 @@ compararla después (ver [ADR 0005](docs/adr/0005-refactors-con-foto.md)). Con o
 
 Los templates fijos tienen precio de lista; la composición del builder va **por
 tramos**: base de USD 549 con 8 secciones incluidas, USD 25 por cada sección
-extra hasta 30, más USD 59 si la receta trae commerce (2026-10-10: 389 / 15 / 39 → 690 / 29 / 79, el
+extra hasta 30, más USD 99 si la receta trae commerce (59 hasta el 2026-10-28, cuando sumó el conector con Shopify; 2026-10-10: 389 / 15 / 39 → 690 / 29 / 79, el
 mismo día bajado a esta opción moderada porque 690 quedó muy caro).
 El builder muestra el ancla «comprar por separado los modelos que usás» (`separateModelsPriceUsd`). Cuenta cada entrada de la
 receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
