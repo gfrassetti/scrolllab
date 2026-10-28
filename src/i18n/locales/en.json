@@ -1470,7 +1470,8 @@
     "clearConfirm": "Remove everything from the cart?",
     "clearYes": "Yes, remove all",
     "clearKeep": "Keep them",
-    "couponIncluded": "Includes the {{percent}}% first-purchase discount"
+    "couponIncluded": "Includes the {{percent}}% first-purchase discount",
+    "withdrawalLink": "Withdrawal request"
   },
   "login": {
     "eyebrow": "Account",
@@ -1907,7 +1908,8 @@
       "renewal": "Renewals aren’t refunded: we’ll review it.",
       "refunded": "Already refunded.",
       "review": "Not refunded automatically: we’ll review it."
-    }
+    },
+    "abroad": "Buying from outside Argentina? This same form is how you exercise your right of withdrawal: same deadline, and the money goes back to the payment method you used."
   },
   "theme": {
     "toLight": "Switch to light theme",

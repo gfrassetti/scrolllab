@@ -309,6 +309,13 @@ export default function CartPage() {
                   >
                     {t('cart.refundLink')}
                   </Link>
+                  {' · '}
+                  <Link
+                    to="/arrepentimiento"
+                    className="underline underline-offset-2 transition-colors hover:text-ink"
+                  >
+                    {t('cart.withdrawalLink')}
+                  </Link>
                 </p>
               </div>
             </aside>

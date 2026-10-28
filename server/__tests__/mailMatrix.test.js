@@ -85,6 +85,15 @@ describe('matriz de mails al cliente (es/en · Mercado Pago/Polar)', () => {
         assertClean(mail, 'recibo')
         assert.match(mail.text, p.money[l.locale])
         assert.match(mail.text, l.locale === 'en' ? /First-purchase discount/ : /Descuento de primera compra/)
+        // El Botón de arrepentimiento, a la vista en el recibo (UE: avisar que existe y dónde).
+        assert.match(mail.text, /\/arrepentimiento/)
+        assert.match(mail.text, l.locale === 'en' ? /Withdrawal request/ : /Botón de arrepentimiento/)
+      })
+
+      it(`${tag}: LAB — la bienvenida avisa del Botón de arrepentimiento`, () => {
+        const sub = { id: 's1', plan: 'hosted_pro', cycle: 'monthly', status: 'active', locale: l.locale, provider: p.provider, currentPeriodEnd: new Date(Date.now() + 30 * 864e5) }
+        const mail = buildSubscriptionWelcome({ subscription: sub, user, ...urls })
+        assert.match(mail.text, /\/arrepentimiento/)
       })
 
       it(`${tag}: compra — pago rechazado`, () => {

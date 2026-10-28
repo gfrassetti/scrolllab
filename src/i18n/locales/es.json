@@ -1470,7 +1470,8 @@
     "clearConfirm": "¿Quitar todo lo que hay en el carrito?",
     "clearYes": "Sí, quitar todo",
     "clearKeep": "Mejor no",
-    "couponIncluded": "Incluye el {{percent}}% de primera compra"
+    "couponIncluded": "Incluye el {{percent}}% de primera compra",
+    "withdrawalLink": "Botón de arrepentimiento"
   },
   "login": {
     "eyebrow": "Cuenta",
@@ -1907,7 +1908,8 @@
       "renewal": "Las renovaciones no se devuelven: lo revisamos.",
       "refunded": "Ya está devuelta.",
       "review": "No se devuelve solo: lo revisamos."
-    }
+    },
+    "abroad": "¿Comprás desde otro país? Este mismo formulario sirve para ejercer tu derecho de arrepentimiento o desistimiento: el plazo es el mismo y el dinero vuelve al medio con el que pagaste."
   },
   "theme": {
     "toLight": "Cambiar a tema claro",

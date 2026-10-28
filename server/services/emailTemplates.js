@@ -1,5 +1,6 @@
 import { db } from '../db.js'
 import { orderPriceSummary } from '../../src/domain/orderSummary.js'
+import { REFUND_DAYS } from '../../src/domain/policy.js'
 import { HOSTED_PLANS, subscriptionPlanPrice } from '../catalog.js'
 import {
   buildOrderReceiptEn,
@@ -8,6 +9,8 @@ import {
   buildSubscriptionTrialReminderEn,
   invoiceNote,
   isMerchantOfRecord,
+  withdrawalNote,
+  withdrawalUrl,
 } from './emailTemplatesBilling.js'
 
 /**
@@ -62,6 +65,11 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
   // Polar es el vendedor legal (merchant of record): la factura la manda él.
   const invoiceLine = isMerchantOfRecord(order.provider) ? ` ${invoiceNote('es')}` : ''
   const buyerName = user.name || user.email
+  // El Botón de arrepentimiento, a la vista en el recibo (con link en el HTML).
+  const withdrawalLink = withdrawalUrl(accountUrl)
+  const withdrawalHtml = withdrawalLink
+    ? `<br /><br />¿Te arrepentiste? Tenés ${REFUND_DAYS} días para pedir el reembolso con el <a href="${escapeHtml(withdrawalLink)}" style="color:#161412;">Botón de arrepentimiento</a>.`
+    : ''
   // Con descuento de primera compra: ítems a precio de lista, la línea del
   // descuento y el total cobrado. Sin descuento, igual que siempre.
   const summary = orderPriceSummary(order)
@@ -145,6 +153,7 @@ export function buildOrderReceipt({ order, user, accountUrl, logoUrl }) {
               <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
                 Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${escapeHtml(invoiceLine)}
                 Si necesitás ayuda, respondé a este email.
+                ${withdrawalHtml}
               </td>
             </tr>
           </table>
@@ -169,7 +178,8 @@ Total: ${formatMoney(order.total, order.currency_id)}
 Ingresá y descargá tu ZIP desde:
 ${accountUrl}
 
-Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${invoiceLine}`
+Este correo es el detalle de tu compra y no reemplaza una factura fiscal.${invoiceLine}
+${withdrawalNote('es', accountUrl)}`
 
   return {
     subject: `Tu compra en Scroll Lab · Orden ${orderId.slice(-8)}`,
@@ -319,6 +329,10 @@ export function buildSubscriptionWelcome({
     new Date(subscription.trialEndsAt) > new Date()
       ? formatDateOnly(subscription.trialEndsAt)
       : null
+  const withdrawalLink = withdrawalUrl(accountUrl)
+  const withdrawalLinkHtml = withdrawalLink
+    ? `<br /><br />¿Te arrepentiste? Tenés ${REFUND_DAYS} días desde el alta para pedir la devolución del primer cobro con el <a href="${escapeHtml(withdrawalLink)}" style="color:#161412;">Botón de arrepentimiento</a>.`
+    : ''
   const nextPaymentLabel = trialEnd ? 'Primer cobro' : 'Próximo pago'
   const headline = trialEnd
     ? 'Tu prueba gratis de ScrollLab LAB arrancó.'
@@ -380,6 +394,7 @@ export function buildSubscriptionWelcome({
             <tr>
               <td style="padding:24px 32px;border-top:1px solid #d6d1c8;color:#77716a;font-size:12px;line-height:1.5;">
                 Este correo confirma la activación de tu suscripción y no reemplaza una factura fiscal.
+                ${withdrawalLinkHtml}
                 Si necesitás ayuda, respondé a este email.
               </td>
             </tr>
@@ -403,7 +418,8 @@ ${accountUrl}
 Se renueva automáticamente. Podés cancelar cuando quieras desde "Mi cuenta";
 seguís con acceso hasta el fin del período pagado.
 
-Este correo confirma la activación y no reemplaza una factura fiscal.`
+Este correo confirma la activación y no reemplaza una factura fiscal.
+${withdrawalNote('es', accountUrl)}`
 
   return {
     subject: trialEnd

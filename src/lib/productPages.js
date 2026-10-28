@@ -12,6 +12,7 @@
 import { INDEXABLE_ROBOTS, SITE_NAME, SITE_URL } from './site.js'
 import { templatePriceUsd } from './pricing.js'
 import { isBuilderHiddenSku } from '../domain/catalog.js'
+import { REFUND_DAYS } from '../domain/policy.js'
 import { publicDemoSkus, renderSharePage, truncate } from './sharePages.js'
 
 export const PRODUCT_BASE_PATH = '/plantillas'
@@ -63,6 +64,8 @@ export const PRODUCT_COPY = {
   },
   licenseLine: 'Licencia Regular: proyectos propios y de clientes, sin límite de sitios',
   licenseMore: 'Ver la licencia',
+  refundLine: `Reembolso total dentro de ${REFUND_DAYS} días si no descargás el ZIP`,
+  refundMore: 'Botón de arrepentimiento',
   share: 'Compartir',
   shareCopied: 'Link copiado',
   includesTitle: 'Qué te llevás',
@@ -283,6 +286,7 @@ export function productSnapshotHtml(data) {
     data.notice ? `<p>${e(data.notice)}</p>` : '',
     `<p>${e(data.priceLine)}</p>`,
     `<p>${e(c.licenseLine)} — <a href="/legal/license">${e(c.licenseMore)}</a></p>`,
+    `<p>${e(c.refundLine)} — <a href="/arrepentimiento">${e(c.refundMore)}</a></p>`,
     `<p><a href="${e(data.demoPath)}">${e(c.demo)}</a></p>`,
     `<h2>${e(c.specsTitle)}</h2>`,
     `<ul>${items(data.specs.map((s) => s.label))}</ul>`,

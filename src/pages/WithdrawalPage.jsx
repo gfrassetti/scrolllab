@@ -168,6 +168,9 @@ export default function WithdrawalPage() {
           <li>{fill(t('withdrawal.ruleZip'))}</li>
           <li>{fill(t('withdrawal.ruleLab'))}</li>
         </ul>
+        <p className="mt-6 border-l-2 border-ink/30 pl-3 text-sm leading-relaxed text-ink/70 md:text-base">
+          {t('withdrawal.abroad')}
+        </p>
         <p className="mt-4 text-sm md:text-base">
           <Link
             to="/legal/refunds"

@@ -209,6 +209,15 @@ function ProductView({ data }) {
                 {c.licenseMore}
               </Link>
             </p>
+            <p className="mt-1.5 text-body-sm text-ink/60">
+              {c.refundLine} ·{' '}
+              <Link
+                to="/arrepentimiento"
+                className="text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+              >
+                {c.refundMore}
+              </Link>
+            </p>
             <SpecList specs={data.specs} title={c.specsTitle} />
           </div>
 
