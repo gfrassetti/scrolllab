@@ -342,8 +342,8 @@ describe('builder → ZIP: una composición con todo editado', () => {
     assert.ok(catalog, 'falta ShopCatalogProvider en el App.jsx')
     assert.deepEqual(catalog.props.products, productsFromItems(items))
     assert.equal(productsFromItems(items).length, 8, 'la prueba no llenó los productos')
-    // La tienda Shopify conectada: la misma config que lee el preview.
-    assert.deepEqual(catalog.props.shopify, shopifyConfigFromItems(items))
-    assert.ok(catalog.props.shopify?.domain, 'la prueba no llenó la tienda Shopify')
+    // La tienda Shopify: la misma config que lee el preview (la prueba deja el
+    // interruptor «Cobrar con Shopify» apagado, así que el ZIP no la lleva).
+    assert.deepEqual(catalog.props.shopify ?? null, shopifyConfigFromItems(items))
   })
 })

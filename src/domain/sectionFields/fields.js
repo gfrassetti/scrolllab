@@ -11,7 +11,7 @@ import { ATRIUM_FIELDS } from './fields/atrium.js'
 import { KIN_FIELDS } from './fields/kin.js'
 import { APEX_FIELDS } from './fields/apex.js'
 import { CONTACT_FIELDS } from './fields/contact.js'
-import { COMMERCE_FIELDS } from './fields/commerce.js'
+import { COMMERCE_FIELDS, PRODUCT_GRID_GROUPS } from './fields/commerce.js'
 
 /** @typedef {import('./types.js').SectionField} SectionField */
 
@@ -61,4 +61,17 @@ export const SECTIONS_WITHOUT_COLOR = Object.freeze({
 
 export function getSectionFields(sectionId) {
   return SECTION_FIELDS[sectionId] || []
+}
+
+/**
+ * Grupos plegables del panel, para las secciones con muchos campos. Sin grupos
+ * el panel muestra la lista de siempre.
+ * @type {Record<string, import('./types.js').SectionFieldGroup[]>}
+ */
+export const SECTION_FIELD_GROUPS = {
+  'commerce/ProductGrid': PRODUCT_GRID_GROUPS,
+}
+
+export function getSectionFieldGroups(sectionId) {
+  return SECTION_FIELD_GROUPS[sectionId] || null
 }

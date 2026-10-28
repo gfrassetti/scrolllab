@@ -23,6 +23,15 @@
  * @property {FieldHelp} [help] Guía desplegable debajo del campo: qué poner y por qué.
  * @property {'on' | 'off'} [default] Solo `toggle`: cómo arranca sin valor (por defecto 'on').
  * @property {FieldExample} [example] Botón bajo el campo que lo completa con un valor de prueba.
+ * @property {string} [group] El grupo plegable del panel (ver SectionFieldGroup).
+ * @property {'hide' | 'only'} [shopify] Con Shopify encendido: 'hide' lo oculta, 'only' solo se ve ahí.
+ *
+ * @typedef {Object} SectionFieldGroup
+ * @property {string} id
+ * @property {string} title
+ * @property {boolean} [open] Arranca abierto.
+ * @property {string} [switch] Un toggle del mismo panel que enciende el grupo (su interruptor va en el título).
+ * @property {string} [note] Qué hace el interruptor (debajo del título).
  *
  * @typedef {Object} FieldExample
  * @property {string} label El botón («Probar con…»).

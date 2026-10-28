@@ -67,6 +67,9 @@ export function shopColorsFromItems(items) {
 export function shopifyConfigFromItems(items) {
   const props = gridOf(items)?.props || {}
   const text = (key) => (typeof props[key] === 'string' ? props[key].trim() : '')
+  // Apagado a propósito: queda guardado pero no se usa. Sin el interruptor
+  // (composiciones de antes de que existiera) manda el dominio.
+  if (props.shopifyEnabled === 'off') return null
   const domain = text('shopifyDomain')
   if (!domain) return null
   return { domain, token: text('shopifyToken'), collection: text('shopifyCollection') }

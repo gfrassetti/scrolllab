@@ -126,7 +126,7 @@ function editsFor(sectionId) {
   let n = 0
   const valueFor = (kind) => (kind === 'text' ? marker(n++) : `https://zq.example/${marker(n++)}`)
   for (const field of SECTION_FIELDS[sectionId] || []) {
-    if (sectionId === 'commerce/ProductGrid' && /^(checkout|cart|detail)[A-Z]/.test(field.key)) continue
+    if (sectionId === 'commerce/ProductGrid' && /^(checkout|cart|detail|shopify)[A-Z]/.test(field.key)) continue
     const id = `${sectionId}.${field.key}`
     if (field.type === 'list') {
       const rows = [0, 1].map((row) => {
@@ -288,6 +288,10 @@ try {
   console.log(`Revisando ${total} valores editados en ${sectionIds.length} secciones…`)
   const checkOnce = async (sectionId) => {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } })
+    // Las fotos y links de prueba apuntan a zq.example, que no existe: el pedido
+    // quedaba colgado y «networkidle» no llegaba nunca (timeouts en chapters,
+    // fizz, monolith y commerce). Se mira el atributo, no que la foto cargue.
+    await page.route(/zq\.example/, (route) => route.abort())
     const missing = await checkSectionRendersProps(page, sectionId)
     await page.close()
     return missing

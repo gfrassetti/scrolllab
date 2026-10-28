@@ -248,6 +248,13 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
       continue
     }
     // La tienda Shopify conectada: la lee shopifyConfigFromItems (toda la tienda, no la grilla).
+    if (id === COMMERCE_GRID_ID && /^shopify[A-Z]/.test(field.key) && field.type === 'toggle') {
+      const off = shopifyConfigFromItems([
+        { id: COMMERCE_GRID_ID, props: { shopifyDomain: 'probe.myshopify.com', [field.key]: 'off' } },
+      ])
+      if (off) fail('props', `'${id}.${field.key}' es un interruptor pero apagado no apaga Shopify`)
+      continue
+    }
     if (id === COMMERCE_GRID_ID && /^shopify[A-Z]/.test(field.key)) {
       const config = shopifyConfigFromItems([
         { id: COMMERCE_GRID_ID, props: { shopifyDomain: 'probe.myshopify.com', [field.key]: 'probe-value' } },
