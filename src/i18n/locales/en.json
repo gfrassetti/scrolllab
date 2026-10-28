@@ -1436,7 +1436,9 @@
       "failed": "The model could not be loaded: check the URL and that the server allows CORS. The demo model is shown meanwhile.",
       "pathOnly": "That is a project path: here you see the demo model and, in the ZIP, yours once you copy the file to public/. To see it now, try it from your computer."
     },
-    "commerceLead": "Link your Shopify store or use your own payments."
+    "commerceLead": "Link your Shopify store or use your own payments.",
+    "editShop": "Edit shop",
+    "backToShop": "← Back to the shop"
   },
   "cart": {
     "eyebrow": "Cart",

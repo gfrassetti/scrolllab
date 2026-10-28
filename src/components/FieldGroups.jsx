@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Collapse from './Collapse'
 
 /**
@@ -84,8 +84,20 @@ function Group({ group, count, open, onOpen, switchOn, onSwitch, children }) {
   )
 }
 
-export default function FieldGroups({ groups, fields, props, renderField, onSwitch }) {
+export default function FieldGroups({ groups, fields, props, renderField, onSwitch, focusGroup = null }) {
   const [openIds, setOpenIds] = useState(() => new Set(groups.filter((g) => g.open).map((g) => g.id)))
+  const root = useRef(null)
+
+  // `focusGroup`: el grupo de la pantalla que se está viendo (carrito, ficha,
+  // checkout). Se abre solo ese y el panel baja hasta él.
+  useEffect(() => {
+    if (!focusGroup) return undefined
+    setOpenIds(new Set([focusGroup]))
+    const timer = window.setTimeout(() => {
+      root.current?.querySelector(`[data-field-group="${focusGroup}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    }, 320)
+    return () => window.clearTimeout(timer)
+  }, [focusGroup])
   const shopify = shopifyIsOn(props)
   const switchKeys = new Set(groups.map((g) => g.switch).filter(Boolean))
   const visible = (field) => {
@@ -103,7 +115,7 @@ export default function FieldGroups({ groups, fields, props, renderField, onSwit
     })
 
   return (
-    <div>
+    <div ref={root}>
       {groups.map((group) => {
         const own = fields.filter((f) => (f.group || groups[0].id) === group.id && visible(f))
         if (!own.length && !group.switch) return null

@@ -1436,7 +1436,9 @@
       "failed": "No se pudo cargar el modelo: revisá la URL y que el servidor permita CORS. Mientras tanto se ve el de la demo.",
       "pathOnly": "Es una ruta del proyecto: acá se ve el modelo de la demo y, en el ZIP, el tuyo si copiás el archivo a public/. Para verlo ahora, probalo desde tu computadora."
     },
-    "commerceLead": "Vinculá tu tienda Shopify o usá tu propio cobro."
+    "commerceLead": "Vinculá tu tienda Shopify o usá tu propio cobro.",
+    "editShop": "Editar tienda",
+    "backToShop": "← Volver a la tienda"
   },
   "cart": {
     "eyebrow": "Carrito",

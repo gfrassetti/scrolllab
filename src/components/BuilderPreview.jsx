@@ -10,6 +10,7 @@ import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
 import FieldGroups from './FieldGroups'
+import { useShopCart } from '../lib/shop/cartStore'
 import ModelTryout from './ModelTryout'
 import FontPicker from './FontPicker'
 import Collapse from './Collapse'
@@ -46,6 +47,9 @@ const CHIP_POSITION = {
 export default function BuilderPreview({ items, font = null, onChangeFont = null, onChangeProps, onExit }) {
   const t = useT()
   const [editingUid, setEditingUid] = useState(null)
+  // La pantalla de la tienda en la que está el preview ('/', '/product/…', '/checkout').
+  const [shopRoute, setShopRoute] = useState('/')
+  const cartOpen = useShopCart((s) => s.drawerOpen)
   const [fontOpen, setFontOpen] = useState(false)
   const fontChoice = fontChoiceById(font)
   const editing = items.find((item) => item.uid === editingUid)
@@ -74,6 +78,19 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
   const shopProducts = productsFromItems(items)
+  const shopItem = items.find((item) => item.sectionId === 'commerce/ProductGrid')
+  const onShopScreen = shopRoute !== '/'
+  // El panel abre el grupo de la pantalla que se está viendo (carrito, ficha, checkout).
+  const focusGroup =
+    editing?.sectionId === 'commerce/ProductGrid'
+      ? cartOpen
+        ? 'cart'
+        : shopRoute === '/checkout'
+          ? 'checkout'
+          : shopRoute.startsWith('/product/')
+            ? 'detail'
+            : null
+      : null
 
   const editLabelFor = (section) => {
     if (section.kind === 'nav') return t('builder.editNav')
@@ -81,6 +98,23 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
     if (section.kind === 'footer') return t('builder.editFooter')
     return t('builder.editSection')
   }
+
+  // En la ficha y el checkout no hay chips «Editar»: este es el de la tienda.
+  const shopEditChip = shopItem ? (
+    <button
+      type="button"
+      data-sl-ui
+      data-native-cursor
+      onClick={() => setEditingUid((uid) => (uid === shopItem.uid ? null : shopItem.uid))}
+      className={`fixed bottom-[4.75rem] left-3 z-[60] min-h-11 border px-4 py-2 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors max-sm:bottom-[8.5rem] ${
+        editingUid === shopItem.uid
+          ? 'border-accent bg-accent text-bone'
+          : 'border-ink/30 bg-bone/90 text-ink hover:border-ink'
+      }`}
+    >
+      {editingUid === shopItem.uid ? t('builder.editing') : t('builder.editShop')}
+    </button>
+  ) : null
 
   const home = (
     <CompositionCanvas
@@ -120,7 +154,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
   )
 
   return (
-    <div className="relative">
+    <div className={`relative ${editing ? 'builder-panel-open' : ''}`}>
       {hasCommerce ? (
         <CompositionShopShell
           font={font}
@@ -129,6 +163,9 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
           checkoutProps={checkoutProps}
           items={items}
           products={shopProducts}
+          syncHistory
+          onRoute={setShopRoute}
+          routeChrome={shopEditChip}
         />
       ) : (
         home
@@ -203,6 +240,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
               return fieldGroups ? (
                 <FieldGroups
                   key={editing.uid}
+                  focusGroup={focusGroup}
                   groups={fieldGroups}
                   fields={fields}
                   props={editing.props}
@@ -264,12 +302,14 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
       <button
         type="button"
         data-native-cursor
-        onClick={onExit}
+        onClick={() => (hasCommerce && onShopScreen ? window.history.back() : onExit())}
+        // Centrado en lo que se ve: sin el ancho del panel de edición (md+).
+        style={{ left: 'calc((100% - var(--builder-panel, 0px)) / 2)' }}
         className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
           hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
         } ${editing ? 'max-md:hidden' : ''}`}
       >
-        {t('builder.exitPreview')} ({items.length})
+        {hasCommerce && onShopScreen ? t('builder.backToShop') : `${t('builder.exitPreview')} (${items.length})`}
       </button>
     </div>
   )

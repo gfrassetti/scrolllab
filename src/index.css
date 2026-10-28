@@ -693,6 +693,14 @@ html.hide-native-scrollbar::-webkit-scrollbar {
 }
 
 /* ——— UI motion utilities (Emil Kowalski) ——— */
+/* Builder: el ancho del panel de edición abierto (md+). El carrito y los botones
+   fijos de la tienda lo respetan siempre; la ficha y el checkout dejan ese lugar
+   libre desde xl (1280 px), donde cabe el diseño de dos columnas. */
+.builder-panel-open { --builder-panel: 0px; }
+@media (min-width: 768px) {
+  .builder-panel-open { --builder-panel: 28rem; }
+}
+
 @layer utilities {
   .ease-out-strong {
     transition-timing-function: var(--ease-out);
