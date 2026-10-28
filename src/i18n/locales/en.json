@@ -130,6 +130,10 @@
         "a": "It depends on whether you code. LAB is no-code: you paste one line into your site (the one you have or a new one on WordPress, Webflow, Wix…), we host the widgets and you edit them from here. The Builder is for developers: you build the whole page with our sections and take the React code, for a one-time payment."
       },
       {
+        "q": "Can I sell with my Shopify products?",
+        "a": "Yes, in two ways. With LAB, any widget goes into your Shopify store as one more section, no apps. With the Builder, the shop kit builds the catalog, product page, cart and checkout in our design and connects to your own Shopify store: products, stock and payments come from Shopify, no backend. The Builder is source code, for people who code."
+      },
+      {
         "q": "Can I build my whole site with widgets?",
         "a": "You can, but what works best is building the base on your platform (menu, texts, forms) and using LAB for the sections that need to stand out. Search engines read your page’s text better than a widget’s, and the site loads faster."
       },
@@ -587,7 +591,8 @@
     "footerWithdrawal": "Withdrawal request",
     "heroLabBefore": "Already have a site? Add animated sections with ",
     "heroLabName": "LAB",
-    "heroLabAfter": ", no code"
+    "heroLabAfter": ", no code",
+    "builderShop": "With the shop kit your page sells: catalog, cart and checkout connected to your own Shopify store (products, stock and payments come from it), no backend."
   },
   "templates": {
     "chapters": {
@@ -790,7 +795,7 @@
     "priceNext": "You reached the {{included}} sections the base covers: the next one adds {{next}}.",
     "priceExtras": "You have {{count}} sections ({{included}} covered by the base). The next one adds {{next}}.",
     "priceMax": "{{max}} sections is the cap here. Remove one if you want to swap it.",
-    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. The grid still counts as one section.",
+    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. The grid counts as one more section, and its fields connect your Shopify store.",
     "commerceIncluded": "+{{price}} Commerce kit (product page, cart and checkout), on top of the section",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",

@@ -130,6 +130,10 @@
         "a": "Depende de si programás. LAB es sin código: pegás una línea en tu sitio (el que ya tenés o uno nuevo en WordPress, Webflow, Wix…), los widgets los hosteamos nosotros y los editás desde acá. El Builder es para desarrolladores: armás la página entera con nuestras secciones y te llevás el código React, con pago único."
       },
       {
+        "q": "¿Puedo vender con mis productos de Shopify?",
+        "a": "Sí, de dos maneras. En LAB, cualquier widget va en tu tienda Shopify como una sección más, sin apps. En el Builder, el kit de tienda arma catálogo, ficha, carrito y checkout con nuestro diseño y se conecta a tu propia tienda Shopify: los productos, el stock y el pago salen de Shopify, sin backend. El Builder es código fuente, para quien programa."
+      },
+      {
         "q": "¿Puedo hacer todo mi sitio con widgets?",
         "a": "Se puede, pero lo que mejor funciona es armar la base en tu plataforma (menú, textos, formularios) y usar LAB en las secciones que tienen que impactar. Los buscadores leen mejor el texto de tu página que el de un widget, y el sitio carga más rápido."
       },
@@ -587,7 +591,8 @@
     "footerWithdrawal": "Botón de arrepentimiento",
     "heroLabBefore": "¿Ya tenés un sitio? Sumale secciones animadas con ",
     "heroLabName": "LAB",
-    "heroLabAfter": ", sin programar"
+    "heroLabAfter": ", sin programar",
+    "builderShop": "Con el kit de tienda, la página vende: catálogo, carrito y checkout conectados a tu propia tienda Shopify (productos, stock y pago salen de ahí), sin backend."
   },
   "templates": {
     "chapters": {
@@ -790,7 +795,7 @@
     "priceNext": "Llegaste a las {{included}} secciones de la base: la próxima suma {{next}}.",
     "priceExtras": "Llevás {{count}} secciones ({{included}} incluidas en la base). La próxima suma {{next}}.",
     "priceMax": "Tope de {{max}} secciones: es lo máximo que se arma acá. Para cambiar una, primero se saca otra.",
-    "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. La grilla cuenta como una sección más.",
+    "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. La grilla cuenta como una sección más, y en sus campos se conecta tu tienda Shopify.",
     "commerceIncluded": "+{{price}} del kit Commerce (ficha, carrito y checkout), aparte de la sección",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",

@@ -92,6 +92,10 @@ export const LAB_SHOPIFY = {
       a: 'El widget deja de mostrarse y la sección queda vacía. Tu tienda sigue funcionando igual; podés borrar la sección cuando quieras.',
     },
     {
+      q: '¿Y una tienda entera con este diseño?',
+      a: 'Eso es el Builder: el kit de tienda arma catálogo, ficha de producto, carrito y checkout con nuestras secciones y se conecta a tu propia tienda Shopify. Los productos, el stock y el pago salen de Shopify, sin backend. Es código fuente, para quien programa; LAB es sin código.',
+    },
+    {
       q: '¿Cuánto cuesta?',
       a: 'Empezás gratis con un widget publicado. Los planes pagos suman más widgets y se cobran en pesos (Mercado Pago) o en dólares con tarjeta.',
     },

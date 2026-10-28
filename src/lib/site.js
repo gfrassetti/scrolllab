@@ -80,7 +80,7 @@ export const SITE_SEO = {
 export const BUILDER_SEO = {
   title: 'Scroll Lab — Builder | Armado de páginas con código fuente',
   description:
-    'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente, editable.',
+    'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente. Con tienda opcional conectada a tu Shopify.',
 }
 
 /**
