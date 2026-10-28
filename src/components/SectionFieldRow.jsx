@@ -214,7 +214,7 @@ function FieldExample({ example, value, onChange }) {
     <button
       type="button"
       onClick={() => onChange(example.value)}
-      className="ui-press mt-2 inline-flex min-h-9 items-center border border-ink/25 px-3 text-[11px] uppercase tracking-[0.16em] text-ink/80 transition-colors hover:border-ink hover:text-ink"
+      className="ui-press mt-2 inline-flex min-h-11 items-center border border-ink/25 px-3 py-2 text-left text-[11px] uppercase tracking-[0.16em] text-ink/80 transition-colors hover:border-ink hover:text-ink"
     >
       {example.label}
     </button>
