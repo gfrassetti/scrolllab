@@ -825,6 +825,13 @@ export default function LabPage({ qa = false }) {
         <section id="ayuda" className="mt-20 scroll-mt-24 border-t border-ink/15 pt-12 md:mt-28">
           <h2 className="text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
           <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
+          <Link
+            to="/lab/shopify"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 text-body-sm font-medium text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+          >
+            <PlatformLogo id="shopify" className="h-4 w-4" />
+            {t('lab.shopifyGuide')}
+          </Link>
           <div className="mt-6 max-w-[68ch]">
             <FaqAccordion items={platformList} openIndex={openPlatform} />
           </div>

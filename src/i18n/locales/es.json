@@ -413,7 +413,8 @@
       "formNote": "Los mensajes de este formulario le llegan por mail a quien creó el widget."
     },
     "worksOn": "Funciona en tu sitio o tu tienda:",
-    "worksOnAny": "y cualquier sitio"
+    "worksOnAny": "y cualquier sitio",
+    "shopifyGuide": "Guía completa para Shopify, con capturas"
   },
   "common": {
     "loading": "Cargando…",

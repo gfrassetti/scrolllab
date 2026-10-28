@@ -413,7 +413,8 @@
       "formNote": "Messages from this form are emailed to whoever created the widget."
     },
     "worksOn": "Works on your site or store:",
-    "worksOnAny": "and any site"
+    "worksOnAny": "and any site",
+    "shopifyGuide": "Full Shopify guide, with screenshots"
   },
   "common": {
     "loading": "Loading…",

@@ -44,6 +44,7 @@ const KinPage = lazy(() => import('./pages/KinPage'))
 const FoldPage = lazy(() => import('./pages/FoldPage'))
 const ApexPage = lazy(() => import('./pages/ApexPage'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
+const LabShopifyPage = lazy(() => import('./pages/LabShopifyPage'))
 const BuilderPage = lazy(() => import('./pages/BuilderPage'))
 const LabPage = lazy(() => import('./pages/LabPage'))
 // Modo prueba (src/domain/qa.js): solo cuentas de QA_BUYER_EMAILS; para el resto, 404.
@@ -238,6 +239,8 @@ export default function App() {
                   <Route path="/plantillas/:sku" element={<ProductPage />} />
                   <Route path="/builder" element={<BuilderPage />} />
                   <Route path="/lab" element={<LabPage />} />
+                  {/* Antes de /lab/:id, que si no la toma como el id de un widget. */}
+                  <Route path="/lab/shopify" element={<LabShopifyPage />} />
                   <Route path="/test" element={<QaHubPage />} />
                   <Route path="/builder-test" element={<QaBuilderPage />} />
                   <Route path="/lab-test" element={<QaLabPage />} />

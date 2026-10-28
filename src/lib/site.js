@@ -95,6 +95,13 @@ export const LAB_SEO = {
     'Secciones animadas de nivel award para tu sitio o tu tienda Shopify, WordPress o Webflow: pegás una línea de código y las editás desde un panel, sin programar. Empezá gratis.',
 }
 
+/** /lab/shopify: la guía de LAB para tiendas Shopify (src/lib/labShopifyPage.js). */
+export const LAB_SHOPIFY_SEO = {
+  title: 'Animaciones scroll para tu tienda Shopify — LAB | Scroll Lab',
+  description:
+    'Secciones animadas de nivel award para tu tienda Shopify, sin apps ni código: pegás una línea en una sección «Liquid personalizado» y las editás desde un panel. Empezá gratis.',
+}
+
 export const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large, noai, noimageai'
 
 function normalizePath(pathname) {
@@ -142,6 +149,14 @@ export function seoForPath(pathname) {
       description: BUILDER_SEO.description,
       robots: INDEXABLE_ROBOTS,
       canonical: `${SITE_URL}/builder`,
+    }
+  }
+  if (path === '/lab/shopify') {
+    return {
+      title: LAB_SHOPIFY_SEO.title,
+      description: LAB_SHOPIFY_SEO.description,
+      robots: INDEXABLE_ROBOTS,
+      canonical: `${SITE_URL}/lab/shopify`,
     }
   }
   if (path === '/lab') {
