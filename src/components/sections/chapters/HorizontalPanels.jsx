@@ -159,6 +159,26 @@ export default function HorizontalPanels({
           }
 
           panelSplits.forEach(({ article, titleSplit, captionSplit }) => {
+            // El paso entero (número + título + bajada) sube y aparece como
+            // un bloque — la señal clara de "ahora el paso 2", más notoria
+            // que el cross-fade palabra por palabra de abajo, que sigue
+            // afinando el texto una vez que el bloque ya está a la vista.
+            gsap.fromTo(
+              article,
+              { autoAlpha: 0, y: 28 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: article,
+                  containerAnimation: tween,
+                  start: 'left 82%',
+                  end: 'left 32%',
+                  scrub: true,
+                },
+              },
+            )
             if (titleSplit) {
               gsap.fromTo(
                 titleSplit.words,
@@ -239,6 +259,23 @@ export default function HorizontalPanels({
           }
 
           panelSplits.forEach(({ article, titleSplit, captionSplit }) => {
+            // Mismo bloque entero (número + título + bajada) que en escritorio,
+            // con el dedo en vez del horizontal: paso 1 sube y aparece, después el 2.
+            gsap.fromTo(
+              article,
+              { autoAlpha: 0, y: 28 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: article,
+                  start: 'top 82%',
+                  end: 'top 42%',
+                  scrub: true,
+                },
+              },
+            )
             if (titleSplit) {
               gsap.fromTo(
                 titleSplit.words,
