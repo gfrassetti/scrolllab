@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getSection } from '../lib/sectionRegistry'
-import { getSectionFieldGroups, getSectionFields, sanitizeProps } from '../lib/sectionFields'
+import { getSectionFields, sanitizeProps, sectionFieldLayout } from '../lib/sectionFields'
 import { recipeHasCommerce } from '../lib/composition'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
@@ -50,9 +50,10 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
   const fontChoice = fontChoiceById(font)
   const editing = items.find((item) => item.uid === editingUid)
   const editingSection = editing ? getSection(editing.sectionId) : null
-  const fields = editing ? getSectionFields(editing.sectionId) : []
-  // Secciones con muchos campos (la grilla de la tienda): grupos plegables.
-  const fieldGroups = editing ? getSectionFieldGroups(editing.sectionId) : null
+  // Secciones con muchos campos: grupos plegables (propios o por tipo).
+  const { groups: fieldGroups, fields } = editing
+    ? sectionFieldLayout(editing.sectionId, getSectionFields(editing.sectionId))
+    : { groups: null, fields: [] }
   // La ayuda de imágenes va una vez por panel, no repetida en cada campo.
   const firstAssetKey = fields.find((f) => f.type === 'image')?.key
   // Un .glb de la computadora probado en el panel: solo cambia lo que se ve acá
