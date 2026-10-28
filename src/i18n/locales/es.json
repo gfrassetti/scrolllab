@@ -28,7 +28,7 @@
     "labShort": "widgets"
   },
   "lab": {
-    "intlNoSubs": "La suscripción a LAB se paga por ahora solo con Mercado Pago, en pesos. Con tarjeta en dólares todavía no está disponible.",
+    "intlNoSubs": "La suscripción a LAB se paga por ahora solo con Mercado Pago, en pesos. Con Polar, en dólares, todavía no está disponible.",
     "eyebrow": "Online widgets",
     "body": "Secciones animadas de nivel premium para tu sitio o tu tienda, sin programar. Funcionan en Shopify, WordPress, Webflow, Wix o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
     "yours": "Tus widgets",
@@ -501,13 +501,13 @@
     "step2Title": "Elegís o armás",
     "step2Body": "Un modelo listo o tu página armada en el builder.",
     "step3Title": "Pagás",
-    "step3Body": "Pagás con Mercado Pago (pesos) o con tarjeta (dólares). La compra aparece en Mis compras.",
+    "step3Body": "Pagás con Mercado Pago (pesos) o con Polar (dólares). La compra aparece en Mis compras.",
     "step4Title": "Descargás el ZIP",
     "step4Body": "Tu compra queda en Mis compras y el ZIP se baja cuando quieras.",
     "howHostedNote": "¿Sin programar? Con LAB le sumás a tu sitio widgets premium — cualquiera de nuestras más de 30 secciones — y los editás online.",
     "howHostedLink": "Probá LAB →",
     "paymentsTitle": "Pago simple y protegido",
-    "paymentsBody": "Pagás con Mercado Pago en pesos, o con tarjeta en dólares a través de Polar. No vemos ni guardamos los datos de tu tarjeta.",
+    "paymentsBody": "Pagás con Mercado Pago en pesos, o con Polar en dólares. No vemos ni guardamos los datos de tu tarjeta.",
     "zipTitle": "Qué viene en el ZIP",
     "zip1": "El proyecto completo, editable",
     "zip2": "Las secciones del modelo o de lo que armaste en el builder",
@@ -1770,7 +1770,7 @@
         "items": [
           "El servicio LAB muestra una sección configurada por vos desde nuestra infraestructura, mediante un <script> que insertás en tu sitio. Es un servicio continuo por suscripción, no un producto entregable.",
           "El código del componente permanece alojado en nuestra infraestructura: no se te licencia ni se te entrega. Para llevarte el código fuente, usá el Builder y la descarga de ZIP.",
-          "La suscripción se cobra por adelantado (mensual o anual): desde Argentina, mediante Mercado Pago en pesos; desde otro país, con tarjeta en dólares a través de Polar, nuestro revendedor autorizado. Se renueva automáticamente al final de cada período hasta que la des de baja.",
+          "La suscripción se cobra por adelantado (mensual o anual): desde Argentina, mediante Mercado Pago en pesos; desde otro país, en dólares a través de Polar, nuestro revendedor autorizado. Se renueva automáticamente al final de cada período hasta que la des de baja.",
           "Podés cancelar cuando quieras desde Mi cuenta. La cancelación detiene las renovaciones futuras y conservás el acceso hasta el final del período ya pagado. Cada cobro se puede reembolsar dentro de los {{days}} días según la Política de reembolsos; pasado ese plazo, los importes ya cobrados no se reembolsan, salvo que la normativa aplicable disponga lo contrario.",
           "Si despublicás la instancia, das de baja la suscripción, o la suspendemos/revocamos por incumplimiento o falta de pago, el embed deja de renderizarse en tu sitio. Al caer la suscripción, las secciones publicadas por encima del límite del plan también dejan de mostrarse.",
           "Los precios pueden cambiar. Te avisaremos con antelación razonable y el nuevo precio rige a partir del período siguiente.",
@@ -1814,7 +1814,7 @@
         "title": "Cómo pedirlo",
         "items": [
           "Desde el Botón de arrepentimiento (al pie del home): sin cuenta, con un código de seguimiento al instante. Vale para cualquier medio de pago.",
-          "Si pagaste con tarjeta, la devolución la gestionamos nosotros con Polar, nuestro revendedor autorizado, que fue quien te cobró: no hace falta que le escribas. Por dudas sobre el cobro o la factura sí podés escribirle a Polar.",
+          "Si pagaste con Polar, la devolución la gestionamos nosotros con Polar, nuestro revendedor autorizado, que fue quien te cobró: no hace falta que le escribas. Por dudas sobre el cobro o la factura sí podés escribirle a Polar.",
           "Antes de disputar el cargo con tu banco, escribinos o usá el Botón de arrepentimiento: lo resolvemos más rápido.",
           "O escribinos con el mail de tu compra y el número de orden (el contacto está al pie de esta página). Lo revisamos y respondemos lo antes posible."
         ],
@@ -1921,13 +1921,13 @@
   },
   "pay": {
     "payAr": "Pagar con Mercado Pago →",
-    "payIntl": "Pagar con tarjeta (USD) →",
+    "payIntl": "Pagar con Polar (USD) →",
     "methodLegend": "Medio de pago",
     "methodMp": "Mercado Pago",
     "methodMpNote": "en pesos argentinos",
-    "methodCard": "Tarjeta",
-    "methodCardNote": "en dólares · vía Polar",
-    "trustIntl": "Pago con tarjeta vía Polar · licencia incluida",
+    "methodCard": "Polar",
+    "methodCardNote": "en dólares (USD)",
+    "trustIntl": "Pago internacional con Polar · licencia incluida",
     "intlTaxNote": "Polar procesa el pago en USD y, antes de pagar, te muestra los impuestos de tu país (IVA o sales tax) si corresponden.",
     "confirming": "Confirmando el pago…"
   },
@@ -1945,7 +1945,7 @@
   },
   "prefs": {
     "label": "Idioma, moneda y tema ({{current}})",
-    "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con tarjeta (Polar).",
+    "currencyNote": "Pesos: pagás con Mercado Pago. Dólares: con Polar.",
     "theme": "Tema",
     "labelShort": "Preferencias ({{current}})"
   }

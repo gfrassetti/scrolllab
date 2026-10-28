@@ -28,7 +28,7 @@
     "labShort": "widgets"
   },
   "lab": {
-    "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Card payment in US dollars isn’t available yet.",
+    "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Paying with Polar, in US dollars, isn’t available yet.",
     "eyebrow": "Online widgets",
     "body": "Premium animated sections for your site or store, no code. They work on Shopify, WordPress, Webflow, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
@@ -501,13 +501,13 @@
     "step2Title": "Pick or build",
     "step2Body": "A ready-made model or a page you build yourself.",
     "step3Title": "Pay",
-    "step3Body": "Pay with Mercado Pago (pesos) or by card (US dollars). Your order shows up under My purchases.",
+    "step3Body": "Pay with Mercado Pago (pesos) or with Polar (US dollars). Your order shows up under My purchases.",
     "step4Title": "Download the ZIP",
     "step4Body": "Your purchase stays under My purchases. Download the ZIP whenever you need it.",
     "howHostedNote": "No code? With LAB you add premium widgets to your site — any of our 30+ sections — and edit them online.",
     "howHostedLink": "Try LAB →",
     "paymentsTitle": "Simple, protected payments",
-    "paymentsBody": "Pay with Mercado Pago in pesos, or by card in US dollars through Polar. We never see or store your card details.",
+    "paymentsBody": "Pay with Mercado Pago in pesos, or with Polar in US dollars. We never see or store your card details.",
     "zipTitle": "What's in the ZIP",
     "zip1": "The full editable project",
     "zip2": "Sections from the model or what you built",
@@ -1770,7 +1770,7 @@
         "items": [
           "The LAB service displays a section you configure, served from our infrastructure through a <script> you add to your site. It is an ongoing subscription service, not a deliverable product.",
           "The component code stays hosted by us: it is not licensed or delivered to you. To get the source code, use the Builder and the ZIP download.",
-          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, by card in US dollars through Polar, our authorized reseller. It renews automatically at the end of each period until you cancel.",
+          "The subscription is billed in advance (monthly or yearly): from Argentina, through Mercado Pago in Argentine pesos; from any other country, in US dollars through Polar, our authorized reseller. It renews automatically at the end of each period until you cancel.",
           "You can cancel anytime from My account. Cancellation stops future renewals and you keep access until the end of the period already paid. Each charge can be refunded within {{days}} days under the Refund policy; after that period, amounts already charged are non-refundable unless applicable law requires otherwise.",
           "If you unpublish the instance, cancel the subscription, or we suspend/revoke it for breach or non-payment, the embed stops rendering on your site. When the subscription lapses, sections published beyond the plan limit also stop showing.",
           "Prices may change. We will give reasonable advance notice and the new price applies from the following period.",
@@ -1814,7 +1814,7 @@
         "title": "How to request it",
         "items": [
           "From the Withdrawal request button (at the bottom of the home page): no account needed, with a tracking code right away. Works for any payment method.",
-          "If you paid by card, we handle the refund with Polar, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Polar.",
+          "If you paid with Polar, we handle the refund with Polar, our authorized reseller, who charged you: you don’t need to write to them. For questions about the charge or the invoice you can write to Polar.",
           "Before disputing the charge with your bank, write to us or use the Withdrawal request button: we resolve it faster.",
           "Or write to us with your purchase email and order number (contact at the bottom of this page). We review it and reply as soon as possible."
         ],
@@ -1921,13 +1921,13 @@
   },
   "pay": {
     "payAr": "Pay with Mercado Pago →",
-    "payIntl": "Pay by card (USD) →",
+    "payIntl": "Pay with Polar (USD) →",
     "methodLegend": "Payment method",
     "methodMp": "Mercado Pago",
     "methodMpNote": "in Argentine pesos",
-    "methodCard": "Card",
-    "methodCardNote": "in US dollars · via Polar",
-    "trustIntl": "Card payment via Polar · license included",
+    "methodCard": "Polar",
+    "methodCardNote": "in US dollars (USD)",
+    "trustIntl": "International payment with Polar · license included",
     "intlTaxNote": "Polar processes the payment in USD and, before you pay, shows your country’s taxes (VAT or sales tax) when they apply.",
     "confirming": "Confirming your payment…"
   },
@@ -1945,7 +1945,7 @@
   },
   "prefs": {
     "label": "Language, currency and theme ({{current}})",
-    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: by card (Polar).",
+    "currencyNote": "Pesos: pay with Mercado Pago. Dollars: with Polar.",
     "theme": "Theme",
     "labelShort": "Preferences ({{current}})"
   }

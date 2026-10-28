@@ -97,7 +97,7 @@ export const LAB_SHOPIFY = {
     },
     {
       q: '¿Cuánto cuesta?',
-      a: 'Empezás gratis con un widget publicado. Los planes pagos suman más widgets y se cobran en pesos (Mercado Pago) o en dólares con tarjeta.',
+      a: 'Empezás gratis con un widget publicado. Los planes pagos suman más widgets y se cobran en pesos (Mercado Pago) o en dólares con Polar.',
     },
   ],
   closingTitle: 'Tu tienda, con movimiento',

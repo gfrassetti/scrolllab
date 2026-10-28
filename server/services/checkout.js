@@ -161,7 +161,7 @@ export async function createCheckoutOrder({
   // Un cupón al 100 % (o un precio mal cargado) no se manda a Polar: cobraría
   // cero y entregaría el ZIP gratis.
   if (usd && lines.some((l) => !(Number(l.unit_price) > 0))) {
-    throw new HttpError(400, 'Ese precio no se puede cobrar con tarjeta', { expose: true })
+    throw new HttpError(400, 'Ese precio no se puede cobrar con Polar', { expose: true })
   }
 
   // En USD se suma en centavos: 0.1 + 0.2 no es 0.3.

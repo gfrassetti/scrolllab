@@ -45,7 +45,7 @@ function QaBadge() {
 
 const FLOWS = [
   {
-    title: 'Polar (tarjeta, en dólares)',
+    title: 'Polar (en dólares)',
     steps: [
       `Comprar el template de prueba por US$ ${QA_TEMPLATE_USD} (el botón de Polar, abajo del de Mercado Pago).`,
       'En el sandbox de Polar no cobra: tarjeta 4242 4242 4242 4242, cualquier fecha futura y CVC.',
