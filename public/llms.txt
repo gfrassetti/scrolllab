@@ -7,7 +7,7 @@ Scroll Lab es un proyecto argentino. Los precios de lista están en dólares (US
 ## Qué ofrecemos
 
 - [Templates](https://www.scrolllab.com.ar/#templates): diez modelos de páginas con scroll cinematográfico, cada uno con su demo en vivo. Se descargan como un proyecto completo con el código fuente.
-- [Builder](https://www.scrolllab.com.ar/builder): armás tu página eligiendo secciones de todos los modelos, con vista previa del scroll en vivo, y te llevás el código. Trae un kit de tienda opcional (catálogo, ficha, carrito y checkout) que se conecta a la tienda Shopify del comprador: los productos, el stock y el pago salen de Shopify, sin backend.
+- [Builder](https://www.scrolllab.com.ar/builder): armás tu página eligiendo secciones de todos los modelos, con vista previa del scroll en vivo, y te llevás el código. Trae un kit de tienda opcional (catálogo, ficha, carrito y checkout) que se conecta a la tienda Shopify del comprador: los productos, el stock y el pago salen de Shopify, sin backend. Sin Shopify, el checkout del kit es de ejemplo y no cobra: el comprador conecta su propio cobro en el código que descarga; Scroll Lab no ofrece un checkout propio.
 - [LAB](https://www.scrolllab.com.ar/lab): una sección con nuestro nivel de diseño que se inserta en cualquier sitio con una línea de código, sin bajar nada. Se edita desde un panel online y funciona por suscripción, con un plan gratuito.
 - [Trabajo a medida](https://www.scrolllab.com.ar/#estudio): diseño y desarrollo de un sitio propio, o adaptación de uno de los modelos a tu marca. Se cotiza caso por caso a través del formulario de contacto.
 

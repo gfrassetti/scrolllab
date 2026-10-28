@@ -131,7 +131,7 @@
       },
       {
         "q": "Can I sell with my Shopify products?",
-        "a": "Yes, in two ways. With LAB, any widget goes into your Shopify store as one more section, no apps. With the Builder, the shop kit builds the catalog, product page, cart and checkout in our design and connects to your own Shopify store: products, stock and payments come from Shopify, no backend. The Builder is source code, for people who code."
+        "a": "Yes, in two ways. With LAB, any widget goes into your Shopify store as one more section, no apps. With the Builder, the shop kit builds the catalog, product page, cart and checkout in our design and connects to your own Shopify store: products, stock and payments come from Shopify, no backend. The Builder is source code, for people who code. Without Shopify, the kit’s checkout is a sample that takes no payments: wiring your own (Mercado Pago, Stripe…) is up to you in the code you download. ScrollLab does not provide a checkout of its own."
       },
       {
         "q": "Can I build my whole site with widgets?",
@@ -592,7 +592,7 @@
     "heroLabBefore": "Already have a site? Add animated sections with ",
     "heroLabName": "LAB",
     "heroLabAfter": ", no code",
-    "builderShop": "With the shop kit your page sells: catalog, cart and checkout connected to your own Shopify store (products, stock and payments come from it), no backend."
+    "builderShop": "With the shop kit your page sells: catalog, cart and checkout connected to your own Shopify store, no backend. Without Shopify, you wire the payments yourself in the code you download."
   },
   "templates": {
     "chapters": {
@@ -789,13 +789,13 @@
     "editing": "Editing",
     "editPanel": "Edit section",
     "noEditableFields": "Nothing to edit here for this section: you tune it in the ZIP's code.",
-    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). To take real payments, connect a Shopify store with two fields (Shopify products, stock and checkout, no backend), or wire your Mercado Pago or Stripe in checkoutAdapter.js. Adding the grid turns on the full kit (+{{price}}).",
+    "commerceHint": "Add a shop to your page: catalog, product page, cart and checkout. It takes payments through your Shopify, connected in two fields. Without Shopify, the checkout is a sample that takes no payments: you wire your own after downloading the code. Adding the grid adds the kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
     "priceNext": "You reached the {{included}} sections the base covers: the next one adds {{next}}.",
     "priceExtras": "You have {{count}} sections ({{included}} covered by the base). The next one adds {{next}}.",
     "priceMax": "{{max}} sections is the cap here. Remove one if you want to swap it.",
-    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. The grid counts as one more section, and its fields connect your Shopify store.",
+    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. Payments go through your Shopify store, connected in the grid’s fields; without it, the checkout is a sample.",
     "commerceIncluded": "+{{price}} Commerce kit (product page, cart and checkout), on top of the section",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",
@@ -1714,7 +1714,7 @@
       },
       {
         "title": "Products and license",
-        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, MONOLITH, FIZZ, ATELIER), builder compositions, and—if you add it—the Commerce kit (catalog, product page, cart, and checkout). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes your license with email and order number."
+        "body": "Products are digital source-code downloads: fixed models (CHAPTERS, MONOLITH, FIZZ, ATELIER), builder compositions, and—if you add it—the Commerce kit (catalog, product page, cart, and checkout). A purchase does not transfer intellectual property ownership; it only grants the usage rights in the Regular License published on the site. The ZIP includes your license with email and order number. The Commerce kit includes a sample checkout that does not process payments: to take payments, the buyer connects their own Shopify store or payment gateway, and that connection is their responsibility. ScrollLab does not provide or operate a checkout for your store."
       },
       {
         "title": "Prices and payments",

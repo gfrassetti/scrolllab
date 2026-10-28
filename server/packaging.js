@@ -445,7 +445,7 @@ function appendWebglIfNeeded(archive, sources, prefix = '') {
   }
 }
 
-const CHECKOUT_PAYMENTS_NOTE = `Checkout ships in **mock** mode. Two ways to take real payments:
+const CHECKOUT_PAYMENTS_NOTE = `Checkout ships in **mock** mode: it takes no payments, and Scroll Lab does not provide a checkout or payment backend of its own. Taking payments is up to you, in two ways:
 
 1. **Shopify** (no backend): pass \`shopify={{ domain, token, collection }}\` to \`<ShopCatalogProvider>\` in \`src/App.jsx\`. Products, prices, variants and stock then come from your Shopify store, and checkout is Shopify's. Setup steps at the top of \`src/lib/shop/shopify.js\`.
 2. **Your own provider**: open \`src/lib/shop/checkoutAdapter.js\`, replace \`createCheckout\` with your Mercado Pago / Stripe backend call and keep the same return shape: \`{ ok, orderId, message, mode }\`.

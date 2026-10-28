@@ -131,7 +131,7 @@
       },
       {
         "q": "¿Puedo vender con mis productos de Shopify?",
-        "a": "Sí, de dos maneras. En LAB, cualquier widget va en tu tienda Shopify como una sección más, sin apps. En el Builder, el kit de tienda arma catálogo, ficha, carrito y checkout con nuestro diseño y se conecta a tu propia tienda Shopify: los productos, el stock y el pago salen de Shopify, sin backend. El Builder es código fuente, para quien programa."
+        "a": "Sí, de dos maneras. En LAB, cualquier widget va en tu tienda Shopify como una sección más, sin apps. En el Builder, el kit de tienda arma catálogo, ficha, carrito y checkout con nuestro diseño y se conecta a tu propia tienda Shopify: los productos, el stock y el pago salen de Shopify, sin backend. El Builder es código fuente, para quien programa. Sin Shopify, el checkout del kit es de ejemplo y no cobra: conectar tu propio cobro (Mercado Pago, Stripe…) lo hacés vos en el código que descargás. ScrollLab no ofrece un checkout propio."
       },
       {
         "q": "¿Puedo hacer todo mi sitio con widgets?",
@@ -592,7 +592,7 @@
     "heroLabBefore": "¿Ya tenés un sitio? Sumale secciones animadas con ",
     "heroLabName": "LAB",
     "heroLabAfter": ", sin programar",
-    "builderShop": "Con el kit de tienda, la página vende: catálogo, carrito y checkout conectados a tu propia tienda Shopify (productos, stock y pago salen de ahí), sin backend."
+    "builderShop": "Con el kit de tienda, la página vende: catálogo, carrito y checkout conectados a tu propia tienda Shopify, sin backend. Sin Shopify, el cobro lo conectás vos en el código que descargás."
   },
   "templates": {
     "chapters": {
@@ -789,13 +789,13 @@
     "editing": "Editando",
     "editPanel": "Editar sección",
     "noEditableFields": "Esta sección no tiene textos para editar acá: se ajusta en el código del ZIP.",
-    "commerceHint": "Una tienda para tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). Para cobrar de verdad: conectás una tienda Shopify con dos campos (productos, stock y checkout de Shopify, sin backend), o tu Mercado Pago o Stripe en checkoutAdapter.js. Al agregar la grilla se activa el kit completo (+{{price}}).",
+    "commerceHint": "Una tienda para tu página: catálogo, ficha, carrito y checkout. Cobra con tu Shopify, conectado en dos campos. Sin Shopify, el checkout es de ejemplo y no cobra: el cobro lo conectás vos al descargar el código. Al agregar la grilla se suma el kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "La base incluye {{included}} secciones: te quedan {{left}} sin costo extra.",
     "priceNext": "Llegaste a las {{included}} secciones de la base: la próxima suma {{next}}.",
     "priceExtras": "Llevás {{count}} secciones ({{included}} incluidas en la base). La próxima suma {{next}}.",
     "priceMax": "Tope de {{max}} secciones: es lo máximo que se arma acá. Para cambiar una, primero se saca otra.",
-    "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. La grilla cuenta como una sección más, y en sus campos se conecta tu tienda Shopify.",
+    "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. El cobro va por tu tienda Shopify, que se conecta en los campos de la grilla; sin ella, el checkout es de ejemplo.",
     "commerceIncluded": "+{{price}} del kit Commerce (ficha, carrito y checkout), aparte de la sección",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",
@@ -1714,7 +1714,7 @@
       },
       {
         "title": "Productos y licencia",
-        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, MONOLITH, FIZZ, ATELIER), composiciones armadas en el builder y, si lo incluís, el kit Commerce (catálogo, ficha de producto, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye tu licencia con email y número de orden."
+        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, MONOLITH, FIZZ, ATELIER), composiciones armadas en el builder y, si lo incluís, el kit Commerce (catálogo, ficha de producto, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye tu licencia con email y número de orden. El kit Commerce trae un checkout de ejemplo que no procesa pagos: para cobrar se conecta la tienda Shopify del comprador o su propia pasarela, y esa conexión corre por su cuenta. ScrollLab no ofrece ni opera un checkout para tu tienda."
       },
       {
         "title": "Precios y pagos",
