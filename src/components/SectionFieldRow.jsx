@@ -94,7 +94,7 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
         className={selectCls}
         style={{ colorScheme: 'light' }}
       >
-        {(field.options || []).map((o) => (
+        {(field.options || []).filter((o) => !o.retired || o.value === value).map((o) => (
           <option
             key={o.value}
             value={o.value}

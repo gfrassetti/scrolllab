@@ -10,7 +10,7 @@ import { toggle } from '../helpers.js'
 const SHOPIFY_DEMO = {
   label: 'Probar con la tienda de ejemplo de Shopify',
   value: 'mock.shop',
-  active: 'Con la tienda de ejemplo de Shopify (mock.shop): productos, carrito y checkout de prueba. Para la tuya van su dominio y su token.',
+  active: 'Con la tienda de ejemplo de Shopify (mock.shop): productos y carrito reales de Shopify. Su checkout es de prueba y aparece vacío; con una tienda real muestra el pedido. Para la tuya van su dominio y su token.',
 }
 
 const SHOPIFY_HELP = {
@@ -39,14 +39,14 @@ export const COMMERCE_FIELDS = {
       options: [
         { value: 'auto', label: 'Auto (sección de al lado)' },
         { value: 'chapters', label: 'Chapters · #ff4b00' },
-        { value: 'nocturne', label: 'Nocturne · #d9ff3f' },
+        { value: 'nocturne', label: 'Nocturne · #d9ff3f', retired: true },
         { value: 'monolith', label: 'Monolith · #2b3cff' },
-        { value: 'velocity', label: 'Velocity · #d9ff3f' },
+        { value: 'velocity', label: 'Velocity · #d9ff3f', retired: true },
         { value: 'fizz', label: 'Fizz · #ff3ea5' },
         { value: 'atelier', label: 'Atelier · #c8d0dc' },
         { value: 'comic', label: 'Comic · #e85a24' },
         { value: 'unity', label: 'Unity · #f4c518' },
-        { value: 'ratio', label: 'Ratio · #e23c24' },
+        { value: 'ratio', label: 'Ratio · #e23c24', retired: true },
         { value: 'atrium', label: 'Atrium · #111111' },
         { value: 'meridian', label: 'Meridian · #8f7a5e' },
         { value: 'kin', label: 'Kin · #e1371f' },

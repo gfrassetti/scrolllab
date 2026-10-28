@@ -64,10 +64,12 @@ async function storefront(config, query, variables, fetchImpl = globalThis.fetch
   return json.data
 }
 
+// Las fotos llegan achicadas por el CDN de Shopify: el original de una tienda
+// suele medir 2000–4096 px (400 KB+ cada una); a 1200 px de ancho pesa ~30 KB.
 const PRODUCT_FIELDS = `
   id handle title description availableForSale
-  featuredImage { url altText }
-  images(first: 4) { nodes { url altText } }
+  featuredImage { url(transform: { maxWidth: 1200 }) altText }
+  images(first: 4) { nodes { url(transform: { maxWidth: 1200 }) altText } }
   options { name optionValues { name swatch { color } } }
   variants(first: 100) {
     nodes { id title availableForSale price { amount currencyCode } }

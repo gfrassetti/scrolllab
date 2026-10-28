@@ -2,6 +2,9 @@
  * @typedef {Object} SectionFieldOption
  * @property {string} value
  * @property {string} label
+ * @property {boolean} [retired] Un template que salió de la venta: el panel no lo
+ *   ofrece (salvo que ya esté elegido) y el servidor lo sigue aceptando, así una
+ *   composición vendida con ese color se rearma igual.
  *
  * @typedef {Object} SectionSubField Un campo de cada fila de una lista.
  * @property {string} key
