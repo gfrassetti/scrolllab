@@ -30,7 +30,7 @@
   "lab": {
     "intlNoSubs": "La suscripción a LAB se paga por ahora solo con Mercado Pago, en pesos. Con Polar, en dólares, todavía no está disponible.",
     "eyebrow": "Online widgets",
-    "body": "Secciones animadas de nivel premium para tu sitio o tu tienda, sin programar. Funcionan en Shopify, WordPress, Webflow, Wix o cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
+    "body": "Secciones animadas de nivel premium para tu sitio o tu tienda, sin programar. Probadas en Shopify y WordPress; funcionan en cualquier sitio donde puedas pegar código. Cambiás textos, fotos y colores desde acá y se actualizan solos.",
     "yours": "Tus widgets",
     "publishedCount": "{{n}} de {{quota}} publicados en tu plan · {{total}} creados",
     "publishedCountFrozen": "{{n}} de {{quota}} activos en tu plan · {{frozen}} congelados · {{total}} creados",
@@ -111,7 +111,7 @@
       },
       {
         "q": "¿Funciona en Webflow, WordPress, etc.?",
-        "a": "Sí, en cualquier sitio donde puedas pegar una etiqueta <script> en el HTML."
+        "a": "Está pensado para cualquier sitio donde puedas pegar una etiqueta <script> en el HTML. Lo probamos en vivo en Shopify y WordPress; en Webflow, Squarespace y otros no lo probamos todavía, y si algo no anda, nos podés escribir."
       },
       {
         "q": "¿Qué pasa si lo despublico o doy de baja el plan?",
@@ -127,7 +127,7 @@
       },
       {
         "q": "¿En qué se diferencia del Builder?",
-        "a": "Depende de si programás. LAB es sin código: pegás una línea en tu sitio (el que ya tenés o uno nuevo en WordPress, Webflow, Wix…), los widgets los hosteamos nosotros y los editás desde acá. El Builder es para desarrolladores: armás la página entera con nuestras secciones y te llevás el código React, con pago único."
+        "a": "Depende de si programás. LAB es sin código: pegás una línea en tu sitio (el que ya tenés o uno nuevo en WordPress, Shopify…), los widgets los hosteamos nosotros y los editás desde acá. El Builder es para desarrolladores: armás la página entera con nuestras secciones y te llevás el código React, con pago único."
       },
       {
         "q": "¿Puedo vender con mis productos de Shopify?",
@@ -261,7 +261,7 @@
     "heroCtaFree": "Empezá gratis",
     "heroCtaPlans": "Ver planes",
     "platformsTitle": "Cómo pegarlo en tu plataforma",
-    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget o del pack publicado.",
+    "platformsNote": "El código es el mismo en todas: el que aparece en la card del widget o del pack publicado. Probamos en vivo Shopify y WordPress; en las demás los pasos son los habituales de cada plataforma.",
     "platforms": [
       {
         "q": "Shopify",

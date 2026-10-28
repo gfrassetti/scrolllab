@@ -30,7 +30,7 @@
   "lab": {
     "intlNoSubs": "LAB subscriptions are paid with Mercado Pago, in Argentine pesos, for now. Paying with Polar, in US dollars, isn’t available yet.",
     "eyebrow": "Online widgets",
-    "body": "Premium animated sections for your site or store, no code. They work on Shopify, WordPress, Webflow, Wix or any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
+    "body": "Premium animated sections for your site or store, no code. Tested on Shopify and WordPress; they work on any site where you can paste code. Change texts, photos and colors from here and they update on their own.",
     "yours": "Your widgets",
     "publishedCount": "{{n}} of {{quota}} published on your plan · {{total}} created",
     "publishedCountFrozen": "{{n}} of {{quota}} live on your plan · {{frozen}} frozen · {{total}} created",
@@ -111,7 +111,7 @@
       },
       {
         "q": "Does it work on Webflow, WordPress, etc.?",
-        "a": "Yes, on any site where you can paste a <script> tag into the HTML."
+        "a": "It is meant for any site where you can paste a <script> tag into the HTML. We tested it live on Shopify and WordPress; we have not tested Webflow, Squarespace and others yet, and if something does not work, write to us."
       },
       {
         "q": "What happens if I unpublish or cancel the plan?",
@@ -127,7 +127,7 @@
       },
       {
         "q": "How is it different from the Builder?",
-        "a": "It depends on whether you code. LAB is no-code: you paste one line into your site (the one you have or a new one on WordPress, Webflow, Wix…), we host the widgets and you edit them from here. The Builder is for developers: you build the whole page with our sections and take the React code, for a one-time payment."
+        "a": "It depends on whether you code. LAB is no-code: you paste one line into your site (the one you have or a new one on WordPress, Shopify…), we host the widgets and you edit them from here. The Builder is for developers: you build the whole page with our sections and take the React code, for a one-time payment."
       },
       {
         "q": "Can I sell with my Shopify products?",
@@ -261,7 +261,7 @@
     "heroCtaFree": "Start free",
     "heroCtaPlans": "See plans",
     "platformsTitle": "How to paste it on your platform",
-    "platformsNote": "The code is the same everywhere: the one shown on the card of the published widget or pack.",
+    "platformsNote": "The code is the same everywhere: the one shown on the card of the published widget or pack. We tested Shopify and WordPress live; on the others the steps are each platform's usual ones.",
     "platforms": [
       {
         "q": "Shopify",
