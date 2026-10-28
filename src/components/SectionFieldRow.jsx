@@ -201,6 +201,26 @@ function FieldHelp({ help, absoluteUrls = false }) {
   )
 }
 
+/**
+ * `field.example`: un botón que completa el campo con un valor de prueba (la
+ * tienda de ejemplo de Shopify). Con ese valor puesto, dice qué se está viendo.
+ */
+function FieldExample({ example, value, onChange }) {
+  if (!example) return null
+  if (value === example.value) {
+    return <p className="mt-2 text-xs leading-relaxed text-ink/60">{example.active}</p>
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(example.value)}
+      className="ui-press mt-2 inline-flex min-h-9 items-center border border-ink/25 px-3 text-[11px] uppercase tracking-[0.16em] text-ink/80 transition-colors hover:border-ink hover:text-ink"
+    >
+      {example.label}
+    </button>
+  )
+}
+
 export default function SectionFieldRow({ field, value, onChange, hint, absoluteUrls = false }) {
   const { t } = useI18n()
 
@@ -313,6 +333,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
           </span>
         ) : null}
       </label>
+      <FieldExample example={field.example} value={value} onChange={onChange} />
       <FieldHelp help={field.help} absoluteUrls={absoluteUrls} />
     </div>
   )

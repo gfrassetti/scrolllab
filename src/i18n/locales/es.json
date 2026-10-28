@@ -784,7 +784,7 @@
     "editing": "Editando",
     "editPanel": "Editar sección",
     "noEditableFields": "Esta sección no tiene textos para editar acá: se ajusta en el código del ZIP.",
-    "commerceHint": "Una tienda para tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). El kit es solo frontend a propósito: conectás tu Mercado Pago o Stripe en checkoutAdapter.js cuando quieras (le pasás la doc a una IA y te lo arma en minutos). Al agregar la grilla se activa el kit completo (+{{price}}).",
+    "commerceHint": "Una tienda para tu página: catálogo, ficha de producto, carrito y checkout. Incluye la UI y la lógica JS (agregar, quitar, sumar y restar cantidades, total). Para cobrar de verdad: conectás una tienda Shopify con dos campos (productos, stock y checkout de Shopify, sin backend), o tu Mercado Pago o Stripe en checkoutAdapter.js. Al agregar la grilla se activa el kit completo (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "La base incluye {{included}} secciones: te quedan {{left}} sin costo extra.",
     "priceNext": "Llegaste a las {{included}} secciones de la base: la próxima suma {{next}}.",

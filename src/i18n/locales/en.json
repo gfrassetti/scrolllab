@@ -784,7 +784,7 @@
     "editing": "Editing",
     "editPanel": "Edit section",
     "noEditableFields": "Nothing to edit here for this section: you tune it in the ZIP's code.",
-    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). The kit is frontend-only on purpose: wire your Mercado Pago or Stripe in checkoutAdapter.js whenever you're ready (paste the docs into an AI assistant and it's a quick job). Adding the grid turns on the full kit (+{{price}}).",
+    "commerceHint": "Add a shop to your page: catalog, product page, cart, and checkout. You get the UI plus the JS logic (add, remove, increase and decrease quantities, totals). To take real payments, connect a Shopify store with two fields (Shopify products, stock and checkout, no backend), or wire your Mercado Pago or Stripe in checkoutAdapter.js. Adding the grid turns on the full kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
     "priceNext": "You reached the {{included}} sections the base covers: the next one adds {{next}}.",

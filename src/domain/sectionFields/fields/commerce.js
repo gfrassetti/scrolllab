@@ -3,6 +3,29 @@ import { toggle } from '../helpers.js'
 /** @typedef {import('../types.js').SectionField} SectionField */
 
 /**
+ * La tienda de prueba pública de Shopify (mock.shop): sin cuenta ni token.
+ * Sirve para ver en el preview el circuito real (productos, carrito y checkout
+ * de Shopify) antes de conectar la tienda propia.
+ */
+const SHOPIFY_DEMO = {
+  label: 'Probar con la tienda de ejemplo de Shopify',
+  value: 'mock.shop',
+  active: 'Con la tienda de ejemplo de Shopify (mock.shop): productos, carrito y checkout de prueba. Para la tuya van su dominio y su token.',
+}
+
+const SHOPIFY_HELP = {
+  title: 'Cómo conectar una tienda Shopify',
+  steps: [
+    'Vacío, la tienda usa los productos de esta sección y el checkout de ejemplo. Con Shopify, los productos, precios, talles, stock y fotos salen de la tienda, y el pago es el checkout de Shopify: la plata va directo a la cuenta de la tienda.',
+    'En el panel de Shopify: Configuración → Apps y canales de venta → Shopify App Store. Instalá el canal «Headless» (es gratis).',
+    'Dentro del canal: «Crear tienda externa» → «Storefront API». Copiá el «Token de acceso público» (el privado no va acá).',
+    'Pegá acá el dominio (tu-tienda.myshopify.com) y el token. Para mostrar una sola colección, su handle va en «Colección».',
+    'Los productos se editan en Shopify y aparecen acá al recargar. Desde ScrollLab se editan los textos, los colores y la ficha.',
+  ],
+  zipSteps: ['En el código queda en <ShopCatalogProvider shopify> de src/App.jsx; el README trae el detalle.'],
+}
+
+/**
  * Campos editables de las secciones de COMMERCE (builder + LAB).
  * El ensamblado y la lista completa: ../fields.js.
  * @type {Record<string, SectionField[]>}
@@ -56,6 +79,17 @@ export const COMMERCE_FIELDS = {
     { key: 'addLabel', label: 'Botón de agregar rápido', type: 'text' },
     { key: 'soldOutLabel', label: 'Producto agotado — texto del botón', type: 'text' },
     { key: 'variantHint', label: 'Pista bajo el botón en productos con talle o color ({label} = el nombre de la variante)', type: 'text' },
+    // Tienda Shopify (src/lib/shop/shopify.js): con dominio y token, los
+    // productos, precios y stock salen de Shopify y se paga en su checkout.
+    {
+      key: 'shopifyDomain',
+      label: 'Shopify · Dominio de la tienda (tu-tienda.myshopify.com; vacío = sin Shopify)',
+      type: 'text',
+      example: SHOPIFY_DEMO,
+      help: SHOPIFY_HELP,
+    },
+    { key: 'shopifyToken', label: 'Shopify · Token público de Storefront (canal «Headless»)', type: 'text' },
+    { key: 'shopifyCollection', label: 'Shopify · Colección a mostrar (su handle; vacío = toda la tienda)', type: 'text' },
     // El catálogo del kit: la grilla, la ficha, el carrito y el checkout usan
     // estos productos (src/lib/shop/catalog.js). Lo que una fila deja vacío
     // toma el valor del producto de ejemplo en esa posición.
@@ -80,11 +114,6 @@ export const COMMERCE_FIELDS = {
         toggle('showSoldOut', 'Agotado', undefined, 'off'),
       ],
     },
-    // Tienda Shopify (src/lib/shop/shopify.js): con dominio y token, los
-    // productos, precios y stock salen de Shopify y se paga en su checkout.
-    { key: 'shopifyDomain', label: 'Shopify · Dominio de la tienda (tu-tienda.myshopify.com; vacío = sin Shopify)', type: 'text' },
-    { key: 'shopifyToken', label: 'Shopify · Token público de Storefront (canal «Headless»)', type: 'text' },
-    { key: 'shopifyCollection', label: 'Shopify · Colección a mostrar (su handle; vacío = toda la tienda)', type: 'text' },
     // El carrito lateral y la ficha de producto tampoco son secciones: sus
     // textos viajan como props `cart*` / `detail*` (src/domain/checkoutProps.js).
     { key: 'cartButtonLabel', label: 'Carrito · Botón flotante', type: 'text' },

@@ -22,6 +22,12 @@
  *   (`linksText`, o la misma prop como texto); sanitizeProps migra lo guardado.
  * @property {FieldHelp} [help] Guía desplegable debajo del campo: qué poner y por qué.
  * @property {'on' | 'off'} [default] Solo `toggle`: cómo arranca sin valor (por defecto 'on').
+ * @property {FieldExample} [example] Botón bajo el campo que lo completa con un valor de prueba.
+ *
+ * @typedef {Object} FieldExample
+ * @property {string} label El botón («Probar con…»).
+ * @property {string} value Lo que escribe en el campo.
+ * @property {string} active Lo que dice mientras el campo tiene ese valor.
  *
  * @typedef {Object} FieldHelp
  * @property {string} title Lo que dice el desplegable cerrado («Cómo elegir…»).
