@@ -39,7 +39,12 @@ export const useShopCart = create(
             variant,
             variantLabel: variant ? product.variants?.label : null,
             name: product.name,
-            price: product.price,
+            // Con Shopify cada variante puede tener su precio (solo para
+            // mostrar: Shopify cobra el suyo) y el carrito lleva su id.
+            price: product.variantPrices?.[variant] ?? product.price,
+            ...(product.variantIds
+              ? { merchandiseId: product.variantIds[variant ?? ''] ?? null }
+              : {}),
             currency: product.currency,
             img: product.img,
             qty,

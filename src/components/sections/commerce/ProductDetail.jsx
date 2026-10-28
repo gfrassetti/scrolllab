@@ -131,6 +131,10 @@ export default function ProductDetail({
   const images = product ? (product.images?.length ? product.images : [product.img]) : []
   const swatches = product?.variants?.swatches
   const centered = shape === 'centered'
+  // Con Shopify: variantes sin stock (no se pueden elegir) y precio por variante.
+  const optionOut = (option) => Boolean(product?.soldOutOptions?.includes(option))
+  const unavailable = Boolean(product?.soldOut) || optionOut(variant)
+  const price = product?.variantPrices?.[variant] ?? product?.price
 
   const info = product && (
     <div className={centered ? 'mx-auto max-w-xl text-center' : ''}>
@@ -146,7 +150,7 @@ export default function ProductDetail({
         ) : null}
       </div>
       <h1 className="mt-3 text-[clamp(2rem,5vw,4rem)] leading-[0.95] font-medium tracking-[-0.03em]">{product.name}</h1>
-      <p className="mt-4 text-lg text-[color:var(--shop-muted)]">{formatShopPrice(product.price, product.currency)}</p>
+      <p className="mt-4 text-lg text-[color:var(--shop-muted)]">{formatShopPrice(price, product.currency)}</p>
       <p className={`mt-4 max-w-[40ch] text-sm leading-relaxed text-[color:var(--shop-muted)] md:text-base ${centered ? 'mx-auto' : ''}`}>
         {product.blurb}
       </p>
@@ -163,18 +167,18 @@ export default function ProductDetail({
                 <label
                   key={option}
                   title={option}
-                  className="ui-press grid size-10 cursor-pointer place-items-center rounded-full border border-[color:var(--shop-border)] has-[:checked]:border-[color:var(--shop-fg)]"
+                  className="ui-press grid size-10 cursor-pointer place-items-center rounded-full border border-[color:var(--shop-border)] has-[:checked]:border-[color:var(--shop-fg)] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-35"
                 >
-                  <input type="radio" name="variant" value={option} checked={variant === option} onChange={() => setVariant(option)} className="sr-only" aria-label={option} />
+                  <input type="radio" name="variant" value={option} checked={variant === option} onChange={() => setVariant(option)} disabled={optionOut(option)} className="sr-only" aria-label={option} />
                   <span aria-hidden="true" className="size-7 rounded-full" style={{ backgroundColor: swatches[option] }} />
                 </label>
               ) : (
                 <label
                   key={option}
-                  className="ui-press cursor-pointer border border-[color:var(--shop-border)] px-3 py-1.5 text-sm has-[:checked]:border-[color:var(--shop-accent)] has-[:checked]:bg-[color:var(--shop-accent)] has-[:checked]:text-[color:var(--shop-accent-fg)]"
+                  className="ui-press cursor-pointer border border-[color:var(--shop-border)] px-3 py-1.5 text-sm has-[:checked]:border-[color:var(--shop-accent)] has-[:checked]:bg-[color:var(--shop-accent)] has-[:checked]:text-[color:var(--shop-accent-fg)] has-[:disabled]:cursor-not-allowed has-[:disabled]:line-through has-[:disabled]:opacity-40"
                   style={{ borderRadius: 'var(--shop-radius)' }}
                 >
-                  <input type="radio" name="variant" value={option} checked={variant === option} onChange={() => setVariant(option)} className="sr-only" />
+                  <input type="radio" name="variant" value={option} checked={variant === option} onChange={() => setVariant(option)} disabled={optionOut(option)} className="sr-only" />
                   {option}
                 </label>
               ),
@@ -190,24 +194,24 @@ export default function ProductDetail({
           className="inline-flex items-center border border-[color:var(--shop-border)]"
           style={{ borderRadius: 'var(--shop-radius)' }}
         >
-          <button type="button" aria-label="−1" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1 || product.soldOut} className="grid size-11 place-items-center text-lg disabled:opacity-30">
+          <button type="button" aria-label="−1" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1 || unavailable} className="grid size-11 place-items-center text-lg disabled:opacity-30">
             −
           </button>
           <span className="min-w-8 text-center text-sm tabular-nums" aria-live="polite">
             {qty}
           </span>
-          <button type="button" aria-label="+1" onClick={() => setQty((q) => Math.min(99, q + 1))} disabled={product.soldOut} className="grid size-11 place-items-center text-lg disabled:opacity-30">
+          <button type="button" aria-label="+1" onClick={() => setQty((q) => Math.min(99, q + 1))} disabled={unavailable} className="grid size-11 place-items-center text-lg disabled:opacity-30">
             +
           </button>
         </div>
         <button
           type="button"
           onClick={() => addItem(product, qty, variant)}
-          disabled={product.soldOut}
+          disabled={unavailable}
           className={btn}
           style={{ borderRadius: 'var(--shop-radius)' }}
         >
-          {product.soldOut ? soldOutLabel : cta}
+          {unavailable ? soldOutLabel : cta}
         </button>
       </div>
 

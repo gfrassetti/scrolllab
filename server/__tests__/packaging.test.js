@@ -506,6 +506,30 @@ describe('ZIP del builder', () => {
     assert.deepEqual(brokenImports(files), [])
   })
 
+  // Con una tienda Shopify conectada en el builder, el ZIP lee esa tienda y
+  // paga en su checkout: la config va al provider, no a la grilla.
+  it('la tienda Shopify conectada viaja al provider del ZIP', async () => {
+    const files = await pack('custom-shopify', (destPath) =>
+      packCustomTemplate({
+        recipe: validateRecipe([
+          {
+            id: 'commerce/ProductGrid',
+            props: { shopifyDomain: 'brand.myshopify.com', shopifyToken: 'abc123', shopifyCollection: 'boards' },
+          },
+        ]),
+        destPath,
+        licenseMeta: LICENSE,
+      }),
+    )
+    const app = files.get('src/App.jsx').toString('utf8')
+    assert.match(app, /shopify=\{\{"domain":"brand\.myshopify\.com","token":"abc123","collection":"boards"\}\}/)
+    assert.doesNotMatch(app, /<ProductGrid_commerce[^>]*shopify/, 'la grilla no necesita la config')
+    assert.ok(files.has('src/lib/shop/shopify.js'))
+    assert.match(files.get('README.md').toString('utf8'), /### Shopify/)
+    assert.deepEqual(brokenImports(files), [])
+    assertDepsCoverImports(files)
+  })
+
   it('no arrastra three cuando la receta no lo usa', async () => {
     const files = await pack('custom-light', (destPath) =>
       packCustomTemplate({

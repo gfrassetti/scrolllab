@@ -80,6 +80,11 @@ export const COMMERCE_FIELDS = {
         toggle('showSoldOut', 'Agotado', undefined, 'off'),
       ],
     },
+    // Tienda Shopify (src/lib/shop/shopify.js): con dominio y token, los
+    // productos, precios y stock salen de Shopify y se paga en su checkout.
+    { key: 'shopifyDomain', label: 'Shopify · Dominio de la tienda (tu-tienda.myshopify.com; vacío = sin Shopify)', type: 'text' },
+    { key: 'shopifyToken', label: 'Shopify · Token público de Storefront (canal «Headless»)', type: 'text' },
+    { key: 'shopifyCollection', label: 'Shopify · Colección a mostrar (su handle; vacío = toda la tienda)', type: 'text' },
     // El carrito lateral y la ficha de producto tampoco son secciones: sus
     // textos viajan como props `cart*` / `detail*` (src/domain/checkoutProps.js).
     { key: 'cartButtonLabel', label: 'Carrito · Botón flotante', type: 'text' },

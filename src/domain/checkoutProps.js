@@ -20,8 +20,11 @@ function propsWithPrefix(gridProps, prefix) {
   return out
 }
 
-/** Prefijos de las props del ProductGrid que van a otra pantalla, no a la grilla. */
-export const SHOP_ROUTE_PREFIXES = Object.freeze(['checkout', 'detail', 'cart'])
+/**
+ * Prefijos de las props del ProductGrid que van a otra pantalla o a toda la
+ * tienda, no a la grilla (`shopify*`: la tienda Shopify conectada).
+ */
+export const SHOP_ROUTE_PREFIXES = Object.freeze(['checkout', 'detail', 'cart', 'shopify'])
 
 export function checkoutPropsFrom(gridProps) {
   return propsWithPrefix(gridProps, 'checkout')
@@ -53,6 +56,20 @@ export function shopColorsFromItems(items) {
     if (typeof props[key] === 'string' && props[key]) out[key] = props[key]
   }
   return out
+}
+
+/**
+ * La tienda Shopify conectada en el ProductGrid ({ domain, token, collection })
+ * o null si no hay dominio. El token es el público de Storefront (solo lectura,
+ * hecho para ir en el navegador). Lo que falte lo resuelve
+ * normalizeShopifyConfig (src/lib/shop/shopify.js).
+ */
+export function shopifyConfigFromItems(items) {
+  const props = gridOf(items)?.props || {}
+  const text = (key) => (typeof props[key] === 'string' ? props[key].trim() : '')
+  const domain = text('shopifyDomain')
+  if (!domain) return null
+  return { domain, token: text('shopifyToken'), collection: text('shopifyCollection') }
 }
 
 /** Moneda de los precios de la tienda (vacío: la del catálogo de ejemplo). */

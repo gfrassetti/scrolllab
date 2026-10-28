@@ -22,7 +22,7 @@ import {
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { THEMED_MODELS, THEME_ADAPTIVE_SECTIONS } from '../src/lib/sectionTheme.js'
 import { SECTION_KINDS, SECTION_IDS } from '../src/domain/sections.js'
-import { checkoutPropsFrom } from '../src/lib/shop/checkoutProps.js'
+import { checkoutPropsFrom, shopifyConfigFromItems } from '../src/lib/shop/checkoutProps.js'
 import { BUILDER_SEO, LAB_SEO, SITE_SEO } from '../src/lib/site.js'
 import { TEMPLATE_META } from '../src/features/home/templateMeta.js'
 
@@ -244,6 +244,16 @@ for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
       const [target] = Object.keys(forwarded)
       if (!target || !checkoutProps?.has(target)) {
         fail('props', `'${id}.${field.key}' es editable pero Checkout no recibe '${target}'`)
+      }
+      continue
+    }
+    // La tienda Shopify conectada: la lee shopifyConfigFromItems (toda la tienda, no la grilla).
+    if (id === COMMERCE_GRID_ID && /^shopify[A-Z]/.test(field.key)) {
+      const config = shopifyConfigFromItems([
+        { id: COMMERCE_GRID_ID, props: { shopifyDomain: 'probe.myshopify.com', [field.key]: 'probe-value' } },
+      ])
+      if (!config || !Object.values(config).includes('probe-value')) {
+        fail('props', `'${id}.${field.key}' es editable pero shopifyConfigFromItems no la lee`)
       }
       continue
     }

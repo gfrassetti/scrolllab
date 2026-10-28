@@ -13,7 +13,7 @@ import {
 } from '../../src/lib/sectionFields.js'
 import { compositionToRecipe } from '../../src/lib/composition.js'
 import { resolveSectionTheme } from '../../src/lib/sectionTheme.js'
-import { checkoutPropsFromItems } from '../../src/lib/shop/checkoutProps.js'
+import { checkoutPropsFromItems, shopifyConfigFromItems } from '../../src/lib/shop/checkoutProps.js'
 import { productsFromItems } from '../../src/lib/shop/catalog.js'
 import { sanitizeSectionProps } from '../sectionFields.js'
 import { ALLOWED_SECTIONS } from '../sections.js'
@@ -326,7 +326,7 @@ describe('builder → ZIP: una composición con todo editado', () => {
       const theme = resolveSectionTheme(item.sectionId, item.props, modelIds, i)
       const expected = { ...(item.props || {}), ...(theme ? { theme } : {}) }
       if (item.sectionId === 'commerce/ProductGrid') {
-        for (const key of Object.keys(expected)) if (/^(checkout|cart|detail)[A-Z]/.test(key)) delete expected[key]
+        for (const key of Object.keys(expected)) if (/^(checkout|cart|detail|shopify)[A-Z]/.test(key)) delete expected[key]
       }
       assert.deepEqual(sections[i].props, expected, `${item.sectionId}: el ZIP no recibe lo editado`)
     }
@@ -342,5 +342,8 @@ describe('builder → ZIP: una composición con todo editado', () => {
     assert.ok(catalog, 'falta ShopCatalogProvider en el App.jsx')
     assert.deepEqual(catalog.props.products, productsFromItems(items))
     assert.equal(productsFromItems(items).length, 8, 'la prueba no llenó los productos')
+    // La tienda Shopify conectada: la misma config que lee el preview.
+    assert.deepEqual(catalog.props.shopify, shopifyConfigFromItems(items))
+    assert.ok(catalog.props.shopify?.domain, 'la prueba no llenó la tienda Shopify')
   })
 })

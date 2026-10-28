@@ -19,6 +19,7 @@ import {
   detailPropsFromItems,
   shopColorsFromItems,
   shopCurrencyFromItems,
+  shopifyConfigFromItems,
 } from '../lib/shop/checkoutProps'
 
 /**
@@ -62,6 +63,7 @@ export default function CompositionShopShell({
       currency: shopCurrencyFromItems(items),
       cart: cartPropsFromItems(items),
       detail: detailPropsFromItems(items),
+      shopify: shopifyConfigFromItems(items),
     }),
     [items],
   )
@@ -74,7 +76,7 @@ export default function CompositionShopShell({
       >
         <ShopThemeProvider theme={theme} colors={shop.colors} className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]">
           {/* Los productos editados en el builder: grilla, ficha, carrito y checkout. */}
-          <ShopCatalogProvider products={products} currency={shop.currency}>
+          <ShopCatalogProvider products={products} currency={shop.currency} shopify={shop.shopify}>
             <MemoryRouter initialEntries={['/']}>
               <Routes>
                 <Route

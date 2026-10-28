@@ -6,7 +6,7 @@ import {
   formatShopPrice,
 } from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
-import { useShopCatalog } from '../../../lib/shop/ShopCatalog'
+import { useShopCatalog, useShopify } from '../../../lib/shop/ShopCatalog'
 import { catalogFromEdits } from '../../../lib/shop/catalog'
 import { shopThemeVars } from '../../../lib/shop/theme'
 
@@ -39,9 +39,12 @@ export default function ProductGrid({
 }) {
   const addItem = useShopCart((s) => s.addItem)
   const catalog = useShopCatalog()
+  // Con una tienda Shopify conectada los productos son los de Shopify (el
+  // catálogo del provider); si no, los editados acá.
+  const shopify = useShopify()
   const shelf = useMemo(
-    () => (products?.length ? catalogFromEdits(products, DEMO_PRODUCTS, currency) : catalog),
-    [products, catalog, currency],
+    () => (!shopify && products?.length ? catalogFromEdits(products, DEMO_PRODUCTS, currency) : catalog),
+    [shopify, products, catalog, currency],
   )
 
   return (

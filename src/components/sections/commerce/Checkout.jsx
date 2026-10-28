@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { formatShopPrice } from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
 import { createCheckout } from '../../../lib/shop/checkoutAdapter'
+import { useShopify } from '../../../lib/shop/ShopCatalog'
+import { createShopifyCheckout } from '../../../lib/shop/shopify'
 
 const num = (value, fallback = 0) => {
   const parsed = Number(value)
@@ -67,6 +69,10 @@ function RadioCard({ name, value, checked, onChange, title, note, price }) {
  *
  * The kit ships frontend-only: wire createCheckout() in checkoutAdapter.js to
  * your payment provider (Mercado Pago, Stripe…) before going live.
+ *
+ * With a Shopify store connected (src/lib/shop/shopify.js) this page is the
+ * order review: the button creates the Shopify cart and sends the shopper to
+ * Shopify's checkout, which asks for contact, shipping, discount and payment.
  */
 export default function Checkout({
   backLabel = 'Back to shop',
@@ -127,7 +133,10 @@ export default function Checkout({
   successTitle = 'Order received',
   successBody = 'This is the demo response — no payment provider is connected yet. Wire createCheckout() in checkoutAdapter.js to charge for real.',
   successCta = 'Keep shopping',
+  /** Con Shopify: la nota en lugar de los formularios (envío y pago van en Shopify). */
+  shopifyNote = 'Contact, shipping, taxes and discount codes come on the next step: Shopify’s secure checkout, where you pay.',
 }) {
+  const shopify = useShopify()
   const uid = useId()
   const lines = useShopCart((s) => s.lines)
   const setQty = useShopCart((s) => s.setQty)
@@ -149,6 +158,8 @@ export default function Checkout({
 
   const totals = useMemo(() => {
     const subtotal = lines.reduce((n, l) => n + l.price * l.qty, 0)
+    // Con Shopify el envío, los cupones y los impuestos los calcula Shopify.
+    if (shopify) return { subtotal, off: 0, shipping: 0, total: subtotal }
     const off = promoState === 'ok' ? Math.round((subtotal * num(promoOff)) / 100) : 0
     const net = subtotal - off
     const freeOver = num(freeShippingOver)
@@ -163,6 +174,7 @@ export default function Checkout({
             : flat
     return { subtotal, off, shipping, total: Math.max(0, net + shipping) }
   }, [
+    shopify,
     lines,
     promoState,
     promoOff,
@@ -184,6 +196,17 @@ export default function Checkout({
     setBusy(true)
     setError(null)
     setResult(null)
+    if (shopify) {
+      try {
+        // Solo viajan ids de variante y cantidades: el precio lo pone Shopify.
+        const url = await createShopifyCheckout(shopify, lines)
+        window.location.assign(url)
+      } catch (err) {
+        setError(err?.message || 'Checkout failed')
+        setBusy(false)
+      }
+      return
+    }
     try {
       const res = await createCheckout({
         items: lines,
@@ -266,6 +289,16 @@ export default function Checkout({
             onSubmit={pay}
             className="mt-12 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16"
           >
+            {shopify ? (
+              <div className="min-w-0">
+                <p
+                  className="max-w-[46ch] border-l-2 border-[color:var(--shop-accent)] pl-4 text-sm leading-relaxed text-[color:var(--shop-muted)] md:text-base"
+                  data-shopify-note
+                >
+                  {shopifyNote}
+                </p>
+              </div>
+            ) : (
             <div className="min-w-0 space-y-12">
               <fieldset className="space-y-5">
                 <legend className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--shop-muted)]">
@@ -445,6 +478,7 @@ export default function Checkout({
                 </div>
               </fieldset>
             </div>
+            )}
 
             <aside className="lg:sticky lg:top-8">
               <div
@@ -537,6 +571,7 @@ export default function Checkout({
                   </ul>
                 )}
 
+                {!shopify && (
                 <div className="mt-5">
                   <label
                     htmlFor={`${uid}-promo`}
@@ -574,6 +609,7 @@ export default function Checkout({
                     </p>
                   )}
                 </div>
+                )}
 
                 <dl className="mt-6 space-y-2 border-t border-[color:var(--shop-border)] pt-4 text-sm">
                   <div className="flex justify-between gap-4">
@@ -592,6 +628,7 @@ export default function Checkout({
                       </dd>
                     </div>
                   )}
+                  {!shopify && (
                   <div className="flex justify-between gap-4">
                     <dt className="text-[color:var(--shop-muted)]">
                       {shippingLabel}
@@ -600,6 +637,7 @@ export default function Checkout({
                       {totals.shipping === 0 ? freeLabel : money(totals.shipping)}
                     </dd>
                   </div>
+                  )}
                   <div className="flex justify-between gap-4 border-t border-[color:var(--shop-border)] pt-3 text-base font-medium">
                     <dt>{totalLabel}</dt>
                     <dd className="tabular-nums">{money(totals.total)}</dd>
