@@ -10,7 +10,7 @@ import { toggle } from '../helpers.js'
 const SHOPIFY_DEMO = {
   label: 'Probar con la tienda de ejemplo de Shopify',
   value: 'mock.shop',
-  active: 'Con la tienda de ejemplo de Shopify (mock.shop): productos, carrito y checkout de prueba. Para la tuya van su dominio y su token.',
+  active: 'Con la tienda de ejemplo de Shopify (mock.shop): productos y carrito reales de Shopify. Su checkout es de prueba y aparece vacío; con una tienda real muestra el pedido. Para la tuya van su dominio y su token.',
 }
 
 const SHOPIFY_HELP = {
@@ -39,14 +39,14 @@ export const COMMERCE_FIELDS = {
       options: [
         { value: 'auto', label: 'Auto (sección de al lado)' },
         { value: 'chapters', label: 'Chapters · #ff4b00' },
-        { value: 'nocturne', label: 'Nocturne · #d9ff3f' },
+        { value: 'nocturne', label: 'Nocturne · #d9ff3f', retired: true },
         { value: 'monolith', label: 'Monolith · #2b3cff' },
-        { value: 'velocity', label: 'Velocity · #d9ff3f' },
+        { value: 'velocity', label: 'Velocity · #d9ff3f', retired: true },
         { value: 'fizz', label: 'Fizz · #ff3ea5' },
         { value: 'atelier', label: 'Atelier · #c8d0dc' },
         { value: 'comic', label: 'Comic · #e85a24' },
         { value: 'unity', label: 'Unity · #f4c518' },
-        { value: 'ratio', label: 'Ratio · #e23c24' },
+        { value: 'ratio', label: 'Ratio · #e23c24', retired: true },
         { value: 'atrium', label: 'Atrium · #111111' },
         { value: 'meridian', label: 'Meridian · #8f7a5e' },
         { value: 'kin', label: 'Kin · #e1371f' },
@@ -81,9 +81,10 @@ export const COMMERCE_FIELDS = {
     { key: 'variantHint', label: 'Pista bajo el botón en productos con talle o color ({label} = el nombre de la variante)', type: 'text' },
     // Tienda Shopify (src/lib/shop/shopify.js): con dominio y token, los
     // productos, precios y stock salen de Shopify y se paga en su checkout.
+    toggle('shopifyEnabled', 'Cobrar con Shopify', undefined, 'off'),
     {
       key: 'shopifyDomain',
-      label: 'Shopify · Dominio de la tienda (tu-tienda.myshopify.com; vacío = sin Shopify)',
+      label: 'Shopify · Dominio de la tienda (tu-tienda.myshopify.com)',
       type: 'text',
       example: SHOPIFY_DEMO,
       help: SHOPIFY_HELP,
@@ -192,6 +193,7 @@ export const COMMERCE_FIELDS = {
       type: 'text',
     },
     { key: 'checkoutPayLabel', label: 'Checkout · Botón pagar', type: 'text' },
+    { key: 'checkoutShopifyNote', label: 'Checkout · Nota (en lugar de los formularios: el envío y el pago van en Shopify)', type: 'textarea' },
     toggle('checkoutShowTrust', 'Checkout · Mostrar las garantías bajo el botón de pagar'),
     {
       key: 'checkoutTrustText',
@@ -231,3 +233,50 @@ export const COMMERCE_FIELDS = {
     { key: 'checkoutSuccessCta', label: 'Checkout · Éxito — botón', type: 'text' },
   ],
 }
+
+/**
+ * El panel de la grilla en grupos plegables. Con Shopify encendido se ocultan
+ * los campos que pasan a Shopify (los productos, la moneda, y el envío, el
+ * pago y el cupón del checkout) y aparecen los propios de Shopify.
+ * @type {import('../types.js').SectionFieldGroup[]}
+ */
+export const PRODUCT_GRID_GROUPS = [
+  { id: 'grid', title: 'Grilla', open: true },
+  { id: 'shopify', title: 'Cobrar con Shopify', switch: 'shopifyEnabled', note: 'Los productos, el stock y el pago salen de una tienda Shopify. Apagado, la tienda usa los productos que cargás acá y el checkout de ejemplo.' },
+  { id: 'products', title: 'Productos' },
+  { id: 'cart', title: 'Carrito' },
+  { id: 'detail', title: 'Ficha de producto' },
+  { id: 'checkout', title: 'Checkout' },
+]
+
+/** Lo que Shopify resuelve por su cuenta: con Shopify encendido no se muestra. */
+const SHOPIFY_REPLACES = new Set([
+  'currency', 'products',
+  'checkoutContactTitle', 'checkoutShippingTitle', 'checkoutCountryOptionsText', 'checkoutDeliveryTitle',
+  'checkoutStandardLabel', 'checkoutStandardNote', 'checkoutExpressLabel', 'checkoutExpressNote',
+  'checkoutPaymentTitle', 'checkoutPayCardLabel', 'checkoutPayWalletLabel', 'checkoutPayTransferLabel',
+  'checkoutPayCardNote', 'checkoutPayWalletNote', 'checkoutPayTransferNote',
+  'checkoutPromoLabel', 'checkoutPromoCode', 'checkoutPromoOff', 'checkoutPromoPlaceholder',
+  'checkoutPromoApplyLabel', 'checkoutPromoOkText', 'checkoutPromoErrorText',
+  'checkoutShippingFlat', 'checkoutExpressPrice', 'checkoutFreeShippingOver',
+  'checkoutSuccessTitle', 'checkoutSuccessBody', 'checkoutSuccessCta',
+  'checkoutEmailLabel', 'checkoutEmailPlaceholder', 'checkoutPhoneLabel', 'checkoutFirstNameLabel',
+  'checkoutLastNameLabel', 'checkoutAddressLabel', 'checkoutCityLabel', 'checkoutZipLabel',
+  'checkoutCountryLabel', 'checkoutNotesLabel', 'checkoutShippingLabel', 'checkoutDiscountLabel', 'checkoutFreeLabel',
+])
+
+const GROUP_PREFIX = [
+  ['shopify', 'shopify'],
+  ['cart', 'cart'],
+  ['detail', 'detail'],
+  ['checkout', 'checkout'],
+]
+
+COMMERCE_FIELDS['commerce/ProductGrid'] = COMMERCE_FIELDS['commerce/ProductGrid'].map((field) => {
+  const prefixed = GROUP_PREFIX.find(([prefix]) => field.key.startsWith(prefix) && field.key.length > prefix.length)
+  const group = field.key === 'products' ? 'products' : prefixed ? prefixed[1] : 'grid'
+  // El título del grupo ya dice «Carrito», «Checkout»…: el rótulo va sin prefijo.
+  const label = field.label.replace(/^(Carrito|Ficha|Checkout|Shopify) · /, '')
+  const shopify = field.key === 'checkoutShopifyNote' ? 'only' : SHOPIFY_REPLACES.has(field.key) ? 'hide' : undefined
+  return { ...field, label, group, ...(shopify ? { shopify } : {}) }
+})

@@ -4,6 +4,7 @@ import SiteHeader from '../components/SiteHeader'
 import { api } from '../lib/api'
 import SnippetBox from '../components/SnippetBox'
 import SectionFieldRow from '../components/SectionFieldRow'
+import FieldGroups from '../components/FieldGroups'
 import LabEditLink from '../components/LabEditLink'
 import LabFramePreview from '../components/LabFramePreview'
 import { useAuth } from '../lib/auth'
@@ -13,6 +14,7 @@ import { getSection } from '../lib/sectionRegistry'
 import {
   getSectionFields,
   sanitizeHostedProps,
+  sectionFieldLayout,
   withoutEmptyRows,
 } from '../lib/sectionFields'
 import { LAB_HIDDEN_FIELDS, isLabFormSection } from '../domain/labForms'
@@ -285,7 +287,10 @@ export default function LabEditorPage() {
                   {fields.length === 0 && (
                     <p className="text-sm text-ink/50">{t('lab.noFields')}</p>
                   )}
-                  {fields.map((field) => (
+                  {(() => {
+                    // Muchos campos: grupos plegables por tipo (Textos, Fotos, Links…).
+                    const layout = sectionFieldLayout(inst.sectionId, fields)
+                    const renderField = (field) => (
                     <SectionFieldRow
                       key={field.key}
                       field={field}
@@ -299,7 +304,20 @@ export default function LabEditorPage() {
                       absoluteUrls
                       hint={field.key === firstAssetKey ? t('lab.assetHint') : undefined}
                     />
-                  ))}
+                  )
+                    return layout.groups ? (
+                      <FieldGroups
+                        key={inst.sectionId}
+                        groups={layout.groups}
+                        fields={layout.fields}
+                        props={props}
+                        renderField={renderField}
+                        onSwitch={setField}
+                      />
+                    ) : (
+                      fields.map(renderField)
+                    )
+                  })()}
 
                   <label className="block border-t border-ink/15 pt-4">
                     <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">

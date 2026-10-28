@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import SectionFieldRow from '../components/SectionFieldRow'
+import FieldGroups from '../components/FieldGroups'
 import LabFramePreview from '../components/LabFramePreview'
 import { useI18n } from '../i18n'
 import { SITE_NAME } from '../lib/site'
 import { getSection } from '../lib/sectionRegistry'
-import { getSectionFields, sanitizeHostedProps, withoutEmptyRows } from '../lib/sectionFields'
+import { getSectionFields, sanitizeHostedProps, sectionFieldLayout, withoutEmptyRows } from '../lib/sectionFields'
 import { LAB_HIDDEN_FIELDS, isLabFormSection } from '../domain/labForms'
 
 const DEVICES = ['desktop', 'tablet', 'mobile']
@@ -168,7 +169,10 @@ export default function LabSharedEditPage() {
                     </p>
                   )}
                   {fields.length === 0 && <p className="text-sm text-ink/50">{t('lab.noFields')}</p>}
-                  {fields.map((field) => (
+                  {(() => {
+                    // Muchos campos: grupos plegables por tipo (Textos, Fotos, Links…).
+                    const layout = sectionFieldLayout(inst.sectionId, fields)
+                    const renderField = (field) => (
                     <SectionFieldRow
                       key={field.key}
                       field={field}
@@ -179,7 +183,20 @@ export default function LabSharedEditPage() {
                       absoluteUrls
                       hint={field.key === firstAssetKey ? t('lab.assetHint') : undefined}
                     />
-                  ))}
+                  )
+                    return layout.groups ? (
+                      <FieldGroups
+                        key={inst.sectionId}
+                        groups={layout.groups}
+                        fields={layout.fields}
+                        props={props}
+                        renderField={renderField}
+                        onSwitch={setField}
+                      />
+                    ) : (
+                      fields.map(renderField)
+                    )
+                  })()}
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-3">

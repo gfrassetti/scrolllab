@@ -514,7 +514,7 @@ describe('ZIP del builder', () => {
         recipe: validateRecipe([
           {
             id: 'commerce/ProductGrid',
-            props: { shopifyDomain: 'brand.myshopify.com', shopifyToken: 'abc123', shopifyCollection: 'boards' },
+            props: { shopifyEnabled: 'on', shopifyDomain: 'brand.myshopify.com', shopifyToken: 'abc123', shopifyCollection: 'boards' },
           },
         ]),
         destPath,

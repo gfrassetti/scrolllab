@@ -94,6 +94,11 @@ describe('shopify: configuración', () => {
     ]
     assert.deepEqual(shopifyConfigFromItems(items), { domain: 'brand.myshopify.com', token: 'abc', collection: '' })
     assert.equal(shopifyConfigFromItems([{ id: 'commerce/ProductGrid', props: { shopifyToken: 'abc' } }]), null)
+    // «Cobrar con Shopify» apagado: el dominio queda guardado pero no se usa.
+    const off = [{ id: 'commerce/ProductGrid', props: { shopifyEnabled: 'off', shopifyDomain: 'brand.myshopify.com', shopifyToken: 'abc' } }]
+    assert.equal(shopifyConfigFromItems(off), null)
+    off[0].props.shopifyEnabled = 'on'
+    assert.equal(shopifyConfigFromItems(off).domain, 'brand.myshopify.com')
   })
 })
 

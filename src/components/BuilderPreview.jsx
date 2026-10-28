@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getSection } from '../lib/sectionRegistry'
-import { getSectionFields, sanitizeProps } from '../lib/sectionFields'
+import { getSectionFields, sanitizeProps, sectionFieldLayout } from '../lib/sectionFields'
 import { recipeHasCommerce } from '../lib/composition'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
@@ -9,6 +9,7 @@ import { productsFromItems } from '../lib/shop/catalog'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
+import FieldGroups from './FieldGroups'
 import ModelTryout from './ModelTryout'
 import FontPicker from './FontPicker'
 import Collapse from './Collapse'
@@ -49,7 +50,10 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
   const fontChoice = fontChoiceById(font)
   const editing = items.find((item) => item.uid === editingUid)
   const editingSection = editing ? getSection(editing.sectionId) : null
-  const fields = editing ? getSectionFields(editing.sectionId) : []
+  // Secciones con muchos campos: grupos plegables (propios o por tipo).
+  const { groups: fieldGroups, fields } = editing
+    ? sectionFieldLayout(editing.sectionId, getSectionFields(editing.sectionId))
+    : { groups: null, fields: [] }
   // La ayuda de imágenes va una vez por panel, no repetida en cada campo.
   const firstAssetKey = fields.find((f) => f.type === 'image')?.key
   // Un .glb de la computadora probado en el panel: solo cambia lo que se ve acá
@@ -158,38 +162,57 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
             </button>
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-            {fields.map((field) => {
-              const value =
-                editing.props?.[field.key] ??
-                (field.type === 'select' ? field.options?.[0]?.value : '') ??
-                ''
-              const onFieldChange = (nextValue) => {
-                const nextProps = sanitizeProps(editing.sectionId, {
-                  ...(editing.props || {}),
-                  [field.key]: nextValue,
-                })
-                onChangeProps(editing.uid, nextProps)
-              }
+            {(() => {
+              const renderField = (field) => {
+                const value =
+                  editing.props?.[field.key] ??
+                  (field.type === 'select' ? field.options?.[0]?.value : '') ??
+                  ''
+                const onFieldChange = (nextValue) => {
+                  const nextProps = sanitizeProps(editing.sectionId, {
+                    ...(editing.props || {}),
+                    [field.key]: nextValue,
+                  })
+                  onChangeProps(editing.uid, nextProps)
+                }
 
-              return (
-                <div key={field.key} className="space-y-2">
-                  <SectionFieldRow
-                    field={field}
-                    value={value}
-                    onChange={onFieldChange}
-                    hint={
-                      FIELD_HINT_KEY[field.type] &&
-                      (field.type === 'list' || field.key === firstAssetKey)
-                        ? t(FIELD_HINT_KEY[field.type])
-                        : undefined
-                    }
-                  />
-                  {field.key === 'modelUrl' && field.type === 'url' ? (
-                    <ModelTryout uid={editing.uid} value={value} onUseRoute={onFieldChange} />
-                  ) : null}
-                </div>
+                return (
+                  <div key={field.key} className="space-y-2">
+                    <SectionFieldRow
+                      field={field}
+                      value={value}
+                      onChange={onFieldChange}
+                      hint={
+                        FIELD_HINT_KEY[field.type] &&
+                        (field.type === 'list' || field.key === firstAssetKey)
+                          ? t(FIELD_HINT_KEY[field.type])
+                          : undefined
+                      }
+                    />
+                    {field.key === 'modelUrl' && field.type === 'url' ? (
+                      <ModelTryout uid={editing.uid} value={value} onUseRoute={onFieldChange} />
+                    ) : null}
+                  </div>
+                )
+              }
+              const editField = (key, nextValue) =>
+                onChangeProps(
+                  editing.uid,
+                  sanitizeProps(editing.sectionId, { ...(editing.props || {}), [key]: nextValue }),
+                )
+              return fieldGroups ? (
+                <FieldGroups
+                  key={editing.uid}
+                  groups={fieldGroups}
+                  fields={fields}
+                  props={editing.props}
+                  renderField={renderField}
+                  onSwitch={editField}
+                />
+              ) : (
+                fields.map(renderField)
               )
-            })}
+            })()}
           </div>
         </aside>
       )}
