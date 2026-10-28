@@ -265,7 +265,7 @@
     "platforms": [
       {
         "q": "Shopify",
-        "a": "1. Online Store → Themes → Customize.\n2. On the page you want, Add section → «Custom Liquid».\n3. Paste the code and save."
+        "a": "1. Online Store → Themes → Customize.\n2. On the page you want, Add section → «Custom Liquid».\n3. Paste the code. To make it span the full width, set “Width: Full”. Save."
       },
       {
         "q": "WordPress",

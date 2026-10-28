@@ -265,7 +265,7 @@
     "platforms": [
       {
         "q": "Shopify",
-        "a": "1. Tienda online → Temas → Personalizar.\n2. En la página que quieras, Agregar sección → «Liquid personalizado».\n3. Pegá el código y guardá."
+        "a": "1. Tienda online → Temas → Personalizar.\n2. En la página que quieras, Agregar sección → «Liquid personalizado».\n3. Pegá el código. Para que ocupe todo el ancho, elegí «Ancho: Completo». Guardá."
       },
       {
         "q": "WordPress",

@@ -45,7 +45,7 @@ export const LAB_SHOPIFY = {
     },
     {
       title: 'Pegás el código y guardás',
-      body: 'Va en el cuadro «Código Liquid». Guardás y el widget aparece en la tienda, en el lugar de la sección: lo podés subir o bajar como cualquier otra.',
+      body: 'Va en el cuadro «Código Liquid». Para que ocupe todo el ancho de la pantalla, en «Ancho» elegí «Completo». Guardás y el widget aparece en la tienda, en el lugar de la sección: lo podés subir o bajar como cualquier otra.',
     },
   ],
   editor: {
@@ -74,6 +74,10 @@ export const LAB_SHOPIFY = {
     {
       q: '¿Funciona con mi tema?',
       a: 'Con los temas de secciones de Shopify (Online Store 2.0), como Horizon o Dawn: todos traen la sección «Liquid personalizado». Lo probamos en Horizon, el tema actual de Shopify.',
+    },
+    {
+      q: '¿Por qué queda un margen blanco alrededor del widget?',
+      a: 'Es el ancho de página de tu tema. En la sección «Liquid personalizado», elegí «Ancho: Completo» y el widget va de borde a borde, también en el teléfono. Con «Página» queda dentro de los márgenes del tema, como el resto del contenido.',
     },
     {
       q: '¿Lo puedo poner en una página de producto o de colección?',
