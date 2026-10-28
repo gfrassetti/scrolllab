@@ -1702,7 +1702,7 @@
   "terms": {
     "eyebrow": "Legal",
     "title": "Términos del Servicio",
-    "effectiveDate": "Vigentes desde el 15 de octubre de 2026",
+    "effectiveDate": "Vigentes desde el 28 de octubre de 2026",
     "intro": "Estos Términos regulan el uso de {{site}}. Al acceder al sitio, crear una cuenta o comprar un producto, aceptás estas condiciones.",
     "sections": [
       {
@@ -1715,7 +1715,16 @@
       },
       {
         "title": "Productos y licencia",
-        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, MONOLITH, FIZZ, ATELIER), composiciones armadas en el builder y, si lo incluís, el kit Commerce (catálogo, ficha de producto, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye tu licencia con email y número de orden. El kit Commerce trae un checkout de ejemplo que no procesa pagos: para cobrar se conecta la tienda Shopify del comprador o su propia pasarela, y esa conexión corre por su cuenta. ScrollLab no ofrece ni opera un checkout para tu tienda."
+        "body": "Los productos son descargas digitales de código fuente: modelos fijos (CHAPTERS, MONOLITH, FIZZ, ATELIER), composiciones armadas en el builder y, si lo incluís, el kit Commerce (catálogo, ficha de producto, carrito y checkout). La compra no transfiere la propiedad intelectual: concede únicamente los derechos de uso de la Licencia Regular publicada en el sitio. El ZIP incluye tu licencia con email y número de orden."
+      },
+      {
+        "title": "Kit Commerce (tienda)",
+        "items": [
+          "El kit Commerce es código fuente: una tienda con catálogo, ficha de producto, carrito y checkout. El checkout que trae es de ejemplo: no procesa pagos ni cobra.",
+          "Para cobrar, conectás tu propia tienda Shopify (la tienda lee de Shopify los productos, el stock y los precios, y el pago se hace en el checkout de Shopify) o tu propia pasarela de pagos en el código que descargás. ScrollLab no ofrece, no opera ni intermedia un checkout o una pasarela para tu tienda.",
+          "Sos el vendedor ante tus clientes: los precios, impuestos, envíos, facturación, devoluciones y el cumplimiento de la normativa de tu tienda son tu responsabilidad. El dinero de tus ventas no pasa por ScrollLab.",
+          "Shopify es un servicio de terceros: su uso, sus costos y sus condiciones se rigen por los términos de Shopify. Shopify y su logo son marcas de Shopify Inc.; ScrollLab no está afiliada a Shopify ni respaldada por Shopify. Shopify puede cambiar su API, por lo que no garantizamos que la conexión siga funcionando sin ajustes."
+        ]
       },
       {
         "title": "Precios y pagos",
