@@ -269,7 +269,7 @@
       },
       {
         "q": "WordPress",
-        "a": "1. Abrí la página en el editor de bloques.\n2. Agregá un bloque «HTML personalizado» donde quieras el widget.\n3. Pegá el código y actualizá la página.\nSi usás un constructor como Elementor, usá su widget «HTML»."
+        "a": "1. Abrí la página en el editor de bloques.\n2. Agregá un bloque «HTML personalizado» donde quieras el widget.\n3. Pegá el código y actualizá la página.\nLos temas de bloques lo dejan en la columna de texto. Para que ocupe todo el ancho, poné el bloque «HTML personalizado» dentro de un bloque «Grupo», dale alineación «Ancho completo» y, en los ajustes de diseño del Grupo, apagá la opción de usar el ancho del contenido.\nSi usás un constructor como Elementor, usá su widget «HTML»."
       },
       {
         "q": "Webflow",

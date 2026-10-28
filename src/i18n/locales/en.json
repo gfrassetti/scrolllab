@@ -269,7 +269,7 @@
       },
       {
         "q": "WordPress",
-        "a": "1. Open the page in the block editor.\n2. Add a «Custom HTML» block where you want the widget.\n3. Paste the code and update the page.\nIf you use a builder like Elementor, use its «HTML» widget."
+        "a": "1. Open the page in the block editor.\n2. Add a «Custom HTML» block where you want the widget.\n3. Paste the code and update the page.\nBlock themes keep it in the text column. To make it span the full width, put the «Custom HTML» block inside a «Group» block, set its alignment to «Full width» and, in the Group layout settings, turn off the option to use the content width.\nIf you use a builder like Elementor, use its «HTML» widget."
       },
       {
         "q": "Webflow",
