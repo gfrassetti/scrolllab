@@ -243,8 +243,15 @@ describe('Suscripciones contra MP (doble en memoria)', () => {
 
   it('webhook de cobro aprobado entregado dos veces → un solo período', async () => {
     const agent = await loginAs('mp-dup@test.com')
-    const { pre } = await subscribeAndAuthorize(agent)
+    const { res, pre } = await subscribeAndAuthorize(agent)
     const debit = '2026-10-02T15:00:00.000Z'
+    // El período vigente vence justo en el cobro. Sin esto queda el fin de la
+    // prueba (hoy + 7 días), que le gana al `debit + 1 mes` fijo según la fecha
+    // en que corre el test (el webhook se queda con el más lejano, a propósito).
+    const row = await fileDb.findSubscriptionById(res.body.subscriptionId)
+    row.currentPeriodEnd = debit
+    row.trialEndsAt = undefined
+    await row.save()
     mp.authorizedPayments.set('ap900', {
       id: 'ap900',
       preapproval_id: pre.id,
