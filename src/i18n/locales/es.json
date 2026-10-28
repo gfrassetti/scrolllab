@@ -789,13 +789,13 @@
     "editing": "Editando",
     "editPanel": "Editar sección",
     "noEditableFields": "Esta sección no tiene textos para editar acá: se ajusta en el código del ZIP.",
-    "commerceHint": "Una tienda para tu página: catálogo, ficha, carrito y checkout. Cobra con tu Shopify, conectado en dos campos. Sin Shopify, el checkout es de ejemplo y no cobra: el cobro lo conectás vos al descargar el código. Al agregar la grilla se suma el kit (+{{price}}).",
+    "commerceHint": "Catálogo, ficha, carrito y checkout. Sin Shopify, el checkout es de ejemplo y no cobra: el cobro lo conectás vos al descargar el código. Al agregar la tienda se suma el kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "La base incluye {{included}} secciones: te quedan {{left}} sin costo extra.",
     "priceNext": "Llegaste a las {{included}} secciones de la base: la próxima suma {{next}}.",
     "priceExtras": "Llevás {{count}} secciones ({{included}} incluidas en la base). La próxima suma {{next}}.",
     "priceMax": "Tope de {{max}} secciones: es lo máximo que se arma acá. Para cambiar una, primero se saca otra.",
-    "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. El cobro va por tu tienda Shopify, que se conecta en los campos de la grilla; sin ella, el checkout es de ejemplo.",
+    "commerceAdded": "Sumaste el kit Commerce: +{{price}} por la ficha, el carrito y el checkout. El cobro va por tu tienda Shopify, que se vincula en los campos de la tienda; sin ella, el checkout es de ejemplo.",
     "commerceIncluded": "+{{price}} del kit Commerce (ficha, carrito y checkout), aparte de la sección",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",
@@ -1255,8 +1255,8 @@
       },
       "commerce": {
         "ProductGrid": {
-          "name": "Grilla de productos",
-          "blurb": "Catálogo + shop; el color del kit se elige para que combine con el resto"
+          "name": "Tienda completa",
+          "blurb": "Catálogo, ficha, carrito y checkout; con tu Shopify o tu propio cobro"
         }
       },
       "kin": {
@@ -1435,7 +1435,8 @@
       "ok": "El modelo cargó.",
       "failed": "No se pudo cargar el modelo: revisá la URL y que el servidor permita CORS. Mientras tanto se ve el de la demo.",
       "pathOnly": "Es una ruta del proyecto: acá se ve el modelo de la demo y, en el ZIP, el tuyo si copiás el archivo a public/. Para verlo ahora, probalo desde tu computadora."
-    }
+    },
+    "commerceLead": "Vinculá tu tienda Shopify o usá tu propio cobro."
   },
   "cart": {
     "eyebrow": "Carrito",

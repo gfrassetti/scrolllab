@@ -4,6 +4,7 @@ import { models } from '../../lib/sectionRegistry'
 import { sectionCopyKey, kindLabelKeys } from './sectionCopy.js'
 import { MAX_CUSTOM_SECTIONS } from '../../lib/pricing'
 import Collapse from '../../components/Collapse'
+import PlatformLogo from '../../components/PlatformLogo'
 
 const KINDS = ['nav', 'hero', 'section', 'footer']
 
@@ -152,9 +153,16 @@ export default function SectionPalette({
               <Collapse open={isOpen}>
                 <div id={panelId} className="pb-4">
                   {model.id === 'commerce' && (
-                    <p className="mb-3 text-body-sm text-ink/55">
-                      {t('builder.commerceHint', { price: commerceSurcharge })}
-                    </p>
+                    <div className="mb-3 space-y-1.5">
+                      {/* La tienda se vincula a la Shopify del comprador (o a su propio cobro). */}
+                      <p className="flex items-center gap-2 text-body-sm font-medium text-ink">
+                        <PlatformLogo id="shopify" className="h-4 w-4 shrink-0" />
+                        {t('builder.commerceLead')}
+                      </p>
+                      <p className="text-body-sm text-ink/55">
+                        {t('builder.commerceHint', { price: commerceSurcharge })}
+                      </p>
+                    </div>
                   )}
                   {model.sections.some((s) => s.beat) && (
                     <p className="mb-3 text-body-sm text-ink/55">{t('builder.beatHint')}</p>

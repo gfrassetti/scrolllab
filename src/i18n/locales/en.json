@@ -789,13 +789,13 @@
     "editing": "Editing",
     "editPanel": "Edit section",
     "noEditableFields": "Nothing to edit here for this section: you tune it in the ZIP's code.",
-    "commerceHint": "Add a shop to your page: catalog, product page, cart and checkout. It takes payments through your Shopify, connected in two fields. Without Shopify, the checkout is a sample that takes no payments: you wire your own after downloading the code. Adding the grid adds the kit (+{{price}}).",
+    "commerceHint": "Catalog, product page, cart and checkout. Without Shopify, the checkout is a sample that takes no payments: you wire your own after downloading the code. Adding the shop adds the kit (+{{price}}).",
     "estimatedPrice": "Total",
     "priceRoom": "The base covers {{included}} sections: {{left}} left at no extra cost.",
     "priceNext": "You reached the {{included}} sections the base covers: the next one adds {{next}}.",
     "priceExtras": "You have {{count}} sections ({{included}} covered by the base). The next one adds {{next}}.",
     "priceMax": "{{max}} sections is the cap here. Remove one if you want to swap it.",
-    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. Payments go through your Shopify store, connected in the grid’s fields; without it, the checkout is a sample.",
+    "commerceAdded": "You added the Commerce kit: +{{price}} for the product page, cart and checkout. Payments go through your Shopify store, linked in the shop’s fields; without it, the checkout is a sample.",
     "commerceIncluded": "+{{price}} Commerce kit (product page, cart and checkout), on top of the section",
     "commerceBadge": "Kit +{{price}}",
     "beatBadge": "Beat",
@@ -1255,8 +1255,8 @@
       },
       "commerce": {
         "ProductGrid": {
-          "name": "Product Grid",
-          "blurb": "Catalog + shop; pick a kit color so it matches the rest of the page"
+          "name": "Full shop",
+          "blurb": "Catalog, product page, cart and checkout; with your Shopify or your own payments"
         }
       },
       "kin": {
@@ -1435,7 +1435,8 @@
       "ok": "The model loaded.",
       "failed": "The model could not be loaded: check the URL and that the server allows CORS. The demo model is shown meanwhile.",
       "pathOnly": "That is a project path: here you see the demo model and, in the ZIP, yours once you copy the file to public/. To see it now, try it from your computer."
-    }
+    },
+    "commerceLead": "Link your Shopify store or use your own payments."
   },
   "cart": {
     "eyebrow": "Cart",

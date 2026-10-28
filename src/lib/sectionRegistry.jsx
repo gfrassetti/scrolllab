@@ -394,7 +394,7 @@ const allModels = [
     sections: [
       {
         id: 'commerce/ProductGrid',
-        name: 'Product Grid',
+        name: 'Tienda completa',
         kind: 'section',
         component: ProductGrid,
         blurb:
