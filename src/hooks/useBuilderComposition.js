@@ -33,6 +33,8 @@ export function useBuilderComposition() {
   // receta, ver src/domain/design.js.
   const [font, setFontState] = useState(boot.font)
   const [preview, setPreview] = useState(false)
+  // La sección que el preview abre ya en edición (el «Editar» de cada fila de la lista).
+  const [previewEditUid, setPreviewEditUid] = useState(null)
   const [dragOver, setDragOver] = useState(null)
   const [limitNotice, setLimitNotice] = useState('')
   // Qué composición del carrito es esta (puede haber varias en el carrito).
@@ -144,7 +146,9 @@ export function useBuilderComposition() {
   // vuelve al builder (no a la página de antes) y dentro de la tienda vuelve a
   // la pantalla anterior (ver CompositionShopShell). `shopDepth` = cuántas
   // pantallas de la tienda se abrieron desde el inicio del preview.
-  const openPreview = useCallback(() => {
+  const openPreview = useCallback((editUid) => {
+    // `onClick={openPreview}` le pasa el evento: solo vale un uid (string).
+    setPreviewEditUid(typeof editUid === 'string' ? editUid : null)
     window.scrollTo(0, 0)
     try {
       if (!window.history.state?.slPreview) {
@@ -188,6 +192,7 @@ export function useBuilderComposition() {
     font,
     setFont,
     preview,
+    previewEditUid,
     dragOver,
     setDragOver,
     limitNotice,

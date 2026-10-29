@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getSection } from '../lib/sectionRegistry'
 import { getSectionFields, sanitizeProps, sectionFieldLayout } from '../lib/sectionFields'
 import { recipeHasCommerce } from '../lib/composition'
@@ -44,9 +44,11 @@ const CHIP_POSITION = {
  * Live composition preview with a side panel to edit text props per section.
  * When the recipe includes commerce/ProductGrid, shop routes run in a nested router.
  */
-export default function BuilderPreview({ items, font = null, onChangeFont = null, onChangeProps, onExit }) {
+export default function BuilderPreview({ items, font = null, onChangeFont = null, onChangeProps, onExit, initialEditingUid = null }) {
   const t = useT()
-  const [editingUid, setEditingUid] = useState(null)
+  const [editingUid, setEditingUid] = useState(initialEditingUid)
+  const [fieldQuery, setFieldQuery] = useState('')
+  const panelRef = useRef(null)
   // La pantalla de la tienda en la que está el preview ('/', '/product/…', '/checkout').
   const [shopRoute, setShopRoute] = useState('/')
   const cartOpen = useShopCart((s) => s.drawerOpen)
@@ -74,6 +76,40 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
       ),
     [items, localModels],
   )
+  // Cada sección que se abre arranca con la búsqueda vacía.
+  useEffect(() => setFieldQuery(''), [editingUid])
+
+  // Escape cierra el panel; el foco entra en él al abrir y vuelve a donde estaba al cerrar.
+  useEffect(() => {
+    if (!editingUid) return undefined
+    const onKey = (event) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) setEditingUid(null)
+    }
+    const back = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const raf = window.requestAnimationFrame(() => panelRef.current?.focus({ preventScroll: true }))
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('keydown', onKey)
+      back?.focus?.({ preventScroll: true })
+    }
+  }, [editingUid])
+
+  // Desde el «Editar» de la lista: el preview abre en esa sección (la nav es fija: no hay a dónde bajar).
+  useEffect(() => {
+    if (!initialEditingUid) return undefined
+    const target = items.find((item) => item.uid === initialEditingUid)
+    if (!target || getSection(target.sectionId)?.kind === 'nav') return undefined
+    const timer = window.setTimeout(() => {
+      document
+        .querySelector(`[data-section-uid="${CSS.escape(initialEditingUid)}"]`)
+        ?.scrollIntoView({ block: 'start' })
+    }, 450)
+    return () => window.clearTimeout(timer)
+    // Solo al montar: después el usuario scrollea donde quiera.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
@@ -173,8 +209,12 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
 
       {editing && editingSection && fields.length > 0 && (
         <aside
+          ref={panelRef}
+          role="dialog"
+          aria-label={`${t('builder.editPanel')}: ${editingSection.name}`}
+          tabIndex={-1}
           data-native-cursor
-          className="fixed inset-x-0 bottom-0 z-9998 flex max-h-[62svh] flex-col border-t border-ink/20 bg-bone text-ink shadow-xl md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-md md:border-t-0 md:border-l"
+          className="fixed inset-x-0 bottom-0 z-9998 flex max-h-[62svh] flex-col border-t border-ink/20 bg-bone text-ink shadow-xl outline-none md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-md md:border-t-0 md:border-l"
         >
           <div className="flex items-center justify-between border-b border-ink/15 px-5 py-4">
             <div>
@@ -198,6 +238,25 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
               {t('common.close')}
             </button>
           </div>
+          {fieldGroups ? (
+            <div className="border-b border-ink/15 px-5 py-3">
+              <input
+                type="search"
+                value={fieldQuery}
+                onChange={(e) => setFieldQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  // Escape borra la búsqueda; con la búsqueda vacía cierra el panel.
+                  if (e.key === 'Escape' && fieldQuery) {
+                    e.stopPropagation()
+                    setFieldQuery('')
+                  }
+                }}
+                placeholder={t('builder.fieldSearch')}
+                aria-label={t('builder.fieldSearch')}
+                className="min-h-11 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none placeholder:text-ink/45 focus:border-ink"
+              />
+            </div>
+          ) : null}
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
             {(() => {
               const renderField = (field) => {
@@ -241,6 +300,8 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
                 <FieldGroups
                   key={editing.uid}
                   focusGroup={focusGroup}
+                  query={fieldQuery}
+                  emptyText={t('builder.fieldSearchEmpty')}
                   groups={fieldGroups}
                   fields={fields}
                   props={editing.props}

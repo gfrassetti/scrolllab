@@ -80,6 +80,7 @@ export default function CompositionCanvas({
         return (
           <div
             key={item.uid}
+            data-section-uid={item.uid}
             className={`relative ${section.model.wrapperClass}`}
           >
             {renderChrome?.(item, section)}

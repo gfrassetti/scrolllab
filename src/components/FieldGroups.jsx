@@ -84,7 +84,7 @@ function Group({ group, count, open, onOpen, switchOn, onSwitch, children }) {
   )
 }
 
-export default function FieldGroups({ groups, fields, props, renderField, onSwitch, focusGroup = null }) {
+export default function FieldGroups({ groups, fields, props, renderField, onSwitch, focusGroup = null, query = '', emptyText = '' }) {
   const [openIds, setOpenIds] = useState(() => new Set(groups.filter((g) => g.open).map((g) => g.id)))
   const root = useRef(null)
 
@@ -114,18 +114,33 @@ export default function FieldGroups({ groups, fields, props, renderField, onSwit
       return next
     })
 
+  // Con una búsqueda se ven solo los campos que coinciden (por rótulo o clave) y sus grupos abiertos.
+  const q = query.trim().toLowerCase()
+  const matches = (field) => !q || field.label.toLowerCase().includes(q) || field.key.toLowerCase().includes(q)
+  const groupShown = (group) => {
+    const own = fields.filter((f) => (f.group || groups[0].id) === group.id && visible(f) && matches(f))
+    return own.length > 0 || (Boolean(group.switch) && (!q || group.title.toLowerCase().includes(q)))
+  }
+  if (q && !groups.some(groupShown)) {
+    return (
+      <p role="status" className="text-sm text-ink/55">
+        {emptyText}
+      </p>
+    )
+  }
+
   return (
     <div ref={root}>
       {groups.map((group) => {
-        const own = fields.filter((f) => (f.group || groups[0].id) === group.id && visible(f))
-        if (!own.length && !group.switch) return null
+        const own = fields.filter((f) => (f.group || groups[0].id) === group.id && visible(f) && matches(f))
+        if (!groupShown(group)) return null
         const switchOn = group.switch ? (group.switch === 'shopifyEnabled' ? shopify : props?.[group.switch] === 'on') : false
         return (
           <Group
             key={group.id}
             group={group}
             count={own.length}
-            open={openIds.has(group.id)}
+            open={q ? true : openIds.has(group.id)}
             onOpen={() => toggleOpen(group.id)}
             switchOn={switchOn}
             onSwitch={() => onSwitch(group.switch, switchOn ? 'off' : 'on')}

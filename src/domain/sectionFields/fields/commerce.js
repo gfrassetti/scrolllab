@@ -242,6 +242,7 @@ export const COMMERCE_FIELDS = {
  */
 export const PRODUCT_GRID_GROUPS = [
   { id: 'grid', title: 'Grilla', open: true },
+  { id: 'style', title: 'Colores y moneda' },
   { id: 'shopify', title: 'Cobrar con Shopify', switch: 'shopifyEnabled', note: 'Los productos, el stock y el pago salen de tu tienda Shopify. Apagado, el checkout es de ejemplo y no cobra: el cobro lo conectás vos en el código que descargás.' },
   { id: 'products', title: 'Productos' },
   { id: 'cart', title: 'Carrito' },
@@ -265,6 +266,9 @@ const SHOPIFY_REPLACES = new Set([
   'checkoutCountryLabel', 'checkoutNotesLabel', 'checkoutShippingLabel', 'checkoutDiscountLabel', 'checkoutFreeLabel',
 ])
 
+/** Los ajustes de aspecto de la grilla: van en su propio grupo, plegado, para que los textos queden primero. */
+const STYLE_KEYS = new Set(['theme', 'bg', 'fg', 'accent', 'currency'])
+
 const GROUP_PREFIX = [
   ['shopify', 'shopify'],
   ['cart', 'cart'],
@@ -274,7 +278,7 @@ const GROUP_PREFIX = [
 
 COMMERCE_FIELDS['commerce/ProductGrid'] = COMMERCE_FIELDS['commerce/ProductGrid'].map((field) => {
   const prefixed = GROUP_PREFIX.find(([prefix]) => field.key.startsWith(prefix) && field.key.length > prefix.length)
-  const group = field.key === 'products' ? 'products' : prefixed ? prefixed[1] : 'grid'
+  const group = field.key === 'products' ? 'products' : STYLE_KEYS.has(field.key) ? 'style' : prefixed ? prefixed[1] : 'grid'
   // El título del grupo ya dice «Carrito», «Checkout»…: el rótulo va sin prefijo.
   const label = field.label.replace(/^(Carrito|Ficha|Checkout|Shopify) · /, '')
   const shopify = field.key === 'checkoutShopifyNote' ? 'only' : SHOPIFY_REPLACES.has(field.key) ? 'hide' : undefined
