@@ -1314,6 +1314,13 @@
           "name": "Footer",
           "blurb": "Full-height closer: brand and plain lines, the menu and a working newsletter field, contact blocks bottom right and the wordmark set huge bottom left."
         }
+      },
+      "ordo": {
+        "Hero": { "name": "Hero", "blurb": "A drafter's sheet: its own loader draws the logo, then a shop is designed piece by piece from the raw shell to the photograph of the finished space, and the sheet turns back into a sketch as it leaves; framed nav, scroll ruler and crosshair cursor." },
+        "Projects": { "name": "Projects", "blurb": "The studio's work as one row per project: a photo card that opens upwards from its lower edge and a ruled fact sheet." },
+        "Studio": { "name": "Studio", "blurb": "One sentence about how the studio works, three large figures and three numbered principles on the ruled sheet." },
+        "Services": { "name": "Services", "blurb": "The disciplines as ruled rows at poster scale; the rust slab of the logo slides in beside the name under the pointer." },
+        "Contact": { "name": "Contact", "blurb": "Closing sheet: one huge sentence over a rust slab, the email as the way in, plain blocks of details and a legal line whose Privacy and Terms open in a panel." }
       }
     },
     "labNote": "You build the page with our sections and take the code. No code, just adding sections to your site?",

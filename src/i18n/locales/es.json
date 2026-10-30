@@ -1314,6 +1314,13 @@
           "name": "Footer",
           "blurb": "Cierre a pantalla completa: marca y líneas simples, el menú y un campo de newsletter que funciona, bloques de contacto abajo a la derecha y la palabra enorme abajo a la izquierda."
         }
+      },
+      "ordo": {
+        "Hero": { "name": "Hero", "blurb": "Una hoja de dibujante: su propio loader dibuja el logo, después se proyecta un local pieza por pieza, de la obra gris a la foto del espacio terminado, y la hoja vuelve a boceto al salir; nav enmarcado, regla de scroll y cursor de mira." },
+        "Projects": { "name": "Projects", "blurb": "La obra del estudio, una fila por proyecto: una tarjeta de foto que se abre hacia arriba desde su borde de abajo y una ficha con líneas." },
+        "Studio": { "name": "Studio", "blurb": "Una frase sobre cómo trabaja el estudio, tres cifras grandes y tres principios numerados sobre la hoja rayada." },
+        "Services": { "name": "Services", "blurb": "Las disciplinas como filas a escala de afiche; la tapa de óxido del logo entra al lado del nombre que toca el puntero." },
+        "Contact": { "name": "Contact", "blurb": "Hoja de cierre: una frase enorme sobre una tapa de óxido, el email como puerta de entrada, bloques de datos y una línea legal cuyos Privacy y Terms se abren en un panel." }
       }
     },
     "labNote": "Armás la página con nuestras secciones y te llevás el código. ¿Sin programar, para sumarle secciones a tu sitio?",
