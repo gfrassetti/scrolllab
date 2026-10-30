@@ -115,6 +115,11 @@ import ApexGallery from '../components/sections/apex/Gallery'
 import ApexModels from '../components/sections/apex/Models'
 import ApexShowroom from '../components/sections/apex/Showroom'
 import ApexFooter from '../components/sections/apex/Footer'
+import OrdoHero from '../components/sections/ordo/Hero'
+import OrdoProjects from '../components/sections/ordo/Projects'
+import OrdoStudio from '../components/sections/ordo/Studio'
+import OrdoServices from '../components/sections/ordo/Services'
+import OrdoContact from '../components/sections/ordo/Contact'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
 import SelectedWorkIndex from '../components/sections/signal/SelectedWorkIndex'
@@ -354,6 +359,20 @@ const allModels = [
     sectionsDir: 'src/components/sections/apex',
   },
   {
+    id: 'ordo',
+    name: 'ORDO',
+    accent: '#c4441f',
+    wrapperClass: MODEL_WRAPPER_CLASS.ordo,
+    sections: [
+      { id: 'ordo/Hero', name: 'Hero', kind: 'hero', component: OrdoHero, blurb: 'A drafter\'s sheet: its own loader draws the logo, then a shop is designed piece by piece from the raw shell to the photograph of the finished space, and the sheet turns back into a sketch as it leaves; framed nav, scroll ruler and crosshair cursor.' },
+      { id: 'ordo/Projects', name: 'Projects', kind: 'section', component: OrdoProjects, blurb: 'The studio\'s work as one row per project: a photo card that opens upwards from its lower edge and a ruled fact sheet.' },
+      { id: 'ordo/Studio', name: 'Studio', kind: 'section', component: OrdoStudio, blurb: 'One sentence about how the studio works, three large figures and three numbered principles on the ruled sheet.' },
+      { id: 'ordo/Services', name: 'Services', kind: 'section', component: OrdoServices, blurb: 'The disciplines as ruled rows at poster scale; the rust slab of the logo slides in beside the name under the pointer.' },
+      { id: 'ordo/Contact', name: 'Contact', kind: 'footer', component: OrdoContact, blurb: 'Closing sheet: one huge sentence over a rust slab, the email as the way in, plain blocks of details and a legal line whose Privacy and Terms open in a panel.' },
+    ],
+    sectionsDir: 'src/components/sections/ordo',
+  },
+  {
     id: 'signal',
     name: 'SIGNAL',
     accent: '#2fe0ff',
@@ -404,8 +423,12 @@ const allModels = [
   },
 ]
 
-/** Paleta del builder: sin modelos todavía en obra. */
-export const models = allModels.filter((model) => !isBuilderHiddenSku(model.id))
+/**
+ * Paleta del builder: sin modelos todavía en obra. Para probar uno en local (`npm run dev` con
+ * `VITE_BUILDER_SHOW_HIDDEN=1`) se muestran todos; en el build de producción esa variable no existe.
+ */
+const SHOW_HIDDEN = import.meta.env?.VITE_BUILDER_SHOW_HIDDEN === '1'
+export const models = allModels.filter((model) => SHOW_HIDDEN || !isBuilderHiddenSku(model.id))
 
 const index = new Map()
 allModels.forEach((model) => {

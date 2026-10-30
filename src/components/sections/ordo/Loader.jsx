@@ -1,7 +1,7 @@
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { gsap } from '../../../lib/gsap'
 import { C, DISPLAY, SITE } from './brand'
-import Logo from './Logo'
+import Logo, { VECTOR_BRAND } from './Logo'
 
 /**
  * ORDO — the loader.
@@ -19,7 +19,8 @@ import Logo from './Logo'
 const S_SECONDS = 1.5 // how long the O takes to be traced
 const RISE = ['R', 'D', 'O2']
 
-export default function Loader({ ready, calm, bridge, onDone }) {
+export default function Loader({ ready, calm, bridge, onDone, brand = SITE.name, tagline = SITE.tagline, places = SITE.places.join(' · ') }) {
+  const custom = brand !== VECTOR_BRAND
   const rootRef = useRef(null)
   const sheetRef = useRef(null)
   const logoRef = useRef(null)
@@ -38,21 +39,24 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       return undefined
     }
     const ctx = gsap.context(() => {
-      const strokes = q('[data-part=O1] [data-stroke]')
-      const fill = q('[data-part=O1] [data-fill]')
+      // A vector brand draws its first letter; a text brand only rises (no strokes to trace).
+      const strokes = custom ? [] : q('[data-part=O1] [data-stroke]')
+      const fill = custom ? [] : q('[data-part=O1] [data-fill]')
+      const rise = custom ? q('[data-part^=L]') : RISE.map((id) => q(`[data-part=${id}]`)[0])
+      const drawSeconds = custom ? 0.25 : S_SECONDS
       // The stroke offset is written as an attribute (GSAP would add "px" and it does not work the same with pathLength).
       const setTrail = (amount) => strokes.forEach((el) => el.setAttribute('stroke-dashoffset', String(1 - amount)))
       setTrail(0)
       gsap.set(fill, { opacity: 0 })
       gsap.set(strokes, { opacity: 1 })
       // The rest of the logo, hidden until the O ends (units are those of the drawing: 1000 = 1 em).
-      gsap.set(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 820 })
+      gsap.set(rise, custom ? { yPercent: 115 } : { y: 820 })
       gsap.set(q('[data-part=slab]'), { autoAlpha: 0, y: -520, rotation: -6, transformOrigin: '20% 100%' })
       gsap.set(q('[data-part=sub]'), { autoAlpha: 0, letterSpacing: '0.7em' })
       gsap.set(footRef.current, { autoAlpha: 0, y: 10 })
 
       const start = 0.15
-      const end = start + S_SECONDS // the O ends and the rest comes in
+      const end = start + drawSeconds // the O ends and the rest comes in
       const trail = { p: 0 }
       const tl = gsap.timeline({
         onUpdate: () => gsap.set(lineRef.current, { scaleX: tl.progress() }),
@@ -65,23 +69,23 @@ export default function Loader({ ready, calm, bridge, onDone }) {
           { p: 0 },
           {
             p: 1,
-            duration: S_SECONDS,
+            duration: drawSeconds,
             ease: 'power1.inOut',
             onUpdate: () => setTrail(trail.p),
           },
           start,
         )
         // …the letter fills in as it passes and the stroke fades out.
-        .to(fill, { opacity: 1, duration: 0.7, ease: 'power1.out' }, start + S_SECONDS * 0.7)
-        .to(strokes, { opacity: 0, duration: 0.5, ease: 'power1.out' }, start + S_SECONDS * 0.88)
+        .to(fill, { opacity: 1, duration: 0.7, ease: 'power1.out' }, start + drawSeconds * 0.7)
+        .to(strokes, { opacity: 0, duration: 0.5, ease: 'power1.out' }, start + drawSeconds * 0.88)
         // The rest, as usual.
-        .to(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07 }, end)
+        .to(rise, custom ? { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07 } : { y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07 }, end)
         .to(q('[data-part=slab]'), { autoAlpha: 1, y: 0, rotation: 0, duration: 0.7, ease: 'power4.out' }, end + 0.6)
         .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1, ease: 'expo.out' }, end + 0.8)
         .to({}, { duration: 0.1 }) // a breather before leaving
     }, logo)
     return () => ctx.revert()
-  }, [calm])
+  }, [calm, custom])
 
   // The exit: when the drawing has finished and the fonts are there, the sheet rises and the logo travels to the header.
   useEffect(() => {
@@ -101,7 +105,7 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       return () => tween.kill()
     }
     const ctx = gsap.context(() => {
-      const row = logo.querySelector('svg[data-part=row]')
+      const row = logo.querySelector('[data-part=row]')
       const target = bridge?.current.target?.()
       const tl = gsap.timeline({ onComplete: finish })
       tl.to(footRef.current, { autoAlpha: 0, y: -8, duration: 0.35, ease: 'power2.out' }, 0)
@@ -134,14 +138,14 @@ export default function Loader({ ready, calm, bridge, onDone }) {
   }, [ready, drawn, calm, bridge, onDone])
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-50" role="status" aria-live="polite" aria-label="Loading ORDO">
+    <div ref={rootRef} className="fixed inset-0 z-50" role="status" aria-live="polite" aria-label={`${brand} — ${tagline}`}>
       <div ref={sheetRef} className="od-sheet absolute inset-0" style={{ clipPath: 'inset(0% 0% 0% 0%)' }}>
         <div
           ref={footRef}
           className="absolute inset-x-0 bottom-0 px-5 pb-6 text-[11px] font-medium tracking-[0.16em] uppercase sm:px-9 sm:pb-8"
           style={{ ...DISPLAY, color: C.mute }}
         >
-          <span className="block max-w-[70%] leading-relaxed">{SITE.places.join(' · ')}</span>
+          <span className="block max-w-[70%] leading-relaxed">{places}</span>
         </div>
         <div className="absolute inset-x-5 bottom-0 h-px sm:inset-x-9" style={{ background: C.hair }}>
           <div ref={lineRef} className="h-full origin-left" style={{ background: C.ink, transform: 'scaleX(0)' }} />
@@ -150,7 +154,7 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       {/* The logo is separate from the sheet: when the sheet rises, it stays in view and travels. */}
       <div className="pointer-events-none absolute inset-0 grid place-items-center">
         <div ref={logoRef} style={{ fontSize: 'clamp(64px, 12.5vw, 168px)', willChange: 'transform' }}>
-          <Logo />
+          <Logo brand={brand} tagline={tagline} />
         </div>
       </div>
     </div>

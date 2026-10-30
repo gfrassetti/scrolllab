@@ -23,6 +23,10 @@
   --od-paper: #f3f1ea;
   --od-ink: #161513;
   --od-rust: #c4441f;
+  /* Greys derived from the ink on the paper: the muted text, the soft body text and the faint marks. */
+  --od-mute: color-mix(in srgb, var(--od-ink) 62%, var(--od-paper));
+  --od-soft: color-mix(in srgb, var(--od-ink) 85%, var(--od-paper));
+  --od-faint: color-mix(in srgb, var(--od-ink) 50%, var(--od-paper));
   --od-ease: cubic-bezier(0.23, 1, 0.32, 1);
   --od-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.38 -0.13'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
   background-color: var(--od-paper);
@@ -96,8 +100,8 @@
 .od-ruler__ticks {
   width: 10px;
   background-image:
-    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.4) 0 1px, transparent 1px 80px),
-    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.2) 0 1px, transparent 1px 8px);
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 40%, transparent) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 20%, transparent) 0 1px, transparent 1px 8px);
   background-size:
     10px 100%,
     5px 100%;
@@ -106,8 +110,8 @@
 .od-ruler__lens {
   width: 18px;
   background-image:
-    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.75) 0 1px, transparent 1px 80px),
-    repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.5) 0 1px, transparent 1px 8px);
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 75%, transparent) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 50%, transparent) 0 1px, transparent 1px 8px);
   background-size:
     18px 100%,
     10px 100%;
@@ -120,7 +124,7 @@
   right: 0;
   width: 16px;
   height: 1px;
-  background: rgba(22, 21, 19, 0.6);
+  background: color-mix(in srgb, var(--od-ink) 60%, transparent);
 }
 .od-ruler__wpn,
 .od-ruler__tag {
@@ -136,7 +140,7 @@
   transition: opacity 0.28s var(--od-ease);
 }
 .od-ruler__wpn {
-  color: #6d675c;
+  color: var(--od-mute);
 }
 /* The cursor: a rust line, longer than any tick, and the number of the sheet you are on. */
 .od-ruler__mark {
@@ -218,7 +222,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background: rgba(22, 21, 19, 0.22);
+  background: color-mix(in srgb, var(--od-ink) 22%, transparent);
   will-change: transform;
 }
 .od-cross__h {
@@ -244,7 +248,7 @@
 .od-cross__plus::after {
   content: '';
   position: absolute;
-  background: #e5431a;
+  background: var(--od-rust);
 }
 .od-cross__plus::before {
   left: 0;
@@ -272,7 +276,7 @@
   font-size: 12px;
   line-height: 1.45;
   letter-spacing: 0.06em;
-  color: #6d675c;
+  color: var(--od-mute);
   font-variant-numeric: tabular-nums;
 }
 .od-cross__coords[data-flip-x='1'] {
@@ -292,8 +296,8 @@
   top: 12px;
   max-width: 220px;
   padding: 7px 10px 8px;
-  background: #1d1c1a;
-  color: #f3f1ea;
+  background: var(--od-ink);
+  color: var(--od-paper);
   font-family: var(--od-font-label);
   font-weight: 500;
   font-size: 11.5px;
@@ -345,7 +349,7 @@
   --nav-h: 54px;
   /* The band under the hero (title and stage text), low like the one on heronaiapp.com. */
   --band-h: max(250px, 30svh);
-  --line: rgba(22, 21, 19, 0.5);
+  --line: color-mix(in srgb, var(--od-ink) 50%, transparent);
 }
 @media (min-width: 1024px) {
   .od-root {
@@ -395,8 +399,8 @@
   /* A tick every 8 px and a long one every 64 (a third / half of a nav cell), counted from the right
      edge: the long ones fall on the nav dividers. */
   background-image:
-    repeating-linear-gradient(to left, transparent 0 63px, rgba(22, 21, 19, 0.38) 63px 64px),
-    repeating-linear-gradient(to left, transparent 0 7px, rgba(22, 21, 19, 0.22) 7px 8px);
+    repeating-linear-gradient(to left, transparent 0 63px, color-mix(in srgb, var(--od-ink) 38%, transparent) 63px 64px),
+    repeating-linear-gradient(to left, transparent 0 7px, color-mix(in srgb, var(--od-ink) 22%, transparent) 7px 8px);
   background-size: 100% 8px, 100% 4px;
   background-repeat: no-repeat;
   transform-origin: right center;
@@ -411,7 +415,7 @@
 }
 @media (hover: hover) {
   .od-cell:hover {
-    background-color: rgba(22, 21, 19, 0.045);
+    background-color: color-mix(in srgb, var(--od-ink) 4.5%, transparent);
   }
 }
 .od-cell__divider {
@@ -481,7 +485,7 @@
   bottom: 0;
   right: calc(var(--i) * var(--mod) - 1px);
   width: 1px;
-  background: rgba(22, 21, 19, 0.085);
+  background: color-mix(in srgb, var(--od-ink) 8.5%, transparent);
   transform-origin: top center;
 }
 
@@ -492,7 +496,7 @@
 }
 .od-panel__edge {
   position: absolute;
-  background: rgba(22, 21, 19, 0.42);
+  background: color-mix(in srgb, var(--od-ink) 42%, transparent);
 }
 .od-panel__edge--t,
 .od-panel__edge--b {
@@ -583,20 +587,20 @@
   background: var(--od-paper);
   margin: 0;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  border-top: 1px solid rgba(22, 21, 19, 0.42);
-  border-left: 1px solid rgba(22, 21, 19, 0.42);
+  border-top: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .od-rotulo__row {
   padding: 5px 8px 6px;
-  border-right: 1px solid rgba(22, 21, 19, 0.42);
-  border-bottom: 1px solid rgba(22, 21, 19, 0.42);
+  border-right: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
   min-width: 0;
 }
 .od-rotulo__row dt {
-  color: #8a8478;
+  color: var(--od-faint);
   font-size: 10.5px;
 }
 .od-rotulo__row dt,
@@ -631,14 +635,14 @@
   left: calc(var(--px) - 28px);
   right: 0;
   height: 1px;
-  background: repeating-linear-gradient(to right, rgba(22, 21, 19, 0.3) 0 6px, transparent 6px 11px);
+  background: repeating-linear-gradient(to right, color-mix(in srgb, var(--od-ink) 30%, transparent) 0 6px, transparent 6px 11px);
   transform: scaleX(0);
 }
 .od-guide--v {
   top: calc(var(--nav-h) + 9px);
   bottom: var(--band-h);
   width: 1px;
-  background: repeating-linear-gradient(to bottom, rgba(22, 21, 19, 0.3) 0 6px, transparent 6px 11px);
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 30%, transparent) 0 6px, transparent 6px 11px);
   transform: scaleY(0);
 }
 .od-guide--rust-v {
@@ -823,7 +827,7 @@
   right: 16px;
   top: calc(var(--nav-h) + 16px);
   bottom: 28px;
-  border: 1px solid rgba(22, 21, 19, 0.42);
+  border: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
   pointer-events: none;
 }
 .od-next__mark--bl {
@@ -842,7 +846,7 @@
 .od-next__shade {
   position: absolute;
   inset: 0;
-  background: #161513;
+  background: var(--od-ink);
   opacity: 0;
   pointer-events: none;
 }
@@ -890,7 +894,7 @@
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-proj__item {
   display: grid;
@@ -905,6 +909,9 @@
   aspect-ratio: 4 / 3;
 }
 /* The grain goes on top of the photo (it does not touch it): it blends in "overlay", so it only shifts the photo's tones. */
+.od-proj[data-grain='off'] .od-proj__card::after {
+  display: none;
+}
 .od-proj__card::after {
   content: '';
   position: absolute;
@@ -933,7 +940,7 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.35;
-  color: #3b3833;
+  color: var(--od-soft);
 }
 .od-proj__row {
   display: flex;
@@ -946,7 +953,7 @@
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-proj__row dd {
   margin: 0;
@@ -1022,7 +1029,7 @@
    paper eating into the stroke (no outline or hatching, which on large letters look like a
    colouring book, and no tremble). */
 .od-sk .od-chunk__ink {
-  color: color-mix(in srgb, #161513, rgb(66 62 56 / 0.58) calc(var(--sk) * 100%));
+  color: color-mix(in srgb, var(--od-ink), color-mix(in srgb, var(--od-ink) 58%, transparent) calc(var(--sk) * 100%));
   background-image: var(--od-pencil-grain);
   background-size: 140px 140px;
   -webkit-background-clip: text;
@@ -1034,14 +1041,14 @@
 }
 /* The quadrant labels, from rust to graphite. */
 .od-sk .od-panel__label {
-  color: color-mix(in srgb, var(--od-rust), #8a857b calc(var(--sk) * 100%));
+  color: color-mix(in srgb, var(--od-rust), var(--od-faint) calc(var(--sk) * 100%));
 }
 /* The rest of the text, to graphite. */
 .od-sk .od-info__step {
-  color: color-mix(in srgb, var(--od-rust), #8a857b calc(var(--sk) * 100%));
+  color: color-mix(in srgb, var(--od-rust), var(--od-faint) calc(var(--sk) * 100%));
 }
 .od-sk .od-info__copy {
-  color: color-mix(in srgb, var(--od-ink), #8a857b calc(var(--sk) * 100%));
+  color: color-mix(in srgb, var(--od-ink), var(--od-faint) calc(var(--sk) * 100%));
 }
 /* The pencil tremble (#od-pencil filter, Sketch.jsx), only while there is a sketch. */
 .od-sk.is-sketch .od-info__side,
@@ -1104,7 +1111,7 @@
   min-width: 2ch;
   font-size: 12px;
   letter-spacing: 0.12em;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-menu__foot {
   margin-top: auto;
@@ -1116,7 +1123,7 @@
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-menu__ig {
   display: inline-flex;
@@ -1306,7 +1313,7 @@
   width: clamp(96px, 28vw, 150px);
   aspect-ratio: 1;
   padding: 6px;
-  border: 1px solid rgb(243 241 234 / 0.7);
+  border: 1px solid color-mix(in srgb, var(--od-paper) 70%, transparent);
 }
 .od-pd-hero__thumb img {
   display: block;
@@ -1369,7 +1376,7 @@
 .od-pd-services li span:last-child {
   font-size: 11.5px;
   letter-spacing: 0.12em;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-pd-stat__n {
   display: flex;
@@ -1462,7 +1469,7 @@
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-pd-end__name {
   font-size: clamp(34px, 8vw, 72px);
@@ -1730,7 +1737,7 @@
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
   text-align: right;
 }
 .od-studio__principles {
@@ -1763,7 +1770,7 @@
   max-width: 44ch;
   font-size: 15px;
   line-height: 1.6;
-  color: #3b3833;
+  color: var(--od-soft);
 }
 @media (min-width: 768px) {
   .od-studio__figures {
@@ -1835,13 +1842,13 @@
   max-width: 46ch;
   font-size: 15px;
   line-height: 1.6;
-  color: #3b3833;
+  color: var(--od-soft);
 }
 .od-svc__tags {
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 @media (min-width: 900px) {
   .od-svc__row {
@@ -1853,6 +1860,10 @@
   .od-svc__tags {
     text-align: right;
   }
+}
+/* Without the slab (`showSlab` off) the hover only moves the name. */
+.od-svc[data-slab='off'] .od-svc__slab {
+  display: none;
 }
 @media (hover: hover) {
   .od-svc__row:hover .od-svc__name {
@@ -1895,7 +1906,7 @@
   margin: clamp(22px, 3vw, 36px) 0 0;
   font-size: clamp(15px, 1.5vw, 19px);
   line-height: 1.55;
-  color: #3b3833;
+  color: var(--od-soft);
 }
 .od-contact__mail {
   display: inline-flex;
@@ -1942,7 +1953,7 @@
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-contact__bp {
   margin: 0;
@@ -1958,7 +1969,7 @@
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #6d675c;
+  color: var(--od-mute);
 }
 .od-contact__legalnav {
   display: flex;

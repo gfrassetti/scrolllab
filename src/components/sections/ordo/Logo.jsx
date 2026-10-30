@@ -17,12 +17,55 @@ const SUB = 0.115
 // below the baseline.
 const RISERS = new Set(['R', 'D', 'O2'])
 
-export default function Logo({ compact = false, hairline = false, className = '', style, ...rest }) {
-  const clipId = `${useId().replace(/:/g, '')}-clip`
+/** The brand the vector logo draws: any other name is set as a plain wordmark (same loader gestures, no tracing). */
+export const VECTOR_BRAND = 'ORDO'
+
+/** A brand of the buyer's own: its letters in the same geometric face, with the rust slab above them. */
+function TextLogo({ brand, tagline, compact, className, style, rest }) {
+  const letters = [...String(brand)]
   return (
     <span
       role="img"
-      aria-label={`${SITE.name} — ${SITE.tagline}`}
+      aria-label={`${brand} — ${tagline}`}
+      className={`inline-flex flex-col leading-none select-none ${className}`}
+      style={{ ...LOGO_FONT, color: C.ink, ...style }}
+      {...rest}
+    >
+      <span data-part="row" aria-hidden="true" className="relative inline-flex uppercase" style={{ paddingTop: '0.12em', lineHeight: 1 }}>
+        {letters.map((ch, i) => (
+          <span key={i} className="inline-block overflow-hidden" style={{ lineHeight: 1.08, whiteSpace: 'pre' }}>
+            <span data-part={`L${i}`} className="inline-block" style={{ fontWeight: 500, letterSpacing: '0.06em' }}>
+              {ch}
+            </span>
+          </span>
+        ))}
+        <span
+          data-part="slab"
+          className="absolute"
+          style={{ left: '22%', width: '52%', top: 0, height: '0.11em', background: C.rust, clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0 100%)' }}
+        />
+      </span>
+      {!compact && (
+        <span
+          data-part="sub"
+          aria-hidden="true"
+          className="block whitespace-nowrap"
+          style={{ marginTop: '0.3em', fontSize: `${SUB}em`, fontWeight: 500, letterSpacing: '0.34em', color: C.mute }}
+        >
+          {tagline}
+        </span>
+      )}
+    </span>
+  )
+}
+
+export default function Logo({ brand = SITE.name, tagline = SITE.tagline, compact = false, hairline = false, className = '', style, ...rest }) {
+  const clipId = `${useId().replace(/:/g, '')}-clip`
+  if (brand !== VECTOR_BRAND) return <TextLogo brand={brand} tagline={tagline} compact={compact} className={className} style={style} rest={rest} />
+  return (
+    <span
+      role="img"
+      aria-label={`${brand} — ${tagline}`}
       className={`inline-flex flex-col leading-none select-none ${className}`}
       style={{ ...LOGO_FONT, color: C.ink, ...style }}
       {...rest}
@@ -43,7 +86,7 @@ export default function Logo({ compact = false, hairline = false, className = ''
           // The tracing stroke is rust (the slab's colour); the fill, ink.
           const body = (
             <g data-part={part.id}>
-              <path data-fill d={part.fill} fill={color} />
+              <path data-fill d={part.fill} style={{ fill: color }} />
               {part.contours.map((d, i) => (
                 <path
                   key={i}
@@ -51,7 +94,7 @@ export default function Logo({ compact = false, hairline = false, className = ''
                   d={d}
                   pathLength="1"
                   fill="none"
-                  stroke={C.rust}
+                  style={{ stroke: C.rust }}
                   // When small (the nav) the stroke is one screen px, at any scale.
                   strokeWidth={hairline ? 1.1 : 11}
                   vectorEffect={hairline ? 'non-scaling-stroke' : undefined}
@@ -86,7 +129,7 @@ export default function Logo({ compact = false, hairline = false, className = ''
             color: C.mute,
           }}
         >
-          {SITE.tagline}
+          {tagline}
         </span>
       )}
     </span>

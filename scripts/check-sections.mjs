@@ -39,6 +39,9 @@ import { fileURLToPath } from 'node:url'
 import { PRODUCTS } from '../server/catalog.js'
 import { ALLOWED_SECTIONS, HOSTABLE_SECTIONS } from '../server/sections.js'
 import { BUILDER_HIDDEN_SKUS } from '../src/domain/catalog.js'
+
+// SHOW_HIDDEN=1: prueba también los modelos en obra (BUILDER_HIDDEN_SKUS), p. ej. ORDO; el builder los muestra con esa variable.
+if (process.env.SHOW_HIDDEN === '1') process.env.VITE_BUILDER_SHOW_HIDDEN = '1'
 import { sectionModelOf } from '../src/domain/sections.js'
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -66,7 +69,7 @@ if (!targets.length) {
 }
 
 // Secciones del builder que cubre el pedido (un modelo = todas las suyas).
-const builderIds = ALLOWED_SECTIONS.filter((id) => !BUILDER_HIDDEN_SKUS.includes(sectionModelOf(id)))
+const builderIds = ALLOWED_SECTIONS.filter((id) => process.env.SHOW_HIDDEN === '1' || !BUILDER_HIDDEN_SKUS.includes(sectionModelOf(id)))
 const ids = [
   ...new Set(
     targets.flatMap((t) => (t.includes('/') ? [t] : builderIds.filter((id) => sectionModelOf(id) === t))),

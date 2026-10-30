@@ -8,11 +8,11 @@
  */
 
 export const C = {
-  paper: '#f3f1ea', // the sheet
-  ink: '#161513',
-  mute: '#6d675c',
-  hair: 'rgba(22, 21, 19, 0.18)',
-  rust: '#c4441f', // the logo's table slab
+  paper: 'var(--od-paper)', // the sheet
+  ink: 'var(--od-ink)',
+  mute: 'var(--od-mute)',
+  hair: 'color-mix(in srgb, var(--od-ink) 18%, transparent)',
+  rust: 'var(--od-rust)', // the logo's table slab
 }
 
 export const FONTS_HREF =

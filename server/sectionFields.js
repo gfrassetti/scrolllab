@@ -78,6 +78,11 @@ export const ASSET_URL_KEYS = new Set([
   'sceneUrl',
   // APEX: el film del hero y sus pósters (escritorio y teléfono).
   'filmSrc',
+  // ORDO: las cuatro capas del dibujo del hero.
+  'photo',
+  'sketch',
+  'sketchEmpty',
+  'sketchRaw',
   'filmSrcMobile',
   'poster',
   'posterMobile',

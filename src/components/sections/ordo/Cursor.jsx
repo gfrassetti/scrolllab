@@ -15,10 +15,15 @@ import { readPlanProbe } from './planProbe'
  */
 // Where it becomes a crosshair: only over the drawing quadrant (the element with data-cursor-zone).
 const ZONE = '[data-cursor-zone]'
-const DOT_STATES = {
-  dot: { width: 14, height: 14, backgroundColor: '#161513', boxShadow: 'inset 0 0 0 0px #161513' },
-  ring: { width: 46, height: 46, backgroundColor: 'rgba(22,21,19,0)', boxShadow: 'inset 0 0 0 1px #161513' },
-  label: { width: 96, height: 96, backgroundColor: 'rgba(22,21,19,1)', boxShadow: 'inset 0 0 0 0px #161513' },
+// The three shapes of the dot. GSAP cannot tween a `var()`, so the ink is read from the page once (it is a colour
+// field of the Hero) and the states are built from it.
+const dotStates = (ink) => {
+  const [r, g, b] = gsap.utils.splitColor(ink)
+  return {
+    dot: { width: 14, height: 14, backgroundColor: ink, boxShadow: `inset 0 0 0 0px ${ink}` },
+    ring: { width: 46, height: 46, backgroundColor: `rgba(${r},${g},${b},0)`, boxShadow: `inset 0 0 0 1px ${ink}` },
+    label: { width: 96, height: 96, backgroundColor: ink, boxShadow: `inset 0 0 0 0px ${ink}` },
+  }
 }
 const INTERACTIVE = 'a, button, [role="button"], summary, input, textarea'
 
@@ -43,6 +48,7 @@ export default function Cursor() {
     const label = dotLabel.current
     const plusEl = plus.current
     const tip = tipRef.current
+    const states = dotStates(getComputedStyle(root).getPropertyValue('--od-ink').trim() || '#161513')
 
     gsap.set([cross, root], { autoAlpha: 0 })
     gsap.set(body, { xPercent: -50, yPercent: -50 }) // centred on the pointer even if its size changes
@@ -69,7 +75,7 @@ export default function Cursor() {
       if (next === dotState && label.textContent === text) return
       dotState = next
       if (text) label.textContent = text
-      gsap.to(body, { ...DOT_STATES[next], duration: 0.45, ease: 'expo.out', overwrite: 'auto' })
+      gsap.to(body, { ...states[next], duration: 0.45, ease: 'expo.out', overwrite: 'auto' })
       gsap.to(label, { autoAlpha: next === 'label' ? 1 : 0, duration: next === 'label' ? 0.3 : 0.15, delay: next === 'label' ? 0.08 : 0 })
     }
 

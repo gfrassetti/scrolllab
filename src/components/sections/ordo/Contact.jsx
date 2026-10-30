@@ -4,18 +4,22 @@ import { contactHref, externalProps, legalDocs } from '../../../lib/contactLinks
 import LegalSheet from '../../LegalSheet'
 import { LABEL, SITE } from './brand'
 import { useReveal } from './reveal'
+import { rows, sectionVars } from './vars'
+import './ordo.css'
 
 /**
- * Contact — the closing sheet: one large sentence, the email as the way in, three plain blocks of details and the
- * legal line. Email and phone are real links (mailto: / tel:), Instagram opens in another tab, and Privacy and Terms
- * open their text in a panel over the page (LegalSheet) while they point at a hash.
+ * Contact — the closing sheet: one large sentence, the email as the way in, plain blocks of details and the legal
+ * line. Email and phone lines are real links (mailto: / tel:), a block with a link (`href`) sends every line there
+ * (an http link opens in another tab), and Privacy and Terms open their text in a panel over the page (LegalSheet)
+ * while they point at a hash, or go to the buyer's own page once they point at one.
+ * Every text, link and colour is a prop; the defaults are the demo copy.
  */
 
 const EMAIL = 'hello@ordo.studio'
 const BLOCKS = [
-  ['Studio', 'Rua do Poço 14\n1200-345 Lisbon, Portugal\nMon–Fri, 9:30–18:30'],
-  ['Call', '+351 21 555 0142'],
-  ['Follow', SITE.instagram.handle],
+  { heading: 'Studio', lines: 'Rua do Poço 14\n1200-345 Lisbon, Portugal\nMon–Fri, 9:30–18:30', href: '' },
+  { heading: 'Call', lines: '+351 21 555 0142', href: '' },
+  { heading: 'Follow', lines: SITE.instagram.handle, href: SITE.instagram.href },
 ]
 
 const PRIVACY = `Last updated: 1 March 2026
@@ -36,14 +40,43 @@ Sending a message does not create a commission: a project starts with a written 
 
 The text, drawings and photographs on this site belong to ORDO Arquitectura Lda. and may not be reused without written permission.`
 
-const LEGAL = [
-  { label: 'Privacy', href: '#privacy', title: 'Privacy', body: PRIVACY },
-  { label: 'Terms', href: '#terms', title: 'Terms', body: TERMS },
-]
+const lines = (t) =>
+  String(t ?? '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
 
-export default function Contact({ calm }) {
+export default function Contact({
+  title = 'Contact',
+  label = 'Lisbon',
+  big = "Let's draw it together.",
+  sub = 'Tell us about the place, the budget and the date. We answer within two working days.',
+  email = EMAIL,
+  mailTip = 'Write to us',
+  blocks,
+  copyright = '© 2026 ORDO Arquitectura Lda.',
+  backLabel = 'Back to top',
+  backHref = '#home',
+  privacyLabel = 'Privacy',
+  privacyHref = '#privacy',
+  privacyText = PRIVACY,
+  termsLabel = 'Terms',
+  termsHref = '#terms',
+  termsText = TERMS,
+  legalCloseLabel = 'Close',
+  showSlab = 'on',
+  bg,
+  fg,
+  accent,
+  calm,
+}) {
   const ref = useRef(null)
   useReveal(ref, calm)
+  const blockRows = rows(blocks, BLOCKS)
+  const legal = [
+    { label: privacyLabel, href: privacyHref, title: privacyLabel, body: privacyText },
+    { label: termsLabel, href: termsHref, title: termsLabel, body: termsText },
+  ]
   const toTop = (e) => {
     e.preventDefault()
     const lenis = getLenis()
@@ -51,41 +84,41 @@ export default function Contact({ calm }) {
     else window.scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' })
   }
   return (
-    <section ref={ref} id="contact" aria-labelledby="contact-title" className="od-sec od-contact">
+    <section ref={ref} id="contact" data-od-section aria-labelledby="contact-title" className="od-root od-sec od-contact" style={sectionVars({ bg, fg, accent })}>
       <header className="od-sec__head">
         <h2 id="contact-title" className="od-sec__title">
-          Contact
+          {title}
         </h2>
         <span className="od-sec__label" style={LABEL}>
-          Lisbon
+          {label}
         </span>
       </header>
 
       <div className="od-contact__main" data-group>
-        <span className="od-contact__slab" data-up aria-hidden="true" />
+        {showSlab !== 'off' && <span className="od-contact__slab" data-up aria-hidden="true" />}
         <p data-sweep className="od-paint od-contact__big">
-          Let&apos;s draw it together.
+          {big}
         </p>
         <p data-up className="od-contact__sub">
-          Tell us about the place, the budget and the date. We answer within two working days.
+          {sub}
         </p>
-        <a data-up href={contactHref(EMAIL)} className="od-contact__mail" data-cursor="Write to us">
-          <span className="od-contact__mailtext">{EMAIL}</span>
+        <a data-up href={contactHref(email) || email} className="od-contact__mail" data-cursor={mailTip}>
+          <span className="od-contact__mailtext">{email}</span>
           <span aria-hidden="true">→</span>
         </a>
       </div>
 
       <div className="od-contact__blocks" data-group>
-        {BLOCKS.map(([heading, lines]) => (
-          <div key={heading} className="od-contact__block" data-up>
+        {blockRows.map((b, i) => (
+          <div key={i} className="od-contact__block" data-up>
             <h3 className="od-contact__bh" style={LABEL}>
-              {heading}
+              {b.heading}
             </h3>
             <p className="od-contact__bp">
-              {lines.split('\n').map((line, i) => {
-                const href = heading === 'Follow' ? SITE.instagram.href : contactHref(line)
+              {lines(b.lines).map((line, j) => {
+                const href = b.href || contactHref(line)
                 return (
-                  <span key={i} className="block">
+                  <span key={j} className="block">
                     {href ? (
                       <a href={href} {...externalProps(href)} className="od-contact__link">
                         {line}
@@ -102,19 +135,19 @@ export default function Contact({ calm }) {
       </div>
 
       <div className="od-contact__legal" style={LABEL}>
-        <span>© 2026 ORDO Arquitectura Lda.</span>
+        <span>{copyright}</span>
         <span className="od-contact__legalnav">
-          {LEGAL.map((l) => (
-            <a key={l.href} href={l.href} className="od-contact__link">
+          {legal.map((l) => (
+            <a key={l.href} href={l.href} {...externalProps(l.href)} className="od-contact__link">
               {l.label}
             </a>
           ))}
-          <a href="#home" onClick={toTop} className="od-contact__link">
-            Back to top <span aria-hidden="true">↑</span>
+          <a href={backHref} onClick={backHref === '#home' ? toTop : undefined} {...externalProps(backHref)} className="od-contact__link">
+            {backLabel} <span aria-hidden="true">↑</span>
           </a>
         </span>
       </div>
-      <LegalSheet docs={legalDocs(LEGAL)} closeLabel="Close" />
+      <LegalSheet docs={legalDocs(legal)} closeLabel={legalCloseLabel} />
     </section>
   )
 }

@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from '../../../lib/gsap'
 import { getLenis, scrollToSection } from '../../../hooks/useLenis'
+import { externalProps } from '../../../lib/contactLinks'
 import { getRoute, navigate } from './router'
 import { hidePaint } from './paint'
 import { C, LABEL, OPEN_DELAY, OPEN_T as T, SITE } from './brand'
 import Logo from './Logo'
+import { rows } from './vars'
 
 /**
  * The site frame, drawn with lines like a floor plan: the nav on top and, below, the edge of the hero's text
@@ -12,7 +14,7 @@ import Logo from './Logo'
  *
  * The opening (after the sketch is painted): two thin lines are born at the centre of the screen and stretch
  * out to the edges; one goes up and stays as the nav's border, the other goes down and stays as the border of
- * the block below (the hero draws that one, Hero.jsx, with the same timings: it belongs to its sheet). Then
+ * the block below (the hero draws that one, Drawing.jsx, with the same timings: it belongs to its sheet). Then
  * the nav dividers are traced (from top to bottom), the buttons are painted (paint.js) and the ruler and the
  * registration crosses come in.
  *
@@ -29,14 +31,31 @@ import Logo from './Logo'
  */
 
 const LINKS = [
-  { id: 'projects', label: 'Projects' },
-  { id: 'studio', label: 'Studio' },
-  { id: 'services', label: 'Services' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Studio', href: '#studio' },
+  { label: 'Services', href: '#services' },
 ]
-const MENU = [...LINKS, { id: 'contact', label: 'Contact', accent: true }]
 
 
-export default function Nav({ logoRef, open, calm }) {
+export default function Nav({
+  logoRef,
+  open,
+  calm,
+  brand = SITE.name,
+  tagline = SITE.tagline,
+  links,
+  homeHref = '#home',
+  ctaLabel = 'Contact',
+  ctaHref = '#contact',
+  ctaTip = 'Get in touch',
+  menuLabel = 'Menu',
+  closeLabel = 'Close',
+  socialLabel = SITE.instagram.handle,
+  socialHref = SITE.instagram.href,
+  places = SITE.places.join(' · '),
+}) {
+  const linkRows = rows(links, LINKS)
+  const menuRows = [...linkRows, { label: ctaLabel, href: ctaHref, accent: true }]
   const rootRef = useRef(null)
 
   // Before opening, everything in the frame is hidden (the lines, at the centre and with no length).
@@ -75,8 +94,8 @@ export default function Nav({ logoRef, open, calm }) {
   const writing = useRef(null)
   const writeLogo = () => {
     if (calm || writing.current?.isActive()) return
-    const svg = logoRef.current?.querySelector('svg[data-part=row]')
-    if (!svg) return
+    const svg = logoRef.current?.querySelector('[data-part=row]')
+    if (!svg || !svg.querySelector('[data-stroke]')) return
     const order = ['O1', 'R', 'D', 'O2', 'slab']
     const tl = gsap.timeline({ defaults: { ease: 'power1.inOut' } })
     order.forEach((id, i) => {
@@ -95,12 +114,17 @@ export default function Nav({ logoRef, open, calm }) {
   }
   useEffect(() => () => writing.current?.kill(), [])
 
-  const go = (id) => (e) => {
-    e.preventDefault()
+  // A link to a section of the page (`#projects`) glides there; from a project page it goes home first. Any other
+  // link (a path or a URL of the buyer's own) is left to the browser.
+  const go = (href) => (e) => {
     setMenu(false)
+    const id = String(href ?? '').startsWith('#') ? decodeURIComponent(href.slice(1)) : ''
+    if (!id) return
+    const onHome = getRoute().name === 'home'
+    if (onHome && !document.getElementById(id)) return
+    e.preventDefault()
     getLenis()?.start()
-    // From a project page, the sections are on the home page.
-    if (getRoute().name !== 'home') navigate({ name: 'home' }, { section: id })
+    if (!onHome) navigate({ name: 'home' }, { section: id })
     else scrollToSection(id)
   }
 
@@ -137,21 +161,23 @@ export default function Nav({ logoRef, open, calm }) {
       <header className="od-frame__nav absolute inset-x-0 top-0 flex items-stretch justify-between">
         <a
           ref={logoRef}
-          href="#home"
-          onClick={go('home')}
+          href={homeHref}
+          onClick={go(homeHref)}
+          {...externalProps(homeHref)}
           onPointerEnter={(e) => e.pointerType !== 'touch' && writeLogo()}
-          aria-label={`${SITE.name}, go to the top`}
+          aria-label={`${brand} — ${tagline}`}
           className="pointer-events-auto flex items-center px-4 sm:px-9"
           style={{ fontSize: 26, opacity: 0 }}
         >
-          <Logo compact hairline />
+          <Logo compact hairline brand={brand} tagline={tagline} />
         </a>
         <nav aria-label="Main" className="flex items-stretch">
-          {LINKS.map((l) => (
+          {linkRows.map((l, i) => (
             <a
-              key={l.id}
-              href={`#${l.id}`}
-              onClick={go(l.id)}
+              key={i}
+              href={l.href}
+              onClick={go(l.href)}
+              {...externalProps(l.href)}
               className="od-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex"
               style={LABEL}
             >
@@ -169,18 +195,19 @@ export default function Nav({ logoRef, open, calm }) {
             style={LABEL}
           >
             <span data-divider className="od-cell__divider" aria-hidden="true" />
-            <span data-in className="od-paint">{menu ? 'Close' : 'Menu'}</span>
+            <span data-in className="od-paint">{menu ? closeLabel : menuLabel}</span>
             <span data-in className={`od-paint od-menu__burger${menu ? ' is-open' : ''}`} aria-hidden="true" />
           </button>
           <a
-            href="#contact"
-            onClick={go('contact')}
+            href={ctaHref}
+            onClick={go(ctaHref)}
+            {...externalProps(ctaHref)}
             className="od-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:flex"
             style={{ ...LABEL, color: C.rust }}
-            data-cursor="Get in touch"
+            data-cursor={ctaTip}
           >
             <span data-divider className="od-cell__divider" aria-hidden="true" />
-            <span data-in className="od-paint">Contact</span>
+            <span data-in className="od-paint">{ctaLabel}</span>
             <span data-in className="od-paint absolute right-3 bottom-2 text-[14px]" aria-hidden="true">
               →
             </span>
@@ -192,15 +219,15 @@ export default function Nav({ logoRef, open, calm }) {
       <nav
         id="od-menu"
         ref={menuRef}
-        aria-label="Menu"
+        aria-label={menuLabel}
         className={`od-menu od-sheet${menu ? ' is-open pointer-events-auto' : ''}`}
         aria-hidden={!menu}
         inert={!menu}
       >
         <ul className="od-menu__list">
-          {MENU.map((l, i) => (
-            <li key={l.id} style={{ '--i': i }}>
-              <a href={`#${l.id}`} onClick={go(l.id)} className="od-menu__link" style={l.accent ? { color: C.rust } : undefined}>
+          {menuRows.map((l, i) => (
+            <li key={i} style={{ '--i': i }}>
+              <a href={l.href} onClick={go(l.href)} {...externalProps(l.href)} className="od-menu__link" style={l.accent ? { color: C.rust } : undefined}>
                 <span className="od-menu__n" style={LABEL}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
@@ -210,9 +237,9 @@ export default function Nav({ logoRef, open, calm }) {
           ))}
         </ul>
         <div className="od-menu__foot" style={LABEL}>
-          <span>{SITE.places.join(' · ')}</span>
-          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="od-menu__ig">
-            {SITE.instagram.handle}
+          <span>{places}</span>
+          <a href={socialHref} {...externalProps(socialHref)} className="od-menu__ig">
+            {socialLabel}
           </a>
         </div>
       </nav>

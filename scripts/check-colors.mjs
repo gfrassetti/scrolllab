@@ -30,6 +30,9 @@ import { chromium } from 'playwright'
 import { SECTION_FIELDS } from '../src/domain/sectionFields/fields.js'
 import { BUILDER_HIDDEN_SKUS } from '../src/domain/catalog.js'
 
+// SHOW_HIDDEN=1: prueba también los modelos en obra (BUILDER_HIDDEN_SKUS), p. ej. ORDO; el builder los muestra con esa variable.
+if (process.env.SHOW_HIDDEN === '1') process.env.VITE_BUILDER_SHOW_HIDDEN = '1'
+
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const STORAGE_KEY = 'builder-composition-v1'
 const args = process.argv.slice(2)
@@ -220,7 +223,7 @@ function scanInPage(sentinels) {
 
 async function main() {
   const ids = Object.keys(SECTION_FIELDS).filter((id) => {
-    if (BUILDER_HIDDEN_SKUS.includes(id.split('/')[0])) return false
+    if (process.env.SHOW_HIDDEN !== '1' && BUILDER_HIDDEN_SKUS.includes(id.split('/')[0])) return false
     if (!only) return true
     return only.includes('/') ? id === only : id.startsWith(`${only}/`)
   })

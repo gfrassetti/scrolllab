@@ -8,7 +8,7 @@ import Loader from './Loader'
 import Cursor from './Cursor'
 import ScrollRuler from './ScrollRuler'
 import Nav from './Nav'
-import Hero from './Hero'
+import Drawing from './Drawing'
 import Projects from './Projects'
 import Studio from './Studio'
 import Services from './Services'
@@ -208,9 +208,9 @@ export default function Site() {
             <ProjectPage key={route.slug} slug={route.slug} calm={calm} boarded={boarded} />
           ) : (
             <>
-              <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} boceto={SALIDA === 'boceto'} />
+              <Drawing boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} boceto={SALIDA === 'boceto'} />
               {SALIDA === 'boceto' && <Sketch calm={calm} exit={heroExit} />}
-              <Projects calm={calm} />
+              <Projects calm={calm} routed />
               <Studio calm={calm} />
               <Services calm={calm} />
               <Contact calm={calm} />

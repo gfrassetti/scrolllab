@@ -127,6 +127,11 @@ const APPROVED = [
   'apex/Models',
   'apex/Showroom',
   'apex/Footer',
+  'ordo/Hero',
+  'ordo/Projects',
+  'ordo/Studio',
+  'ordo/Services',
+  'ordo/Contact',
   'contact/ContactForm',
   'commerce/ProductGrid',
 ]

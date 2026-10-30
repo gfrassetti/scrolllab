@@ -63,7 +63,9 @@ export default function ScrollRuler({ on }) {
       } else if (marked.length) {
         spots = marked.map((el) => el.getBoundingClientRect().top + window.scrollY)
       } else {
-        spots = [...document.querySelectorAll('main > section')].map((el) => el.offsetTop)
+        // The sheets of the page: the sections that mark themselves (a composition has no <main>), else the sections of <main>.
+        const sheets = [...document.querySelectorAll('[data-od-section]')]
+        spots = (sheets.length ? sheets : [...document.querySelectorAll('main > section')]).map((el) => el.getBoundingClientRect().top + window.scrollY)
       }
       const next = spots.map((y, i) => ({ n: String(i + 1).padStart(2, '0'), y, f: Math.min(1, y / max) }))
       marksRef.current = next

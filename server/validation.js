@@ -177,7 +177,9 @@ export function validateRecipe(recipe, maxRecipeSections = 30) {
       throw new HttpError(400, `Sección no permitida: ${String(id)}`)
     }
     const model = String(id).split('/')[0]
-    if (BUILDER_HIDDEN_SKUS.includes(model)) {
+    // `BUILDER_SHOW_HIDDEN=1` (solo fuera de producción): probar en local un modelo que todavía está en obra.
+    const showHidden = process.env.BUILDER_SHOW_HIDDEN === '1' && process.env.NODE_ENV !== 'production'
+    if (!showHidden && BUILDER_HIDDEN_SKUS.includes(model)) {
       throw new HttpError(400, `Sección no permitida: ${String(id)}`)
     }
     const props =
