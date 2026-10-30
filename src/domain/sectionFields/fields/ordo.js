@@ -39,6 +39,7 @@ const LEGAL_PANEL_HELP = {
   ],
 }
 
+/** @type {SectionField[]} */
 const COLORS = [
   { key: 'bg', label: 'Color del papel (fondo)', type: 'color' },
   { key: 'fg', label: 'Color de la tinta (texto y líneas)', type: 'color' },
@@ -192,7 +193,7 @@ export const ORDO_FIELDS = {
     { key: 'copyright', label: 'Línea de derechos', type: 'text' },
     { key: 'backLabel', label: 'Enlace «volver arriba» — texto', type: 'text' },
     { key: 'backHref', label: 'Enlace «volver arriba» — destino (#home vuelve al principio)', type: 'href' },
-    ...legalFields().map((f) => (f.key === 'privacyHref' ? { ...f, help: LEGAL_PANEL_HELP } : f)),
+    ...legalFields().map((f) => /** @type {SectionField} */ (f.key === 'privacyHref' ? { ...f, help: LEGAL_PANEL_HELP } : f)),
     toggle('showSlab', 'Tapa de óxido sobre la frase grande'),
     ...COLORS,
   ],
