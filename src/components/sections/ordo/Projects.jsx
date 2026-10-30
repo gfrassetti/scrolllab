@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
-import { gsap } from '../../../lib/gsap'
+import { gsap, ScrollTrigger } from '../../../lib/gsap'
 import { externalProps } from '../../../lib/contactLinks'
 import { LABEL } from './brand'
 import { PROJECTS } from './projects'
@@ -14,12 +14,14 @@ import './ordo.css'
  * router. Placed in a composition there is no router: each card goes to the `href` of its row (a section of the page,
  * a page of the buyer's own, or nothing).
  *
- * The sheet of the hero turns back into a sketch as it leaves (Sketch.jsx) and this section follows it. Each
- * card is revealed as it comes into view: the photo opens upwards from its lower edge while it settles from a
- * slight zoom, and the fact sheet rises after it.
+ * The sheet of the hero turns back into a sketch as it leaves (Sketch.jsx) and this section follows it. The section is
+ * pinned: one stage with every project stacked on the same layout, and the scroll (GSAP, scrubbed) changes the project
+ * on it. The next photo opens upwards from its lower edge while it settles from a slight zoom; the fact sheet of the
+ * one leaving sinks and fades, and the next one rises into its place. The scroll snaps to each project, so the stage
+ * always rests on one complete project.
  *
- * Every text, photo, link and colour is a prop; the defaults are the demo projects. With «reduce motion» everything
- * is already in place, no reveal.
+ * Every text, photo, link and colour is a prop; the defaults are the demo projects. With «reduce motion» nothing is
+ * pinned: the projects are a plain list, one row after the other.
  */
 
 /** The demo projects as rows of this section. */
@@ -59,7 +61,7 @@ function Item({ project, index, total, routed, labels, tip, wordNumber }) {
           <img
             src={image}
             srcSet={project.imageSmall ? `${small} 900w, ${image} 1800w` : undefined}
-            sizes="(min-width: 1024px) 62vw, 100vw"
+            sizes="(min-width: 1024px) 62vw, 230vw"
             alt={project.alt || `${project.name}, ${String(project.kind ?? '').toLowerCase()} in ${project.place}`}
             className="od-proj__img od-proj__img--cover"
             loading={index === 0 ? undefined : 'lazy'}
@@ -115,51 +117,103 @@ export default function Projects({
   calm,
 }) {
   const sectionRef = useRef(null)
+  const counterRef = useRef(null)
+  const barRef = useRef(null)
   const list = rows(projects, DEMO_ROWS)
+  const count = list.length
 
+  // The pin: the stage stays on screen while the scroll walks through the projects.
   useLayoutEffect(() => {
-    if (calm) return undefined
+    if (calm || count < 2) return undefined
+    const root = sectionRef.current
     const ctx = gsap.context(() => {
-      gsap.utils.toArray('[data-proj-item]').forEach((item) => {
+      const stage = root.querySelector('[data-proj-stage]')
+      const items = gsap.utils.toArray('[data-proj-item]')
+      const first = items[0]
+      const tl = gsap.timeline({ defaults: { ease: 'none' } })
+      // Every project but the first waits hidden on the same spot.
+      items.slice(1).forEach((item) => {
+        gsap.set(item, { autoAlpha: 0 })
+        gsap.set(item.querySelector('[data-proj-card]'), { clipPath: 'inset(100% 0% 0% 0%)' })
+        gsap.set(item.querySelector('[data-proj-img]'), { scale: 1.2 })
+        gsap.set(item.querySelector('[data-proj-ficha]'), { autoAlpha: 0, y: 26 })
+      })
+      gsap.set(first.querySelector('[data-proj-card]'), { clipPath: 'inset(0% 0% 0% 0%)' })
+      // One unit of the timeline per project; the change happens in the middle 60% of each unit and the stage rests at
+      // the whole numbers (the snap below).
+      items.forEach((item, i) => {
+        if (!i) return
+        const prev = items[i - 1]
+        const at = i - 1 + 0.2
+        const d = 0.6
         const card = item.querySelector('[data-proj-card]')
         const img = item.querySelector('[data-proj-img]')
         const ficha = item.querySelector('[data-proj-ficha]')
-        gsap.set(card, { clipPath: 'inset(14% 0% 0% 0%)' })
-        if (img) gsap.set(img, { scale: 1.12 })
-        gsap.set(ficha, { autoAlpha: 0, y: 18 })
-        gsap
-          .timeline({ scrollTrigger: { trigger: item, start: 'top 82%', once: true } })
-          .to(card, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.out' }, 0)
-          .to(ficha, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 0.35)
-        if (img) gsap.to(img, { scale: 1, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: item, start: 'top 82%', once: true } })
+        tl.set(item, { autoAlpha: 1 }, at)
+          .fromTo(card, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.inOut', duration: d }, at)
+          .fromTo(img, { scale: 1.2 }, { scale: 1, ease: 'power2.out', duration: d }, at)
+          // The one leaving: its fact sheet sinks while the new photo covers it, and its photo drifts up a little.
+          .to(prev.querySelector('[data-proj-ficha]'), { autoAlpha: 0, y: -22, ease: 'power2.in', duration: d * 0.45 }, at)
+          .to(prev.querySelector('[data-proj-img]'), { yPercent: -4, scale: 1.04, ease: 'power1.in', duration: d }, at)
+          .fromTo(ficha, { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, ease: 'power3.out', duration: d * 0.55 }, at + d * 0.45)
+          .set(prev, { autoAlpha: 0 }, at + d)
       })
-    }, sectionRef)
+      const last = count - 1
+      const st = ScrollTrigger.create({
+        trigger: root,
+        start: 'top top',
+        end: () => `+=${last * window.innerHeight * 0.9}`,
+        pin: stage,
+        scrub: 0.6,
+        animation: tl,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        snap: { snapTo: 1 / last, duration: { min: 0.25, max: 0.7 }, delay: 0.05, ease: 'power2.inOut' },
+        onUpdate: (self) => {
+          const idx = Math.min(last, Math.max(0, Math.round(self.progress * last)))
+          if (counterRef.current && counterRef.current.dataset.i !== String(idx)) {
+            counterRef.current.dataset.i = String(idx)
+            counterRef.current.textContent = String(idx + 1).padStart(2, '0')
+          }
+          // Only the project on the stage can be reached with the keyboard or a click.
+          items.forEach((item, j) => item.toggleAttribute('inert', j !== idx))
+          if (barRef.current) barRef.current.style.transform = `scaleX(${self.progress.toFixed(4)})`
+        },
+      })
+      items.slice(1).forEach((item) => item.setAttribute('inert', ''))
+      return () => st.kill()
+    }, root)
     return () => ctx.revert()
-  }, [calm, list.length])
+  }, [calm, count])
 
-  const last = String(list.length).padStart(2, '0')
   const labels = { project: title, type: typeLabel, place: placeLabel, year: yearLabel, area: areaLabel }
+  const total = String(count).padStart(2, '0')
   return (
     <section
       ref={sectionRef}
       id="projects"
       data-od-section
       aria-labelledby="projects-title"
-      className="od-root od-proj relative min-h-svh"
+      className={`od-root od-proj relative${calm ? ' min-h-svh' : ' od-proj--pin'}`}
       style={sectionVars({ bg, fg, accent })}
       data-grain={showGrain === 'off' ? 'off' : undefined}
     >
-      <header className="od-proj__head">
-        <h2 id="projects-title" className="od-proj__title">
-          {title}
-        </h2>
-        <span className="od-proj__label" style={LABEL}>
-          01 — {last}
-        </span>
-      </header>
-      {list.map((p, i) => (
-        <Item key={i} project={p} index={i} total={list.length} routed={routed} labels={labels} tip={cursorTip} wordNumber={(a, b) => `${a} / ${b}`} />
-      ))}
+      <div data-proj-stage className="od-proj__stage">
+        <header className="od-proj__head">
+          <h2 id="projects-title" className="od-proj__title">
+            {title}
+          </h2>
+          <span className="od-proj__label" style={LABEL}>
+            <span ref={counterRef}>01</span> — {total}
+          </span>
+        </header>
+        {!calm && count > 1 && <span ref={barRef} className="od-proj__bar" aria-hidden="true" />}
+        <div className="od-proj__slides">
+          {list.map((p, i) => (
+            <Item key={i} project={p} index={i} total={count} routed={routed} labels={labels} tip={cursorTip} wordNumber={(a, b) => `${a} / ${b}`} />
+          ))}
+        </div>
+      </div>
     </section>
   )
 }

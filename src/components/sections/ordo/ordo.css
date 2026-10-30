@@ -1990,3 +1990,65 @@
     border-top: 1px solid var(--line);
   }
 }
+
+/* ── Projects, pinned: every project on the same stage (Projects.jsx) ── */
+/* The stage fills the screen and the projects are stacked on one grid cell; the scroll changes which one shows. With
+   «reduce motion» there is no `.od-proj--pin`: the rules above lay them out as a list. */
+.od-proj.od-proj--pin {
+  padding: 0;
+}
+.od-proj--pin .od-proj__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: calc(var(--nav-h) + 22px) 16px 18px;
+}
+.od-proj--pin .od-proj__head {
+  margin-bottom: 0;
+}
+/* The progress of the walk through the projects: a rust line on the rule of the header. */
+.od-proj__bar {
+  display: block;
+  height: 2px;
+  margin-top: -1px;
+  margin-bottom: 16px;
+  background: var(--od-rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.od-proj--pin .od-proj__slides {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+}
+.od-proj--pin .od-proj__item {
+  grid-area: 1 / 1;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.od-proj--pin .od-proj__item + .od-proj__item {
+  margin-top: 0;
+}
+.od-proj--pin .od-proj__card {
+  aspect-ratio: auto;
+  height: 100%;
+}
+@media (min-width: 640px) {
+  .od-proj--pin .od-proj__stage {
+    padding: calc(var(--nav-h) + 28px) 36px 26px;
+  }
+  .od-proj--pin .od-proj__item {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+}
+@media (min-width: 1024px) {
+  .od-proj--pin .od-proj__item {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: end;
+  }
+}
