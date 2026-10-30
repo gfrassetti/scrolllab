@@ -10,6 +10,9 @@ import ScrollRuler from '../components/sections/ordo/ScrollRuler'
 import Nav from '../components/sections/ordo/Nav'
 import Hero from '../components/sections/ordo/Hero'
 import Projects from '../components/sections/ordo/Projects'
+import Studio from '../components/sections/ordo/Studio'
+import Services from '../components/sections/ordo/Services'
+import Contact from '../components/sections/ordo/Contact'
 import ProjectPage from '../components/sections/ordo/ProjectPage'
 import { setTransitionHandler, takePendingSection, useRoute } from '../components/sections/ordo/router'
 import Sketch from '../components/sections/ordo/Sketch'
@@ -208,6 +211,9 @@ export default function OrdoPage() {
               <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} boceto={SALIDA === 'boceto'} />
               {SALIDA === 'boceto' && <Sketch calm={calm} exit={heroExit} />}
               <Projects calm={calm} />
+              <Studio calm={calm} />
+              <Services calm={calm} />
+              <Contact calm={calm} />
             </>
           )}
         </main>

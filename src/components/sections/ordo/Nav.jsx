@@ -29,8 +29,8 @@ import Logo from './Logo'
  */
 
 const LINKS = [
-  { id: 'studio', label: 'Studio' },
   { id: 'projects', label: 'Projects' },
+  { id: 'studio', label: 'Studio' },
   { id: 'services', label: 'Services' },
 ]
 const MENU = [...LINKS, { id: 'contact', label: 'Contact', accent: true }]
