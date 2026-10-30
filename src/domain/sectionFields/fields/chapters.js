@@ -19,9 +19,9 @@ export const CHAPTERS_FIELDS = {
     { key: 'contentsTitle', label: 'Índice — rótulo de arriba', type: 'text' },
   ],
   'chapters/HeroKinetic': [
-    { key: 'lineOne', label: 'Linea 1', type: 'text' },
-    { key: 'lineTwo', label: 'Linea 2', type: 'text' },
-    { key: 'lineThree', label: 'Linea 3', type: 'text' },
+    { key: 'lineOne', label: 'Línea 1', type: 'text' },
+    { key: 'lineTwo', label: 'Línea 2', type: 'text' },
+    { key: 'lineThree', label: 'Línea 3', type: 'text' },
     { key: 'kicker', label: 'Sobretítulo', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Pista', type: 'text' },
@@ -33,7 +33,7 @@ export const CHAPTERS_FIELDS = {
   ],
   'chapters/ManifestoReveal': [
     CHAPTER_LABEL,
-    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'chapter', label: 'Capítulo', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Rótulo', type: 'text' },
     {
@@ -54,18 +54,18 @@ export const CHAPTERS_FIELDS = {
   ],
   'chapters/QuoteBreak': [
     CHAPTER_LABEL,
-    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'chapter', label: 'Capítulo', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'quote', label: 'Cita', type: 'textarea' },
-    { key: 'attribution', label: 'Attribution', type: 'text' },
+    { key: 'attribution', label: 'Atribución', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'chapters/ParallaxEditorial': [
     CHAPTER_LABEL,
-    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'chapter', label: 'Capítulo', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'ghostWord', label: 'Palabra de fondo', type: 'text' },
@@ -116,7 +116,7 @@ export const CHAPTERS_FIELDS = {
       ],
     },
     CHAPTER_LABEL,
-    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'chapter', label: 'Capítulo', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'heading', label: 'Encabezado', type: 'text' },
@@ -161,7 +161,7 @@ export const CHAPTERS_FIELDS = {
   ],
   'chapters/StickyImageStory': [
     CHAPTER_LABEL,
-    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'chapter', label: 'Capítulo', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Rótulo', type: 'text' },
     {
@@ -182,7 +182,7 @@ export const CHAPTERS_FIELDS = {
   ],
   'chapters/StackingCards': [
     CHAPTER_LABEL,
-    { key: 'chapter', label: 'Chapter', type: 'text' },
+    { key: 'chapter', label: 'Capítulo', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
     { key: 'label', label: 'Rótulo', type: 'text' },
     {

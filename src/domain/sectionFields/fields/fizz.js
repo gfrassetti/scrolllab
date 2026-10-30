@@ -23,7 +23,7 @@ export const FIZZ_FIELDS = {
     { key: 'tagline', label: 'Lema', type: 'textarea' },
     { key: 'meta', label: 'Meta', type: 'text' },
     { key: 'hint', label: 'Pista', type: 'text' },
-    { key: 'statement', label: 'Statement', type: 'textarea' },
+    { key: 'statement', label: 'Frase principal', type: 'textarea' },
     { key: 'cta', label: 'Botón', type: 'text' },
     { key: 'ctaHref', label: 'Botón — enlace', type: 'href' },
     { key: 'marquee', label: 'Frase que cruza la pantalla', type: 'text' },

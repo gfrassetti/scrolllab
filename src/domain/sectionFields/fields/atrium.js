@@ -129,7 +129,7 @@ export const ATRIUM_FIELDS = {
         { key: 'label', label: 'Texto', type: 'text' },
       ],
     },
-    { key: 'closer', label: 'Closing statement', type: 'textarea' },
+    { key: 'closer', label: 'Frase de cierre', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
@@ -181,7 +181,7 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/FooterAtrium': [
-    { key: 'mark', label: 'Mark', type: 'text' },
+    { key: 'mark', label: 'Marca', type: 'text' },
     { key: 'reserved', label: 'Reserved', type: 'text' },
     { key: 'license', label: 'Razón social', type: 'text' },
     { key: 'design', label: 'Dirección', type: 'text' },

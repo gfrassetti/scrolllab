@@ -10,7 +10,7 @@ import { navLinks, SEQ_LABEL, MENU_BUTTON, toggle } from '../helpers.js'
 export const NOCTURNE_FIELDS = {
   'nocturne/NavNocturne': [
     { key: 'brand', label: 'Marca', type: 'text' },
-    { key: 'marker', label: 'Marker', type: 'text' },
+    { key: 'marker', label: 'Marcador', type: 'text' },
     navLinks(),
     ...MENU_BUTTON,
     { key: 'bg', label: 'Color de fondo', type: 'color' },

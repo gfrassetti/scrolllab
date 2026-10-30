@@ -10,8 +10,8 @@ import { navLinks, toggle } from '../helpers.js'
 export const UNITY_FIELDS = {
   'unity/NavUnity': [
     { key: 'brand', label: 'Marca o frase', type: 'text' },
-    { key: 'logo', label: 'Logo text', type: 'text' },
-    { key: 'logoSrc', label: 'Logo image', type: 'image' },
+    { key: 'logo', label: 'Texto del logo', type: 'text' },
+    { key: 'logoSrc', label: 'Imagen del logo', type: 'image' },
     navLinks(3),
     { key: 'menuLabel', label: 'Rótulo del menú', type: 'text' },
     { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
@@ -99,7 +99,7 @@ export const UNITY_FIELDS = {
     { key: 'img1', label: 'Imagen 1', type: 'image' },
     { key: 'img2', label: 'Imagen 2', type: 'image' },
     { key: 'img3', label: 'Imagen 3', type: 'image' },
-    { key: 'anchor', label: 'Anchor id', type: 'text' },
+    { key: 'anchor', label: 'Id del ancla (destino del enlace)', type: 'text' },
   ],
   'unity/LastPortrait': [
     { key: 'title', label: 'Título', type: 'text' },
@@ -133,9 +133,9 @@ export const UNITY_FIELDS = {
   'unity/FooterTrophy': [
     { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
     { key: 'title', label: 'Título', type: 'text' },
-    { key: 'accentWord', label: 'Accent word', type: 'text' },
-    { key: 'metaLeft', label: 'Meta left', type: 'text' },
-    { key: 'metaRight', label: 'Meta right', type: 'text' },
+    { key: 'accentWord', label: 'Palabra de acento', type: 'text' },
+    { key: 'metaLeft', label: 'Meta izquierda', type: 'text' },
+    { key: 'metaRight', label: 'Meta derecha', type: 'text' },
     { key: 'orbSrc', label: 'Orb photo', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },

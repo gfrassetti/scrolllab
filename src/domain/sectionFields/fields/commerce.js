@@ -182,7 +182,7 @@ export const COMMERCE_FIELDS = {
       type: 'text',
     },
     { key: 'checkoutSummaryTitle', label: 'Checkout · Resumen', type: 'text' },
-    { key: 'checkoutPromoLabel', label: 'Checkout · Cupón — label', type: 'text' },
+    { key: 'checkoutPromoLabel', label: 'Checkout · Cupón — rótulo', type: 'text' },
     { key: 'checkoutPromoCode', label: 'Checkout · Cupón válido', type: 'text' },
     { key: 'checkoutPromoOff', label: 'Checkout · Cupón — % off', type: 'text' },
     { key: 'checkoutShippingFlat', label: 'Checkout · Costo envío', type: 'text' },

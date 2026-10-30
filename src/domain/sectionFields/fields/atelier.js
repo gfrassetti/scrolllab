@@ -13,7 +13,7 @@ export const ATELIER_FIELDS = {
     { key: 'cta', label: 'Botón (derecha)', type: 'text' },
     { key: 'ctaHref', label: 'Botón — enlace', type: 'href' },
     { key: 'menuLabel', label: 'Rótulo del menú', type: 'text' },
-    { key: 'closeLabel', label: 'Close label', type: 'text' },
+    { key: 'closeLabel', label: 'Rótulo de cerrar', type: 'text' },
     navLinks(),
     { key: 'bg', label: 'Menú del teléfono — color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto (barra sobre fondo claro y menú del teléfono)', type: 'color' },
