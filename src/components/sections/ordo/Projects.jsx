@@ -75,7 +75,7 @@ function Item({ project, index, total, routed, labels, tip, wordNumber }) {
             <span className="od-proj__n" style={LABEL}>
               {n}
             </span>
-            <a href={href} onClick={open} {...ext} className="od-proj__name">
+            <a href={href} onClick={open} {...ext} className="od-proj__name tpl-hit relative">
               {project.name}
             </a>
           </dd>

@@ -131,6 +131,7 @@ export default function Hero({
         exit={heroExit}
         boceto
         brand={brand}
+        tagline={tagline}
         stages={stages}
         titleParts={parts.some((p) => p != null && p !== '') ? parts.map((p) => (p === '' ? undefined : p)) : undefined}
         sheetLabel={sheetLabel}

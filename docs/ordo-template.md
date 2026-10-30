@@ -1,6 +1,6 @@
 # ORDO — template de estudio de arquitectura e interiorismo (home de una página + páginas de proyecto)
 
-> **Estado (2026-10-30): en obra, solo en local.** Está en `COMING_SOON_SKUS` / `LOCAL_ONLY_SKUS` / `BUILDER_HIDDEN_SKUS`
+> **Estado (2026-10-30): en obra, solo en local; en el builder solo con `VITE_BUILDER_SHOW_HIDDEN=1`.** Está en `COMING_SOON_SKUS` / `LOCAL_ONLY_SKUS` / `BUILDER_HIDDEN_SKUS`
 > (`src/domain/catalog.js`): `/templates/ordo` renderiza en local y en producción redirige a la home. Precio propuesto:
 > **USD 349** (`TEMPLATE_PRICES_USD.ordo`), por debajo de la base del builder (549) y de KIN / MERIDIAN (379). Para
 > ponerlo a la venta: precio aprobado por el dueño, sacarlo de las tres listas, tarjeta en `templateMeta.js`, textos
@@ -59,14 +59,55 @@ Sigue las reglas de AGENTS.md: con «reducir movimiento» el hero queda quieto c
 (`calm`); la tira de proyecto pasa a vertical; el hero entra con `trackPointer` / el toque. Pendientes de medir: `check:mobile`,
 `check:motion` y `check:parity` todavía no tienen a ORDO en sus listas (se suman al salir a la venta).
 
+## En el builder (2026-10-30)
+
+ORDO tiene cinco secciones en el builder, todas con todo editable (`src/domain/sectionFields/fields/ordo.js`):
+
+| Sección | Qué es | Campos |
+|---|---|---|
+| `ordo/Hero` | loader + nav + el dibujo en cuatro hojas + salida a boceto + regla de scroll + cursor (`Hero.jsx` arma el conjunto; el dibujo es `Drawing.jsx`) | marca y bajada, línea de lugar, links del nav (hasta 3), botón de contacto, red social, las cuatro hojas (título y texto), las cuatro partes del titular, rótulos, las cuatro capas del dibujo (imágenes), 4 interruptores (loader, cursor, regla, líneas de construcción), colores |
+| `ordo/Projects` | una fila por proyecto (hasta 6) | nombre, tipo, lugar, año, m², foto, descripción de la foto y enlace por fila; rótulos; grano; colores |
+| `ordo/Studio` | frase, tres cifras, tres principios | todos los textos; colores |
+| `ordo/Services` | hasta 6 disciplinas | nombre, descripción, etiquetas; tapa al pasar el mouse; colores |
+| `ordo/Contact` | cierre | frase, email, cuatro bloques, derechos, Privacy / Terms (panel), «volver arriba»; tapa; colores |
+
+- **Colores.** Todo sale de tres variables en `.od-root` (`--od-paper`, `--od-ink`, `--od-rust`) y de sus derivados (`--od-mute`,
+  `--od-soft`, `--od-faint`, las líneas). Cada sección pone `bg` / `fg` / `accent` en su propia raíz (`vars.js`). Lo que se dibuja en
+  el canvas (la foto y el boceto) trae su propio papel (#efebe3): con otro fondo el borde de la foto se nota (el campo lo avisa).
+- **Marca.** Con el nombre `ORDO` se dibuja el logo vectorial; con otro nombre se arma un wordmark en Jost, mayúsculas, con la
+  tapa de óxido arriba; en el loader las letras suben una por una (sin trazo). `Logo.jsx` (`VECTOR_BRAND`), `Loader.jsx`, `Nav.jsx`.
+- **Proyectos.** En la página completa (`Site.jsx`, `routed`) cada tarjeta abre su página (`/projects/<slug>`). En una composición
+  no hay rutas: cada tarjeta va al `href` de su fila (por defecto `#contact`).
+- **No entran** al builder las páginas de proyecto ni el cambio de ruta: son de la página completa.
+
+### Verlo en local, con ORDO en el builder
+
+ORDO sigue en `BUILDER_HIDDEN_SKUS` (la paleta pública no lo muestra y el servidor rechaza sus secciones). Para probarlo:
+
+```bash
+VITE_BUILDER_SHOW_HIDDEN=1 BUILDER_SHOW_HIDDEN=1 npm run dev   # web :5173, API :8787; ORDO aparece en /builder
+```
+
+`VITE_BUILDER_SHOW_HIDDEN` (front, `sectionRegistry.jsx`) y `BUILDER_SHOW_HIDDEN` (servidor, `validation.js`, nunca en producción).
+La página completa está en `/templates/ordo`. Los chequeos aceptan `SHOW_HIDDEN=1` para incluir modelos en obra:
+
+```bash
+SHOW_HIDDEN=1 npm run check:editable -- ordo      # 5/5 al 100 %
+SHOW_HIDDEN=1 npm run check:builder -- ordo       # lo editado aparece en la vista previa
+SHOW_HIDDEN=1 npm run check:colors -- ordo        # 5/5
+SHOW_HIDDEN=1 npm run check:builder-save -- ordo
+SHOW_HIDDEN=1 npm run check:visual -- ordo custom:ordo
+npm run check:mobile -- ordo --quick && npm run check:motion -- ordo --quick && npm run check:parity -- ordo
+```
+
+Estado al 2026-10-30: todo en verde. `check:editable` necesita que `react-router-dom` cargue en el SSR de Vite: en un Node 22
+con `react-router-dom` 7.18 puede fallar con «Named export 'Link' not found» (es del entorno, le pasa a todas las secciones).
+
 ## Pendientes antes de la venta
 
-1. Decisión del dueño: precio y salida a la venta (ver arriba).
-2. Campos del builder: hoy ORDO está **fuera del builder** (`BUILDER_HIDDEN_SKUS`) y sin campos editables en
-   `src/domain/sectionFields`. Si entra, cada texto / foto / link / color es un campo (regla «todo lo visible se edita»);
-   Hero, Loader y Nav dependen del estado de la página (`Site.jsx`) y habría que separarlos.
-3. `npm run check:sections -- ordo`, `check:visual -- ordo`, `check:mobile`, `check:motion`, `check:parity`.
-4. Poster (`public/catalog/ordo.*`, 4:5): hoy es una captura de la hoja 04 del hero; rehacerlo con `npm run capture:catalog`
-   cuando ORDO esté en `SCROLL_AT`.
-5. Un favicon propio en el ZIP (el de la demo, la R bajo la tapa, está en `src/studio/ordo/public/favicon.svg`, solo para el
+1. Decisión del dueño: precio y salida a la venta (ver arriba). Sacarlo de las tres listas lo muestra en el builder público.
+2. Un favicon propio en el ZIP (el de la demo, la R bajo la tapa, está en `src/studio/ordo/public/favicon.svg`, solo para el
    build de preview `npm run build:ordo`).
+3. Poster (`public/catalog/ordo.*`, 4:5): hoy es una captura de la hoja 04 del hero; rehacerlo con `npm run capture:catalog`
+   cuando ORDO esté en `SCROLL_AT`.
+4. LAB: ORDO no es un widget (el hero se fija a pantalla y trae su loader); no entra a `HOSTABLE_SECTIONS`.

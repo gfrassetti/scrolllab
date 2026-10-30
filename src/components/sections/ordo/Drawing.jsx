@@ -149,6 +149,7 @@ export default function Hero({
   exit,
   boceto = false,
   brand = SITE.name,
+  tagline = SITE.tagline,
   stages,
   titleParts,
   sheetLabel = 'Elevation · Scale 1:50 · Sheet',
@@ -590,7 +591,7 @@ export default function Hero({
           <div className="od-info__side">
             {/* The line that separates the headline from the text: it is traced from top to bottom on opening (data-vline). */}
             <span data-vline className="od-info__vline" aria-hidden="true" />
-            <h2 className="sr-only">{stageList[0].text}</h2>
+            <h2 className="sr-only">{tagline}</h2>
             {/* The sheet number: the same as the quadrant's sheet ("Sheet 02 / 04"). */}
             <span data-paint data-paint-stage className="od-paint od-info__step" style={LABEL} aria-hidden="true">
               {st.n} / 04

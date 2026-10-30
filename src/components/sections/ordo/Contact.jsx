@@ -102,7 +102,7 @@ export default function Contact({
         <p data-up className="od-contact__sub">
           {sub}
         </p>
-        <a data-up href={contactHref(email) || email} className="od-contact__mail" data-cursor={mailTip}>
+        <a data-up href={contactHref(email) || email} className="od-contact__mail tpl-hit relative" data-cursor={mailTip}>
           <span className="od-contact__mailtext">{email}</span>
           <span aria-hidden="true">→</span>
         </a>
@@ -120,7 +120,7 @@ export default function Contact({
                 return (
                   <span key={j} className="block">
                     {href ? (
-                      <a href={href} {...externalProps(href)} className="od-contact__link">
+                      <a href={href} {...externalProps(href)} className="od-contact__link tpl-hit relative">
                         {line}
                       </a>
                     ) : (
@@ -138,11 +138,11 @@ export default function Contact({
         <span>{copyright}</span>
         <span className="od-contact__legalnav">
           {legal.map((l) => (
-            <a key={l.href} href={l.href} {...externalProps(l.href)} className="od-contact__link">
+            <a key={l.href} href={l.href} {...externalProps(l.href)} className="od-contact__link tpl-hit relative">
               {l.label}
             </a>
           ))}
-          <a href={backHref} onClick={backHref === '#home' ? toTop : undefined} {...externalProps(backHref)} className="od-contact__link">
+          <a href={backHref} onClick={backHref === '#home' ? toTop : undefined} {...externalProps(backHref)} className="od-contact__link tpl-hit relative">
             {backLabel} <span aria-hidden="true">↑</span>
           </a>
         </span>
