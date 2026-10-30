@@ -919,7 +919,7 @@ export default function Hero({
         </div>
 
         <div className="relative mt-[7vw] flex flex-col justify-end md:col-span-3 md:mt-0 md:pb-[1.25vw]">
-          <div data-kin-fade className="text-[max(11px,3.3vw)] leading-[1.15] md:text-[max(11px,0.82vw)]">
+          <div data-kin-fade className="text-[max(14px,3.3vw)] leading-[1.15] md:text-[max(11px,0.82vw)]">
             <p className="flex justify-between pb-[0.6em]">
               <span>{listLabel}</span>
               <span className="tabular-nums">({pad(roomTexts.length)})</span>
