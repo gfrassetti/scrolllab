@@ -29,6 +29,7 @@ export const COMMERCE_FIELDS = {
         { value: 'kin', label: 'Kin · #e1371f' },
         { value: 'fold', label: 'Fold · #c8742f' },
         { value: 'apex', label: 'Apex · #9cc3ff' },
+        { value: 'ordo', label: 'Ordo · #c4441f' },
       ],
     },
     { key: 'bg', label: 'Color de fondo (pisa el de la paleta)', type: 'color' },

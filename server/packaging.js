@@ -183,6 +183,12 @@ const MODEL_FILES = {
       'design/blender/apex-showroom.blend',
     ],
   },
+  ordo: {
+    page: 'src/pages/OrdoPage.jsx',
+    sectionsDir: 'src/components/sections/ordo',
+    pageName: 'App.jsx',
+    importPrefix: './components/sections/ordo',
+  },
   fold: {
     page: 'src/pages/FoldPage.jsx',
     sectionsDir: 'src/components/sections/fold',
@@ -699,8 +705,30 @@ The gallery and the model list read their pictures from
 \`src/components/sections/apex/assets/\` (or any \`image\` prop).
 `
 
+const ORDO_NOTE = `## The hero room, the projects and the brand
+
+**The hero room.** The sheet draws a shop piece by piece and ends on its photograph. It is four images of the same room,
+aligned pixel to pixel, in \`src/components/sections/ordo/assets/\`: \`sketch-raw\` (the shell as it arrives), \`sketch-empty\`
+(the finished shell, no furniture), \`sketch-room\` (the full pencil sketch) and \`room-photo\` (the photograph; each has a
+\`-1200\` copy for phones). \`designPieces.js\` lists the rectangles that are drawn one after another (shell first, furniture
+after) and \`localScene.js\` is the shader that reveals them. To use your own room, make the four images with the same camera,
+keep their proportions (2400 × 1029) and measure the rectangles again in \`designPieces.js\`. The demo images are samples.
+
+**The projects.** Every project is an object in \`projects.js\` (name, place, year, area, services, six photos, three notes and a
+closing sentence). Add one and it appears in the Projects section, gets its page at \`/projects/<slug>\` and joins the "next
+project" loop. Each photo has a large and a small WebP (\`-s\`, or \`-900\` for the cover): the page uses both through \`srcset\`.
+The project pages are routes of the same \`index.html\`: the dev server already serves it for any path, but in production your
+host must return \`index.html\` for unknown paths (Netlify \`_redirects\`, Vercel rewrites, Cloudflare Workers
+\`not_found_handling: single-page-application\`).
+
+**The brand.** The name, tagline, places and Instagram handle are in \`brand.js\`. The logo is outlined paths generated from Jost
+(SIL Open Font License) in \`logoPaths.js\`: the loader draws the first letter and the rest rise onto the slab. Colours are the
+\`--od-*\` variables at the top of \`ordo.css\`. Studio, Services and Contact hold their copy at the top of each file.
+`
+
 /** Notas del template completo (su ZIP trae los GLB de public/). */
 const MODEL_3D_NOTES = {
+  ordo: ORDO_NOTE,
   apex: APEX_FILM_NOTE,
   fold: FOLD_FILM_NOTE,
   fizz: `${fizzHero3dNote({ demoGlb: true })}\n${FIZZ_CANS_NOTE}`,

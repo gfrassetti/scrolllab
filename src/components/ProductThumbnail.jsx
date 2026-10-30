@@ -77,6 +77,12 @@ const styles = {
     accent: '#9cc3ff',
     code: 'AX',
   },
+  ordo: {
+    background: '#f3f1ea',
+    color: '#161513',
+    accent: '#c4441f',
+    code: 'OR',
+  },
   ratio: {
     background: '#ffffff',
     color: '#111111',

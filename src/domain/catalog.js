@@ -39,6 +39,9 @@ export const TEMPLATE_PRICES_USD = Object.freeze({
   kin: 379,
   fold: 229,
   apex: 239,
+  // ORDO (2026-10-30): en obra y solo en local hasta que el dueño apruebe el precio y la salida a la venta. Propuesta: 349
+  // (por debajo de la base del builder y de KIN/MERIDIAN, 379).
+  ordo: 349,
 })
 
 export const BUNDLE_PRICE_USD = 879
@@ -100,20 +103,20 @@ export const WELCOME_COUPON_PERCENT = 10
  * (decisión del dueño): su código queda solo para rearmar los ZIP ya vendidos y no romper los
  * widgets de LAB ya publicados.
  */
-export const COMING_SOON_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne'])
+export const COMING_SOON_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne', 'ordo'])
 
 /**
  * Solo en local: sin card en home, sin sitemap ni páginas de producto, y en
  * producción la ruta redirige a la home. RATIO sigue en obra; PLUM y SIGNAL no
  * se van a terminar.
  */
-export const LOCAL_ONLY_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne'])
+export const LOCAL_ONLY_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne', 'ordo'])
 
 /**
  * No entran a la paleta pública del builder, y el servidor rechaza sus
  * secciones aunque alguien arme la receta a mano.
  */
-export const BUILDER_HIDDEN_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne'])
+export const BUILDER_HIDDEN_SKUS = Object.freeze(['ratio', 'plum', 'signal', 'velocity', 'nocturne', 'ordo'])
 
 /**
  * No se van a terminar: quedan en el repo solo como referencia local y el

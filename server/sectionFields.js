@@ -36,6 +36,7 @@ const THEME_PRESETS = new Set([
   'kin',
   'fold',
   'apex',
+  'ordo',
 ])
 
 /**
