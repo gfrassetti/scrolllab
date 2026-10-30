@@ -1,13 +1,13 @@
 /*
- * elStudio — el papel y el cursor.
+ * ORDO — the paper and the cursor.
  *
- * Toda la página es una hoja de papel casi blanco con un grano fino (ruido SVG que se repite).
- * El cursor propio solo existe con mouse (hover + puntero fino): en el teléfono no hay nada
- * que ocultar.
+ * The whole page is a sheet of almost white paper with a fine grain (repeating SVG noise).
+ * The custom cursor only exists with a mouse (hover + fine pointer): on the phone there is nothing
+ * to hide.
  */
 
 .od-root {
-  /* Poppins: geométrica redonda y abierta (la más cercana a Cera Pro); Arial solo si la fuente no carga. */
+  /* Poppins: round, open geometric (the closest to Cera Pro); Arial only if the font does not load. */
   --od-font-body: 'Poppins', Arial, sans-serif;
   --od-font-display: var(--od-font-body);
   --od-font-label: var(--od-font-body);
@@ -15,10 +15,10 @@
   --od-title-tracking: -0.025em;
   --od-body-scale: 0.92;
   /*
-   * La hoja: papel casi blanco con un grano apenas perceptible, que se repite y se mueve con la página.
+   * The sheet: almost white paper with a barely perceptible grain, which repeats and moves with the page.
    */
-  /* El grano de película: un solo ruido fino y parejo (en escala de grises, centrado en gris medio), que se mezcla con la
-     foto: los granos claros la aclaran y los oscuros la ensucian, sin dibujar un patrón. */
+  /* The film grain: a single fine, even noise (in greyscale, centred on mid grey), which blends with the
+     photo: the light grains lighten it and the dark ones dirty it, without drawing a pattern. */
   --od-film: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' seed='6' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='0' intercept='1'/></feComponentTransfer></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
   --od-paper: #f3f1ea;
   --od-ink: #161513;
@@ -34,37 +34,37 @@
   text-rendering: optimizeLegibility;
 }
 
-/* La hoja del loader: exactamente la misma que la de la página (si no, al subir la cortina se ve un salto de color). */
+/* The loader sheet: exactly the same as the page's (otherwise, when the curtain rises, a colour jump shows). */
 .od-sheet {
   background-color: var(--od-paper);
   background-image: var(--od-grain);
   background-size: 200px 200px;
 }
 
-/* Selección: la tinta al revés. */
+/* Selection: the ink reversed. */
 .od-root ::selection {
   background: var(--od-ink);
   color: var(--od-paper);
 }
 
-/* Foco de teclado visible, con el óxido de la marca. */
+/* Visible keyboard focus, with the brand rust. */
 .od-root :focus-visible {
   outline: 2px solid var(--od-rust);
   outline-offset: 4px;
 }
 
 /* ── Scroll ─────────────────────────────────────────────────────────── */
-/* Con Lenis (la rueda y los links del nav) el scroll es suave por JS y Lenis apaga esta propiedad; la
-   regla vale para lo demás: cuando Lenis no corre (saltos del teclado, un navegador que lo frena) y
-   salvo para quien pide menos movimiento. */
+/* With Lenis (the wheel and the nav links) the scroll is smooth through JS and Lenis turns this property off; the
+   rule applies to the rest: when Lenis is not running (keyboard jumps, a browser that holds it back) and
+   except for whoever asks for less motion. */
 @media (prefers-reduced-motion: no-preference) {
   html:not(.lenis) {
     scroll-behavior: smooth;
   }
 }
-/* ── La regla de scroll (ScrollRuler.jsx) ───────────────────────────── */
-/* La hermana vertical de la regla que cae bajo el nav: arranca donde ella termina y comparte su medida
-   (una marca cada 8 px, una larga cada 80). */
+/* ── The scroll ruler (ScrollRuler.jsx) ─────────────────────────────── */
+/* The vertical sibling of the ruler that drops under the nav: it starts where that one ends and shares its measure
+   (a tick every 8 px, a long one every 80). */
 .od-ruler {
   --y: 0px;
   position: fixed;
@@ -102,7 +102,7 @@
     10px 100%,
     5px 100%;
 }
-/* La lupa: las mismas marcas, más largas y más oscuras, que solo se ven alrededor del cursor. */
+/* The magnifier: the same ticks, longer and darker, which are only seen around the cursor. */
 .od-ruler__lens {
   width: 18px;
   background-image:
@@ -114,7 +114,7 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--y) - 64px), #000 var(--y), transparent calc(var(--y) + 64px));
   mask-image: linear-gradient(to bottom, transparent calc(var(--y) - 64px), #000 var(--y), transparent calc(var(--y) + 64px));
 }
-/* Una hoja del sitio: una línea larga sobre la regla, con su número. */
+/* A sheet of the site: a long line over the ruler, with its number. */
 .od-ruler__wp {
   position: absolute;
   right: 0;
@@ -138,7 +138,7 @@
 .od-ruler__wpn {
   color: #6d675c;
 }
-/* El cursor: una línea de óxido, más larga que cualquier marca, y el número de la hoja en la que se está. */
+/* The cursor: a rust line, longer than any tick, and the number of the sheet you are on. */
 .od-ruler__mark {
   position: absolute;
   top: 0;
@@ -165,7 +165,7 @@
   height: 3px;
   margin-top: -1.5px;
 }
-/* En el teléfono: solo indicador, más angosta y sin números (el piso es 11 px y no hay lugar). */
+/* On the phone: indicator only, narrower and without numbers (the floor is 11 px and there is no room). */
 @media (max-width: 639px) {
   .od-ruler__wpn,
   .od-ruler__tag {
@@ -208,7 +208,7 @@
   }
 }
 
-/* La mira del hero: dos ejes que cruzan la pantalla, la cruz roja y las coordenadas. */
+/* The hero crosshair: two axes that run across the screen, the red cross and the coordinates. */
 .od-cross {
   position: absolute;
   inset: 0;
@@ -260,7 +260,7 @@
   width: 3px;
   margin-left: -1.5px;
 }
-/* Las coordenadas: abajo a la izquierda de la cruz; junto a un borde pasan al otro lado. */
+/* The coordinates: below and to the left of the cross; next to an edge they go to the other side. */
 .od-cross__coords {
   position: absolute;
   right: 12px;
@@ -285,7 +285,7 @@
   bottom: 12px;
 }
 
-/* El cartel junto a la mira: abajo a la derecha (cerca del borde derecho, a la izquierda). */
+/* The label next to the crosshair: below and to the right (near the right edge, to the left). */
 .od-cross__tip {
   position: absolute;
   left: 14px;
@@ -307,7 +307,7 @@
   left: auto;
   right: 14px;
 }
-/* Fuera del hero: el punto de tinta (disco con texto sobre `data-cursor`). */
+/* Outside the hero: the ink dot (a disc with text over `data-cursor`). */
 .od-cursor__dot {
   position: absolute;
   top: 0;
@@ -337,13 +337,13 @@
   opacity: 0;
 }
 
-/* ── El marco: nav y franja de abajo, dibujados con líneas ─────────── */
+/* ── The frame: nav and bottom band, drawn with lines ──────────────── */
 .od-root {
-  /* El módulo: lo que miden las celdas del nav. Las líneas de la página se miden desde el borde derecho en
-     múltiplos de él, así las divisiones del nav, las marcas de la regla y las columnas coinciden siempre. */
+  /* The module: what the nav cells measure. The page lines are measured from the right edge in
+     multiples of it, so the nav dividers, the ruler ticks and the columns always coincide. */
   --mod: 128px;
   --nav-h: 54px;
-  /* La franja de abajo del hero (título y texto de la etapa), baja como la de heronaiapp.com. */
+  /* The band under the hero (title and stage text), low like the one on heronaiapp.com. */
   --band-h: max(250px, 30svh);
   --line: rgba(22, 21, 19, 0.5);
 }
@@ -385,22 +385,22 @@
 .od-frame__line--bottom {
   bottom: var(--band-h);
 }
-/* La regla bajo el nav: una marca por cada 8 px y una más larga cada 80. */
+/* The ruler under the nav: a tick every 8 px and a longer one every 80. */
 .od-frame__ruler {
   position: absolute;
   left: 0;
   right: 0;
   top: calc(var(--nav-h) + 1px);
   height: 8px;
-  /* Una marca cada 8 px y una larga cada 64 (un tercio / la mitad de una celda del nav), contadas desde el borde
-     derecho: las largas caen sobre las divisiones del nav. */
+  /* A tick every 8 px and a long one every 64 (a third / half of a nav cell), counted from the right
+     edge: the long ones fall on the nav dividers. */
   background-image:
     repeating-linear-gradient(to left, transparent 0 63px, rgba(22, 21, 19, 0.38) 63px 64px),
     repeating-linear-gradient(to left, transparent 0 7px, rgba(22, 21, 19, 0.22) 7px 8px);
   background-size: 100% 8px, 100% 4px;
   background-repeat: no-repeat;
   transform-origin: right center;
-  /* Solo se ve con el mouse sobre el dibujo (junto con las guías punteadas): son muchas líneas para tenerlas siempre. */
+  /* Only seen with the mouse over the drawing (together with the dotted guides): too many lines to have them always. */
   opacity: 0;
   transition: opacity 0.4s var(--od-ease);
 }
@@ -423,7 +423,7 @@
   background: var(--line);
   transform-origin: top center;
 }
-/* Cruces de registro en las esquinas del cuadro. */
+/* Registration crosses in the corners of the frame. */
 .od-frame__mark {
   position: absolute;
   width: 11px;
@@ -464,9 +464,9 @@
   bottom: calc(var(--band-h) + 10px);
 }
 
-/* ── La lámina del hero ─────────────────────────────────────────────── */
-/* La grilla de columnas, entre el nav y la franja de abajo. */
-/* Las columnas: la continuación de las divisiones del nav, una por módulo desde el borde derecho. */
+/* ── The hero sheet ─────────────────────────────────────────────────── */
+/* The column grid, between the nav and the bottom band. */
+/* The columns: the continuation of the nav dividers, one per module from the right edge. */
 .od-cols {
   position: absolute;
   left: 0;
@@ -485,7 +485,7 @@
   transform-origin: top center;
 }
 
-/* El cuadrante del dibujo: cuatro bordes y sus rótulos. */
+/* The drawing quadrant: four borders and their labels. */
 .od-panel {
   position: absolute;
   pointer-events: none;
@@ -523,7 +523,7 @@
   transform-origin: center bottom;
 }
 .od-panel__label {
-  /* Sobre el borde de arriba, centrado en la franja entre el lomo del nav y el cuadrante: no pisa el dibujo. */
+  /* On the top edge, centred in the band between the nav binding and the quadrant: it does not cover the drawing. */
   position: absolute;
   bottom: calc(100% + 4px);
   line-height: 1.4;
@@ -532,7 +532,7 @@
   text-transform: uppercase;
   color: var(--od-rust);
 }
-/* En el teléfono la franja es más baja: el rótulo baja a 11 px. */
+/* On the phone the band is lower: the label drops to 11 px. */
 @media (max-width: 639px) {
   .od-panel__label {
     bottom: calc(100% + 2px);
@@ -544,7 +544,7 @@
   left: 0;
 }
 @media (max-width: 639px) {
-  /* La cruz de registro de la esquina cae sobre el borde: el rótulo arranca después de ella. */
+  /* The registration cross of the corner falls on the edge: the label starts after it. */
   .od-panel__label--tl {
     left: 14px;
   }
@@ -563,7 +563,7 @@
   line-height: 1.35;
 }
 
-/* La marca gigante: se ubica y se escala desde el JS (font-size = el ancho de la lámina). */
+/* The giant mark: it is placed and scaled from JS (font-size = the sheet width). */
 .od-word {
   position: absolute;
   top: 0;
@@ -574,7 +574,7 @@
   line-height: 0;
 }
 
-/* El rótulo: el cuadro de datos de una lámina. */
+/* The label: the data block of a sheet. */
 .od-rotulo {
   position: absolute;
   right: 14px;
@@ -614,7 +614,7 @@
   grid-column: 1 / -1;
 }
 
-/* Las líneas de construcción: guías punteadas y una regla en óxido alrededor del cuadrante. */
+/* The construction lines: dotted guides and a rust ruler around the quadrant. */
 .od-guides {
   position: absolute;
   inset: 0;
@@ -686,11 +686,11 @@
   }
 }
 
-/* ── «Se pinta» (paint.js) ──────────────────────────────────────────── */
+/* ── "Painted in" (paint.js) ────────────────────────────────────────── */
 /*
- * La máscara mide tres veces el ancho del elemento: a la izquierda tinta, a la derecha vacío y, en el
- * medio, un borde irregular de trazo (ruido que desplaza el borde). Correrla de 100 % a 0 % barre el
- * elemento de izquierda a derecha.
+ * The mask is three times the width of the element: ink on the left, empty on the right and, in the
+ * middle, an irregular stroke edge (noise that displaces the edge). Moving it from 100 % to 0 % sweeps the
+ * element from left to right.
  */
 .od-paint {
   --paint: 0;
@@ -704,7 +704,7 @@
   mask-position: calc(var(--paint) * 1%) 0;
 }
 
-/* El título por partes: cada una aparece con un fundido (Hero.jsx). Lo que todavía no llegó no se ve, pero ocupa su lugar. */
+/* The title in parts: each one appears with a fade (Hero.jsx). What has not arrived yet is not seen, but takes up its place. */
 .od-chunk {
   position: relative;
   display: inline-block;
@@ -713,10 +713,10 @@
   display: block;
 }
 
-/* ── El bloque de abajo del hero ───────────────────────────────────── */
+/* ── The block under the hero ──────────────────────────────────────── */
 .od-info {
   position: absolute;
-  /* la señal de scroll se ubica contra este bloque */
+  /* the scroll cue is placed against this block */
   left: 0;
   right: 0;
   bottom: 0;
@@ -738,7 +738,7 @@
 }
 .od-info__line {
   display: block;
-  /* El interlineado es apretado: el aire de arriba evita que la máscara del pintado corte la tilde. */
+  /* The line height is tight: the air above keeps the paint mask from cutting the accent. */
   padding-top: 0.16em;
   margin-top: -0.16em;
 }
@@ -747,11 +747,11 @@
   border-top: 1px solid var(--line);
   min-height: 0;
   min-width: 0;
-  /* El número arriba y el texto abajo, apoyado en la línea del título. */
+  /* The number on top and the text below, resting on the title's line. */
   display: flex;
   flex-direction: column;
 }
-/* En el teléfono el texto va debajo del titular: la separación es la línea de arriba (border-top). */
+/* On the phone the text goes below the headline: the separation is the line above (border-top). */
 .od-info__vline {
   display: none;
 }
@@ -783,7 +783,7 @@
   .od-info {
     grid-template-rows: none;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    /* El borde de la celda de texto cae sobre una línea de columna (un múltiplo del módulo desde la derecha). */
+    /* The edge of the text cell falls on a column line (a multiple of the module from the right). */
     grid-template-columns: minmax(0, 1fr) round(down, 40vw, var(--mod));
     padding-left: 36px;
   }
@@ -807,7 +807,7 @@
   .od-info__step {
     padding: 16px 20px 0;
   }
-  /* El pie del texto cae sobre la línea de base de la última línea del título (su padding de abajo). */
+  /* The foot of the text falls on the baseline of the last line of the title (its bottom padding). */
   .od-info__copy {
     margin-top: auto;
     padding: 8px 24px 22px 20px;
@@ -816,7 +816,7 @@
   }
 }
 
-/* ── Lámina 05: la hoja que queda debajo del hero ─────────────────── */
+/* ── Sheet 05: the sheet left under the hero ──────────────────────── */
 .od-next__panel {
   position: absolute;
   left: 16px;
@@ -838,7 +838,7 @@
   position: relative;
   margin-top: calc(var(--nav-h) + 60px);
 }
-/* La sombra que le hacía la hoja de arriba. */
+/* The shadow that the sheet above cast on it. */
 .od-next__shade {
   position: absolute;
   inset: 0;
@@ -859,7 +859,7 @@
   }
 }
 
-/* ── Proyectos: la tarjeta donde aterriza el local del hero ─────────── */
+/* ── Projects: the card where the hero's shop lands ─────────────────── */
 .od-proj,
 .od-sec {
   padding: calc(var(--nav-h) + 22px) 16px clamp(40px, 6vw, 88px);
@@ -904,7 +904,7 @@
   overflow: hidden;
   aspect-ratio: 4 / 3;
 }
-/* El grano va encima de la foto (no la toca): se mezcla en «superposición», así solo mueve los tonos de la foto. */
+/* The grain goes on top of the photo (it does not touch it): it blends in "overlay", so it only shifts the photo's tones. */
 .od-proj__card::after {
   content: '';
   position: absolute;
@@ -921,7 +921,7 @@
   max-width: none;
   display: block;
 }
-/* La foto propia del proyecto: cubre la tarjeta. */
+/* The project's own photo: it covers the card. */
 .od-proj__img--cover {
   inset: 0;
   width: 100%;
@@ -987,7 +987,7 @@
   .od-proj__card {
     aspect-ratio: 16 / 10;
   }
-  /* En tablet la ficha va debajo, en dos columnas: el nombre y los datos. */
+  /* On tablet the info goes below, in two columns: the name and the details. */
   .od-proj__ficha {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1014,13 +1014,13 @@
   }
 }
 
-/* ── El boceto: al salir, la hoja del hero vuelve a lápiz (--sk 0 → 1, Boceto.jsx) ── */
+/* ── The sketch: on exit, the hero sheet goes back to pencil (--sk 0 → 1, Sketch.jsx) ─── */
 .od-sk {
   --sk: 0;
 }
-/* El título: de tinta a grafito. Las letras quedan en el gris de un lápiz blando, con el grano del
-   papel comiéndose el trazo (sin contorno ni rayado, que en letras grandes se ven de libro para
-   colorear, y sin temblor). */
+/* The title: from ink to graphite. The letters stay in the grey of a soft pencil, with the grain of the
+   paper eating into the stroke (no outline or hatching, which on large letters look like a
+   colouring book, and no tremble). */
 .od-sk .od-chunk__ink {
   color: color-mix(in srgb, #161513, rgb(66 62 56 / 0.58) calc(var(--sk) * 100%));
   background-image: var(--od-pencil-grain);
@@ -1029,28 +1029,28 @@
   background-clip: text;
 }
 .od-sk {
-  /* El grano del grafito: puntos claros que dejan ver el papel a través del trazo. */
+  /* The graphite grain: light dots that let the paper show through the stroke. */
   --od-pencil-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.19  0 0 0 0 0.17  0 0 0 1.5 -0.5'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
 }
-/* Los rótulos del cuadrante, de óxido a grafito. */
+/* The quadrant labels, from rust to graphite. */
 .od-sk .od-panel__label {
   color: color-mix(in srgb, var(--od-rust), #8a857b calc(var(--sk) * 100%));
 }
-/* El resto del texto, a grafito. */
+/* The rest of the text, to graphite. */
 .od-sk .od-info__step {
   color: color-mix(in srgb, var(--od-rust), #8a857b calc(var(--sk) * 100%));
 }
 .od-sk .od-info__copy {
   color: color-mix(in srgb, var(--od-ink), #8a857b calc(var(--sk) * 100%));
 }
-/* El temblor del lápiz (filtro #od-pencil, Boceto.jsx), solo mientras hay boceto. */
+/* The pencil tremble (#od-pencil filter, Sketch.jsx), only while there is a sketch. */
 .od-sk.is-sketch .od-info__side,
 .od-sk.is-sketch .od-panel,
 .od-sk.is-sketch .od-frame__line {
   filter: url(#od-pencil);
 }
 
-/* ── El menú del teléfono ───────────────────────────────────────────── */
+/* ── The phone menu ─────────────────────────────────────────────────── */
 .od-menu {
   position: absolute;
   left: 0;
@@ -1125,7 +1125,7 @@
   margin: -14px 0;
   color: var(--od-ink);
 }
-/* El botón: dos rayas que se cruzan en una X al abrir. */
+/* The button: two bars that cross into an X on opening. */
 .od-menu__burger {
   position: absolute;
   right: 16px;
@@ -1168,14 +1168,14 @@
   }
 }
 
-/* ── Tablet en vertical: el título del hero más grande (hay alto de sobra) ── */
+/* ── Tablet in portrait: the hero title larger (there is height to spare) ─── */
 @media (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
   .od-info__title {
     font-size: clamp(24px, 3.9vw, 44px);
   }
 }
 
-/* ── La tarjeta de Proyectos es un enlace ─────────────────────────── */
+/* ── The Projects card is a link ──────────────────────────────────── */
 .od-proj__card {
   display: block;
 }
@@ -1198,9 +1198,9 @@
   }
 }
 
-/* ── La página de un proyecto (ProjectPage.jsx) ───────────────────── */
-/* Una tira horizontal (≥ 768 px, salvo con «reducir movimiento»): el scroll vertical la corre hacia la izquierda.
-   Debajo de 768 px y con «reducir movimiento» (.od-pd--v) los paneles van uno debajo del otro. */
+/* ── A project page (ProjectPage.jsx) ─────────────────────────────── */
+/* A horizontal strip (≥ 768 px, except with "reduce motion"): the vertical scroll moves it to the left.
+   Below 768 px and with "reduce motion" (.od-pd--v) the panels go one below the other. */
 .od-pd {
   --pad: 16px;
   --ph: calc(100svh - var(--nav-h) - 9px);
@@ -1210,7 +1210,7 @@
     --pad: 36px;
   }
 }
-/* El grano de película, sobre toda la vista: uno que se mezcla con las fotos y otro de puntos finos para el papel. */
+/* The film grain, over the whole view: one that blends with the photos and another of fine dots for the paper. */
 .od-pd-grain {
   position: fixed;
   inset: 0;
@@ -1246,7 +1246,7 @@
   line-height: 1.04;
   letter-spacing: var(--od-title-tracking);
 }
-/* Las fotos: un marco que recorta, con la foto 24 % más grande adentro (el parallax la mueve). */
+/* The photos: a frame that crops, with the photo 24 % larger inside (the parallax moves it). */
 .od-px {
   position: relative;
   display: block;
@@ -1270,7 +1270,7 @@
   aspect-ratio: auto !important;
 }
 
-/* La portada: el panel de color */
+/* The cover: the colour panel */
 .od-pd-p--cover {
   display: flex;
   flex-direction: column;
@@ -1334,7 +1334,7 @@
   height: 58svh;
 }
 
-/* La descripción */
+/* The description */
 .od-pd-p--intro {
   display: flex;
   flex-direction: column;
@@ -1396,7 +1396,7 @@
   letter-spacing: -0.02em;
 }
 
-/* Las fotos con su nota */
+/* The photos with their note */
 .od-pd-p--photo {
   margin: clamp(56px, 10vw, 110px) 0 0;
   padding: 0 var(--pad);
@@ -1429,7 +1429,7 @@
   margin: clamp(48px, 8vw, 90px) var(--pad) 0 auto;
 }
 
-/* El cierre: una sección debajo de la tira, con scroll vertical normal. */
+/* The closing: a section below the strip, with normal vertical scroll. */
 .od-pd-end {
   display: flex;
   flex-direction: column;
@@ -1497,7 +1497,7 @@
   margin-top: 24px;
 }
 
-/* ── La tira horizontal ───────────────────────────────────────────── */
+/* ── The horizontal strip ─────────────────────────────────────────── */
 @media (min-width: 768px) {
   .od-pd:not(.od-pd--v) .od-pd-h {
     height: 100svh;
@@ -1514,7 +1514,7 @@
     height: 100%;
     margin: 0;
   }
-  /* Mitad y mitad: la portada y la primera foto llenan la pantalla. */
+  /* Half and half: the cover and the first photo fill the screen. */
   .od-pd:not(.od-pd--v) .od-pd-p--cover,
   .od-pd:not(.od-pd--v) .od-pd-p--hero {
     width: 50vw;
@@ -1576,7 +1576,7 @@
   }
 }
 
-/* La cortina del cambio de página: óxido, sobre todo menos el cursor. */
+/* The page-change curtain: rust, over everything except the cursor. */
 .od-curtain {
   position: fixed;
   inset: 0;
@@ -1587,10 +1587,10 @@
   clip-path: inset(100% 0% 0% 0%);
 }
 
-/* ── La señal de scroll: «Scroll» y una flecha de boceto ───────────── */
+/* ── The scroll cue: "Scroll" and a sketch arrow ───────────────────── */
 .od-scrollcue {
   position: absolute;
-  display: none; /* en el teléfono no entra junto al título */
+  display: none; /* on the phone it does not fit next to the title */
   align-items: flex-end;
   gap: 12px;
   pointer-events: none;
@@ -1618,7 +1618,7 @@
 .od-scrollcue__s1 {
   stroke-width: 1.6;
 }
-/* En pantallas anchas va al pie de la columna del título, contra la celda de texto. */
+/* On wide screens it goes at the foot of the title column, against the text cell. */
 @media (min-width: 1024px) {
   .od-scrollcue {
     display: flex;
@@ -1642,7 +1642,7 @@
 .od-scrollcue.is-on .od-scrollcue__label {
   opacity: 1;
 }
-/* La flecha se traza como un lápiz (el asta, la segunda pasada y la punta), queda, se borra y vuelve. */
+/* The arrow is traced like a pencil (the shaft, the second pass and the tip), it stays, is erased and comes back. */
 .od-scrollcue.is-on .od-scrollcue__arrow {
   animation: od-cue-bob 2.8s var(--od-ease) infinite;
 }
@@ -1886,7 +1886,7 @@
   font-weight: var(--od-title-weight);
   line-height: 0.98;
   letter-spacing: -0.045em;
-  /* The paint mask clips to the line box: leave room for the descender of the «g». */
+  /* The paint mask clips to the line box: leave room for the descender of the "g". */
   padding-bottom: 0.16em;
   margin-bottom: -0.16em;
 }

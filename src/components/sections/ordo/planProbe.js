@@ -1,7 +1,7 @@
 /**
- * Un puente chico entre el hero y el cursor: el hero registra cómo pasar un punto de la pantalla a
- * metros del plano, y la mira del cursor lo usa para mostrar coordenadas reales (X:4.20M) en vez de
- * píxeles. Sin hero montado, el cursor vuelve a los px.
+ * A small bridge between the hero and the cursor: the hero registers how to turn a screen point into
+ * plan metres, and the cursor crosshair uses it to show real coordinates (X:4.20M) instead of
+ * pixels. With no hero mounted, the cursor goes back to px.
  */
 let probe = null
 
@@ -9,7 +9,7 @@ export function setPlanProbe(fn) {
   probe = fn
 }
 
-/** Metros del plano bajo el punto (px del viewport), o null si no hay plano debajo. */
+/** Metres of the plan under the point (viewport px), or null if there is no plan underneath. */
 export function readPlanProbe(clientX, clientY) {
   return probe ? probe(clientX, clientY) : null
 }

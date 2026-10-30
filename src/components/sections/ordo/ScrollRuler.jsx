@@ -4,24 +4,24 @@ import { getLenis } from '../../../hooks/useLenis'
 import { LABEL } from './brand'
 
 const FINE_POINTER = '(hover: hover) and (pointer: fine)'
-/** Cuánto quedan a la vista los números después del último movimiento (ms): un destello, no un cartel. */
+/** How long the numbers stay visible after the last movement (ms): a flash, not a sign. */
 const ACTIVE_MS = 600
 
 /**
- * La barra de scroll de elStudio: una regla vertical, la hermana de la que cae bajo el nav.
+ * The scroll bar of the site: a vertical ruler, the sibling of the one that drops under the nav.
  *
- * Sobre el borde derecho, marcas finas cada 8 px y una más larga cada 80. Un cursor de óxido marca dónde
- * está la página; las marcas de alrededor se agrandan un poco, como bajo una lupa. Las secciones de la página
- * (cada `<section>` de <main>, numeradas en orden: hoy Inicio y Proyectos; las que se sumen entran solas)
- * están marcadas con una línea más larga, y mientras se scrollea (y un instante después) aparece el número de
- * la sección en la que se está; quieta la página, la regla queda sola. Las etapas del hero no tienen marca:
- * son parte del recorrido de la sección 01.
+ * Along the right edge, fine ticks every 8 px and a longer one every 80. A rust cursor marks where
+ * the page is; the ticks around it grow a little, as under a magnifying glass. The page sections
+ * (each `<section>` of <main>, numbered in order: today Home and Projects; any that are added come in on their own)
+ * are marked with a longer line, and while scrolling (and a moment after) the number of
+ * the current section appears; when the page is still, the ruler is left alone. The hero stages have no mark:
+ * they are part of the run of section 01.
  *
- * Reemplaza a la barra nativa (clase `hide-native-scrollbar` en <html>, src/index.css). Con mouse o
- * trackpad se clickea y se arrastra como una barra normal; en el teléfono es solo indicador (una franja
- * que tomara toques le robaría el scroll al dedo).
+ * It replaces the native bar (class `hide-native-scrollbar` on <html>, src/index.css). With a mouse or
+ * trackpad it is clicked and dragged like a normal bar; on the phone it is only an indicator (a strip
+ * that took touches would steal the scroll from the finger).
  *
- * Solo se mueven transformaciones y una variable de CSS del cursor; no hay nada que redibujar por cuadro.
+ * Only transforms and a CSS variable of the cursor move; there is nothing to redraw per frame.
  */
 export default function ScrollRuler({ on }) {
   const [fine, setFine] = useState(() => typeof window !== 'undefined' && window.matchMedia(FINE_POINTER).matches)
@@ -39,16 +39,16 @@ export default function ScrollRuler({ on }) {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  // Dónde empieza cada sección (en fracción del recorrido). Se mide al cargar y al cambiar de tamaño.
+  // Where each section starts (as a fraction of the run). It is measured on load and on resize.
   useEffect(() => {
     const measure = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight
       if (max <= 0) return
-      // La página de un proyecto marca sus paneles (data-spot): en la tira horizontal, según cuánto scroll lleva
-      // cada uno; en vertical, donde empieza cada uno. La portada y la de un solo scroll, sus secciones.
+      // A project page marks its panels (data-spot): in the horizontal strip, by how much scroll each one takes
+      // up; in vertical, where each one starts. The home page and the single-scroll one, their sections.
       const marked = [...document.querySelectorAll('[data-spot]')]
       const wrap = document.querySelector('.od-pd-h')
-      // La tira horizontal (ProjectPage): su disparador da dónde empieza y cuánto dura (se lee en vivo, no una copia).
+      // The horizontal strip (ProjectPage): its trigger gives where it starts and how long it lasts (read live, not a copy).
       const pin = wrap ? ScrollTrigger.getAll().find((t) => t.pin === wrap) : null
       const dist = pin ? pin.end - pin.start : 0
       let spots
@@ -56,7 +56,7 @@ export default function ScrollRuler({ on }) {
         const track = document.querySelector('[data-pd-track]')
         const run = Math.max(1, track.scrollWidth - window.innerWidth)
         const start = Math.max(0, pin.start)
-        // Los de la tira, según cuánto scroll lleva cada uno; los de abajo (el cierre), donde empiezan.
+        // Those in the strip, by how much scroll each one takes; those below (the closing), where they start.
         spots = marked.map((el) =>
           track.contains(el) ? start + Math.min(1, Math.max(0, el.offsetLeft / run)) * dist : el.getBoundingClientRect().top + window.scrollY,
         )
@@ -81,7 +81,7 @@ export default function ScrollRuler({ on }) {
     }
   }, [])
 
-  // El cursor sigue la página; el número de la hoja se enciende mientras se scrollea.
+  // The cursor follows the page; the sheet number lights up while scrolling.
   useEffect(() => {
     const root = document.documentElement
     root.classList.add('hide-native-scrollbar')
@@ -98,7 +98,7 @@ export default function ScrollRuler({ on }) {
       mark.style.transform = `translate3d(0, ${y.toFixed(1)}px, 0)`
       ruler.style.setProperty('--y', `${y.toFixed(1)}px`)
       let n = '01'
-      // Una sección cuenta cuando ya ocupa la parte de arriba de la pantalla (no recién cuando llega al tope).
+      // A section counts once it already occupies the top of the screen (not only when it reaches the top).
       for (const m of marksRef.current) if (scroll + window.innerHeight * 0.6 >= m.y) n = m.n
       if (n !== lastTag) {
         lastTag = n
@@ -124,7 +124,7 @@ export default function ScrollRuler({ on }) {
     }
   }, [])
 
-  // Click o arrastre: la altura en la regla es la altura en la página.
+  // Click or drag: the height on the ruler is the height on the page.
   useEffect(() => {
     const ruler = rulerRef.current
     if (!fine || !ruler) return undefined

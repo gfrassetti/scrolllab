@@ -1,31 +1,31 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * El enrutador mínimo de elStudio: una portada y una página por proyecto (`/projects/<slug>`).
+ * The minimal router of the site: a home page and one page per project (`/projects/<slug>`).
  *
- * La dirección se actualiza con history.pushState (si el navegador lo permite: en un iframe con sandbox puede
- * fallar y el sitio sigue andando con el estado en memoria). Con el sitio publicado, la dirección de un proyecto
- * se puede abrir directo si el hosting devuelve index.html para cualquier ruta (_redirects, ver vite.elstudio.config.js).
+ * The address is updated with history.pushState (if the browser allows it: in a sandboxed iframe it may
+ * fail and the site keeps working with the state in memory). With the published site, a project's address
+ * can be opened directly if the hosting returns index.html for any route (_redirects, see vite.ordo.config.js).
  *
- * `navigate` pasa por un manejador de transición (la cortina de ElStudioPage): él decide cuándo cambiar de ruta.
+ * `navigate` goes through a transition handler (the curtain in Site.jsx): it decides when to change the route.
  */
 
 const PROJECT_PATH = /\/projects\/([a-z0-9-]+)\/?$/
 
-/** La ruta actual: { name: 'home' } o { name: 'project', slug }. */
+/** The current route: { name: 'home' } or { name: 'project', slug }. */
 function read() {
   if (typeof window === 'undefined') return { name: 'home' }
   const m = window.location.pathname.match(PROJECT_PATH)
   return m ? { name: 'project', slug: m[1] } : { name: 'home' }
 }
 
-/** La carpeta desde la que cuelga el sitio (`/` publicado, `/estudio/elstudio` en local). */
+/** The folder the site hangs from (`/` when published, `/templates/ordo` locally). */
 function base() {
   return window.location.pathname.replace(PROJECT_PATH, '').replace(/\/+$/, '')
 }
 
 let route = read()
-let pending = null // la sección a la que ir al volver a la portada
+let pending = null // the section to go to when returning to the home page
 let handler = null
 const subs = new Set()
 
@@ -39,7 +39,7 @@ function commit(next, section) {
 
 const same = (a, b) => a.name === b.name && a.slug === b.slug
 
-/** Ir a otra ruta: `to` es { name: 'home' } o { name: 'project', slug }. */
+/** Go to another route: `to` is { name: 'home' } or { name: 'project', slug }. */
 export function navigate(to, { section = null, push = true } = {}) {
   if (same(route, to) && !section) return
   const apply = () => {
@@ -48,7 +48,7 @@ export function navigate(to, { section = null, push = true } = {}) {
       try {
         window.history.pushState(null, '', path)
       } catch {
-        // iframe con sandbox: sigue con el estado en memoria
+        // sandboxed iframe: carry on with the state in memory
       }
     }
     commit(to, section)
@@ -57,23 +57,23 @@ export function navigate(to, { section = null, push = true } = {}) {
   else apply()
 }
 
-/** La ruta actual, sin suscribirse. */
+/** The current route, without subscribing. */
 export const getRoute = () => route
 
-/** La dirección de una ruta, para los href (clic con el botón del medio, copiar enlace). */
+/** The address of a route, for hrefs (middle click, copy link). */
 export function hrefOf(to) {
   if (typeof window === 'undefined') return '#'
   return to.name === 'project' ? `${base()}/projects/${to.slug}` : `${base() || ''}/`
 }
 
-/** La sección a la que hay que ir al montar la portada (una sola vez). */
+/** The section to go to when the home page mounts (only once). */
 export function takePendingSection() {
   const s = pending
   pending = null
   return s
 }
 
-/** ElStudioPage registra acá su transición (cortina). */
+/** Site registers its transition (curtain) here. */
 export function setTransitionHandler(fn) {
   handler = fn
 }

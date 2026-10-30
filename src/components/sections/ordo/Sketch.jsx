@@ -3,15 +3,15 @@ import { gsap, ScrollTrigger } from '../../../lib/gsap'
 import { HERO_VH } from './brand'
 
 /**
- * La salida del hero: al terminar sus cuatro etapas, todo (menos el nav) vuelve a ser una hoja en
- * boceto. El hero sigue fijo 100vh más de scroll y en ese tramo:
- *   - la foto del local se despinta con el mismo pincel con el que se pintó (al revés) y vuelven los
- *     trazos de lápiz (en la escena, Hero.jsx → setBack);
- *   - el título queda en contorno con rayado de grafito, el texto pasa a gris lápiz y el texto y el
- *     marco tiemblan apenas, como trazados a mano (--sk y el filtro #od-pencil, ordo.css).
- * Después la hoja, ya en boceto, sigue con el scroll hacia abajo y queda atrás.
+ * The hero exit: when its four stages end, everything (except the nav) becomes a sketched sheet again. The
+ * hero stays fixed for 100vh more of scroll and in that stretch:
+ *   - the photo of the shop is unpainted with the same brush it was painted with (in reverse) and the
+ *     pencil strokes come back (in the scene, Hero.jsx → setBack);
+ *   - the title stays in outline with graphite hatching, the text turns pencil grey and the text and the
+ *     frame tremble slightly, as if drawn by hand (--sk and the #od-pencil filter, ordo.css).
+ * Then the sheet, already a sketch, keeps going with the scroll and is left behind.
  *
- * Con «reducir movimiento» no hay vuelta a boceto: el hero termina y sigue Proyectos.
+ * With "reduce motion" there is no return to a sketch: the hero ends and Projects follows.
  */
 export default function Sketch({ calm, exit }) {
   const dispRef = useRef(null)
@@ -27,7 +27,7 @@ export default function Sketch({ calm, exit }) {
       const t = Math.min(1, u / 0.85)
       const back = t * t * (3 - 2 * t)
       exit.current?.setBack(back)
-      // El temblor, en cuatro escalones (cada cambio vuelve a pasar el filtro sobre el texto y el marco).
+      // The tremble, in four steps (each change runs the filter over the text and the frame again).
       const disp = (Math.ceil(back * 4) / 4) * 2.6
       if (disp !== lastDisp) dispRef.current?.setAttribute('scale', String((lastDisp = disp)))
     }
@@ -60,7 +60,7 @@ export default function Sketch({ calm, exit }) {
 
   if (calm) return null
 
-  // El lápiz: un temblor apenas visible en los trazos del texto y del marco.
+  // The pencil: a barely visible tremble in the strokes of the text and the frame.
   return (
     <svg width="0" height="0" className="pointer-events-none absolute" aria-hidden="true">
       <filter id="od-pencil" x="-2%" y="-10%" width="104%" height="120%">

@@ -1,41 +1,41 @@
 /**
- * Las piezas que se diseñan en el hero, en el orden en que se dibujan. Cada una es un rectángulo del
- * boceto en alzado (en px de la imagen a IMG.w × IMG.h, origen arriba a la izquierda).
+ * The pieces designed in the hero, in the order they are drawn. Each one is a rectangle of the
+ * elevation sketch (in image px at IMG.w × IMG.h, origin at the top left).
  *
- * Hay dos capas, como en un proyecto de interiorismo: primero la obra (`obra: true`) y después el
- * equipamiento. En la obra, sobre el local como se recibió (boceto-obra: ventana chica, paredes con
- * parches, el caño y la lamparita) se dibuja lo que proyecta el estudio: el ventanal, el nicho, el
- * cielorraso y los revestimientos, hasta el local vacío (boceto-vacio). En el equipamiento, sobre el
- * local vacío se dibuja cada mueble hasta el boceto completo. Los rectángulos se pueden pisar: lo que
- * ya dibujó una pieza anterior queda dibujado. Si se regeneran los bocetos, hay que volver a medirlos.
+ * There are two layers, as in an interior design project: first the building work (`obra: true`) and then the
+ * furnishings. In the building work, over the shop as it was received (sketch-raw: small window, patched walls,
+ * the pipe and the bare bulb) what the studio designs is drawn: the big window, the niche, the
+ * ceiling and the wall and floor finishes, up to the empty shop (sketch-empty). In the furnishings, over the
+ * empty shop each piece of furniture is drawn up to the complete sketch. Rectangles may overlap: what
+ * an earlier piece already drew stays drawn. If the sketches are regenerated, they must be measured again.
  */
 export const IMG = { w: 2100, h: 900 }
 
 export const DESIGN_PIECES = [
-  // La obra. El ventanal: la ventana chica de siempre se vuelve un paño de piso a techo.
+  // The building work. The big window: the usual small window becomes a floor-to-ceiling pane.
   { id: 'window', obra: true, rect: [150, 140, 545, 715] },
-  // El nicho con su estante (donde estaba la lamparita colgando).
+  // The niche with its shelf (where the bare bulb used to hang).
   { id: 'niche', obra: true, rect: [905, 140, 1115, 645] },
-  // El cielorraso: se tapa la losa con el caño a la vista.
+  // The ceiling: the slab with the exposed pipe is covered.
   { id: 'ceiling', obra: true, rect: [118, 108, 1985, 192] },
-  // Los revestimientos: paredes y piso terminados (se van los parches de la obra).
+  // The finishes: walls and floor completed (the patches from the building work are gone).
   { id: 'finishes', obra: true, rect: [118, 120, 1985, 748] },
-  // El equipamiento.
-  // La barra de piedra y las tres banquetas.
+  // The furnishings.
+  // The stone bar and the three stools.
   { id: 'bar', rect: [1118, 536, 1758, 745] },
-  // La repisa negra con sus objetos y la planta que cuelga, la rama sobre la barra y la luz lineal.
+  // The black shelf with its objects and the hanging plant, the branch over the bar and the linear light.
   { id: 'shelves', rect: [1175, 130, 1780, 548] },
-  // El banco bajo el ventanal, con su almohadón.
+  // The bench under the big window, with its cushion.
   { id: 'bench', rect: [240, 595, 520, 712] },
-  // La mesa redonda, las dos sillas y la planta de hojas grandes.
+  // The round table, the two chairs and the big-leafed plant.
   { id: 'table', rect: [430, 322, 905, 733] },
-  // El florero en el estante del nicho.
+  // The vase on the niche shelf.
   { id: 'console', rect: [975, 380, 1045, 460] },
-  // El pedestal con la esfera y la planta alta.
+  // The plinth with the sphere and the tall plant.
   { id: 'plinths', rect: [1835, 318, 1978, 735] },
-  // El árbol en su maceta, junto al ventanal.
+  // The tree in its pot, next to the big window.
   { id: 'plant', rect: [130, 170, 400, 722] },
 ]
 
-/** El interior en la imagen (fracciones): de muro a muro, del cielorraso al piso. Mide 9,5 × 3 m. */
+/** The interior in the image (fractions): from wall to wall, from the ceiling to the floor. It measures 9.5 × 3 m. */
 export const ROOM_IN_IMAGE = { x0: 0.0595, x1: 0.942, y0: 0.164, y1: 0.822, w: 9.5, h: 3 }

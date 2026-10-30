@@ -1,12 +1,12 @@
 /**
- * Contornos del logo de ORDO (generado). «ORDO» en Jost Medium (SIL Open Font License), pasados a trazos
- * para que el loader los dibuje con stroke-dashoffset. La tapa (`slab`) es un polígono propio apoyado
- * sobre la R y la D, como un dintel sobre dos columnas. Unidades: 1000 = 1 em, y hacia abajo, línea de base en y = 0.
- *   fill      el glifo entero (con sus contraformas)
- *   contours  cada contorno por separado, para dibujarlos a la vez
+ * Outlines of the ORDO logo (generated). "ORDO" in Jost Medium (SIL Open Font License), turned into strokes
+ * so that the loader draws them with stroke-dashoffset. The slab (`slab`) is a polygon of its own resting
+ * on the R and the D, like a lintel on two columns. Units: 1000 = 1 em, y pointing down, baseline at y = 0.
+ *   fill      the whole glyph (with its counters)
+ *   contours  each outline separately, to draw them all at once
  */
 export const LOGO_VIEWBOX = { x: -2.0, y: -800.0, w: 3116.0, h: 831.0 }
-/** Dónde empieza la palabra (en unidades): el subtítulo se alinea ahí. */
+/** Where the word starts (in units): the subtitle aligns there. */
 export const LOGO_WORD_X = 38.0
 export const LOGO_PARTS = [
  {

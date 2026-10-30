@@ -2,34 +2,34 @@ import * as THREE from 'three'
 import { DESIGN_PIECES, IMG } from './designPieces'
 
 /**
- * La escena del hero: un local (café / showroom) en maqueta, visto como una casa de muñecas (dos
- * muros de fondo y el piso, sin los muros que taparían la vista).
+ * The hero scene: a shop (café / showroom) as a scale model, seen like a dollhouse (two
+ * back walls and the floor, without the walls that would block the view).
  *
- * Se ve en tres estados, todos de la misma escena (por eso coinciden al milímetro):
- *   boceto    un filtro de dibujo sobre el render: contornos en grafito que tiemblan y se cortan
- *             como un trazo a mano, sombras en rayado / rayado cruzado según la luz y manchas de
- *             carbonilla en lo más oscuro. Se «pinta» con `setReveal` (desde el centro hacia afuera).
- *   maqueta   el 3D de papel blanco con las aristas en tinta (`setSketch(0)`).
- *   decorado  pieza por pieza toma su material, entran los objetos y se encienden las lámparas
+ * It is seen in three states, all of the same scene (that is why they match to the millimetre):
+ *   sketch    a drawing filter over the render: graphite outlines that tremble and break up
+ *             like a hand-drawn stroke, shadows in hatching / cross-hatching according to the light and charcoal
+ *             smudges in the darkest areas. It is "painted in" with `setReveal` (from the centre outwards).
+ *   model     the white paper 3D with the edges in ink (`setSketch(0)`).
+ *   dressed   each piece in turn takes its material, the objects come in and the lamps light up
  *             (`setDecor`).
  *
- * Todo en metros: x a la derecha (a lo largo del muro del fondo), z hacia el frente, y hacia arriba;
- * el rincón del fondo a la izquierda es el origen.
+ * All in metres: x to the right (along the back wall), z towards the front, y up;
+ * the back corner on the left is the origin.
  *
  *   const scene = createLocalScene({ canvas })
- *   scene.setFrame(x, y, w, h)  el rectángulo de la pantalla donde va el cuadro
- *   scene.setReveal(0..1)       cuánto del boceto está dibujado
- *   scene.setSketch(0..1)       cuánto se ve el boceto (va encima del 3D)
- *   scene.setRise(0..1)         el local sube desde el dibujo
- *   scene.setPhoto(0..1)        la foto del local (createLocalScene({ photo })) se pinta encima
- *   scene.setDecor(0..1)        cuánto está decorado
- *   scene.setCamera(0..1)       la cámara se acerca al final
- *   scene.render()              dibuja si algo cambió
+ *   scene.setFrame(x, y, w, h)  the screen rectangle where the frame goes
+ *   scene.setReveal(0..1)       how much of the sketch is drawn
+ *   scene.setSketch(0..1)       how much of the sketch is seen (it goes on top of the 3D)
+ *   scene.setRise(0..1)         the shop rises from the drawing
+ *   scene.setPhoto(0..1)        the photo of the shop (createLocalScene({ photo })) is painted on top
+ *   scene.setDecor(0..1)        how much is dressed
+ *   scene.setCamera(0..1)       the camera moves in at the end
+ *   scene.render()              draws if something changed
  */
 
 export const ROOM = { w: 9, d: 6, h: 3.3, t: 0.2 }
-/** El cuadro: la cámara encuadra este aspecto, entero, dentro del rectángulo que le den. */
-export const FRAME_ASPECT = 21 / 9 // el alzado (boceto, vacío y foto) es 21:9
+/** The frame: the camera fits this aspect, whole, inside the rectangle it is given. */
+export const FRAME_ASPECT = 21 / 9 // the elevation (sketch, empty and photo) is 21:9
 
 const INK = new THREE.Color('#161513')
 const PAPER = new THREE.Color('#f6f4ee')
@@ -48,7 +48,7 @@ const backOut = (t) => {
   return 1 + (s + 1) * u * u * u + s * u * u
 }
 
-/* ── Piezas ─────────────────────────────────────────────────────────── */
+/* ── Pieces ─────────────────────────────────────────────────────────── */
 
 const box = (w, h, d, x, y, z) => {
   const g = new THREE.BoxGeometry(w, h, d)
@@ -63,16 +63,16 @@ const cyl = (r, h, x, y, z, seg = 40, rTop = r) => {
 const ball = (r, x, y, z) => new THREE.SphereGeometry(r, 28, 18).translate(x, y, z)
 
 /**
- * Las piezas del local. `object: true` son los objetos que entran al decorar (jarrones, libros,
- * almohadones…): no están en el boceto. El resto está desde el principio y al decorar toma color.
+ * The pieces of the shop. `object: true` are the objects that come in when dressing (vases, books,
+ * cushions…): they are not in the sketch. The rest is there from the start and takes colour when dressing.
  */
 function buildPieces() {
   const { w, d, h, t } = ROOM
   const list = []
   const add = (id, parts, object = false) => list.push({ id, parts, object })
 
-  // La caja: base, piso, muro del fondo y muro izquierdo con la vidriera.
-  // La base termina justo debajo del piso: si las dos caras quedan en el mismo plano, se pelean (rayas).
+  // The box: base, floor, back wall and left wall with the shop window.
+  // The base ends just under the floor: if both faces end up on the same plane, they fight (stripes).
   add('base', [{ geo: box(w + t, 0.2, d + t, w / 2 - t / 2, -0.22, d / 2 - t / 2), mat: 'base' }])
   add('floor', [{ geo: box(w, 0.02, d, w / 2, -0.02, d / 2), mat: 'floor' }])
   const win = { z0: 1.1, z1: 4.9, y0: 0.45, y1: 2.85 }
@@ -91,7 +91,7 @@ function buildPieces() {
   frame.push({ geo: box(0.01, win.y1 - win.y0, win.z1 - win.z0, -t / 2, win.y0, (win.z0 + win.z1) / 2), mat: 'glass', edges: false })
   add('window', frame)
 
-  // El nicho en arco del fondo y su consola.
+  // The arched niche at the back and its console.
   const arch = new THREE.Shape()
   const aw = 1.7
   const ah = 2.7
@@ -113,10 +113,10 @@ function buildPieces() {
     true,
   )
 
-  // Alfombra redonda.
+  // Round rug.
   add('rug', [{ geo: cyl(1.35, 0.015, 4.7, 0, 3.7, 64), mat: 'rug' }])
 
-  // La barra con el extremo redondeado y la mesada oscura apenas volada.
+  // The bar with the rounded end and the dark countertop slightly overhanging.
   const bar = { x0: 5.9, x1: 8.7, z0: 0.15, z1: 0.9, h: 1.05 }
   const bz = (bar.z0 + bar.z1) / 2
   const bd = bar.z1 - bar.z0
@@ -134,7 +134,7 @@ function buildPieces() {
   }
   add('stools', stools)
 
-  // Estantes sobre la barra y lo que va encima.
+  // Shelves above the bar and what goes on them.
   add(
     'shelves',
     [1.65, 2.1, 2.55].map((y) => ({ geo: box(2.5, 0.04, 0.26, 7.3, y, 0.13), mat: 'wood' })),
@@ -154,7 +154,7 @@ function buildPieces() {
   objects.push({ geo: box(0.28, 0.05, 0.19, 7.22, 2.2, 0.13), mat: 'clay' })
   add('shelf-objects', objects, true)
 
-  // Lámparas colgantes (la pantalla es la que se enciende).
+  // Pendant lamps (the shade is what lights up).
   const lamps = []
   for (const x of [6.45, 7.3, 8.15]) {
     lamps.push({ geo: cyl(0.006, h - 2.3, x, 2.3, 0.6, 6), mat: 'ink', edges: false })
@@ -165,7 +165,7 @@ function buildPieces() {
   }
   add('lamps', lamps)
 
-  // Mesa redonda y dos sillas.
+  // Round table and two chairs.
   add('table', [
     { geo: cyl(0.3, 0.03, 4.7, 0, 3.7, 40), mat: 'stone' },
     { geo: cyl(0.06, 0.7, 4.7, 0.03, 3.7, 20), mat: 'stone' },
@@ -180,7 +180,7 @@ function buildPieces() {
     ].map((g) => ({ geo: g.rotateY(rot).translate(cx, 0, cz), mat: 'wood' }))
   add('chairs', [...chair(4.7, 2.75, 0), ...chair(5.65, 4.1, -2.2)])
 
-  // Banco bajo la vidriera y sus almohadones.
+  // Bench under the shop window and its cushions.
   add('bench', [
     { geo: box(0.55, 0.32, 3.4, 0.33, 0, 3.0), mat: 'wood' },
     { geo: box(0.55, 0.12, 3.4, 0.33, 0.32, 3.0), mat: 'linen' },
@@ -194,7 +194,7 @@ function buildPieces() {
     true,
   )
 
-  // Pedestales de exhibición (es un showroom) y sus piezas.
+  // Display plinths (it is a showroom) and their pieces.
   add('plinths', [
     { geo: box(0.55, 0.95, 0.55, 7.55, 0, 4.35), mat: 'stone' },
     { geo: box(0.45, 0.6, 0.45, 8.25, 0, 4.95), mat: 'stone' },
@@ -208,7 +208,7 @@ function buildPieces() {
     true,
   )
 
-  // Planta grande en el rincón de adelante.
+  // Large plant in the front corner.
   add('plant', [
     { geo: cyl(0.26, 0.55, 0.62, 0, 5.4, 32, 0.3), mat: 'clay' },
     { geo: cyl(0.02, 0.6, 0.62, 0.5, 5.4, 8), mat: 'wood', edges: false },
@@ -224,7 +224,7 @@ function buildPieces() {
   return list
 }
 
-/** El orden en que se decora: cada paso colorea una pieza o hace entrar sus objetos. */
+/** The order of dressing: each step colours a piece or brings its objects in. */
 const DECOR_ORDER = [
   'floor',
   'walls',
@@ -250,8 +250,8 @@ const DECOR_ORDER = [
 ]
 
 /**
- * El color final de cada material: una maqueta de papel casi monocroma (como las de Illoca), con
- * el óxido de la marca en el arco y algunas piezas, y el verde apagado de las plantas.
+ * The final colour of each material: an almost monochrome paper model (like Illoca's), with
+ * the brand rust on the arch and a few pieces, and the muted green of the plants.
  */
 const FINAL = {
   base: '#d6d0c3',
@@ -273,7 +273,7 @@ const FINAL = {
   leaf: '#8fa682',
 }
 
-/* ── El filtro de boceto ─────────────────────────────────────────────── */
+/* ── The sketch filter ─────────────────────────────────────────────── */
 
 const sketchVertex = /* glsl */ `
   varying vec2 vUv;
@@ -284,37 +284,37 @@ const sketchVertex = /* glsl */ `
 `
 
 const sketchFragment = /* glsl */ `
-  uniform sampler2D tColor;   // el 3D tal como está (sube y se decora)
+  uniform sampler2D tColor;   // the 3D as it is (it rises and is dressed)
   uniform sampler2D tNormal;
-  uniform sampler2D tColorB;  // la fuente del boceto: el local entero, en maqueta blanca
+  uniform sampler2D tColorB;  // the sketch source: the whole shop, as a white model
   uniform sampler2D tNormalB;
-  uniform sampler2D tColorO;  // lo que muestra el arrastre (el otro estado)
+  uniform sampler2D tColorO;  // what the drag shows (the other state)
   uniform sampler2D tNormalO;
-  uniform sampler2D tPhoto;   // la foto del local terminado (misma cámara que el arranque)
-  uniform float uPhoto;       // 1: el arrastre muestra la foto
-  uniform vec4 uFrame;        // el cuadro de la cámara en el canvas (x, y, w, h en 0–1, y hacia arriba)
-  uniform float uPhotoReveal; // cuánto de la foto está pintado sobre la maqueta (el final del hero)
-  uniform float uPhotoZoom;   // el acercamiento final sobre la foto (1 = sin zoom)
-  uniform float uPhotoSat;    // el color de la foto (0 = en grises: luz y sombra)
-  uniform sampler2D tSketchImg; // el boceto dibujado a lápiz (misma toma que la foto)
-  uniform sampler2D tSketchEmpty; // el mismo boceto con el local vacío (con la arquitectura del estudio)
+  uniform sampler2D tPhoto;   // the photo of the finished shop (same camera as the start)
+  uniform float uPhoto;       // 1: the drag shows the photo
+  uniform vec4 uFrame;        // the camera frame in the canvas (x, y, w, h in 0–1, y up)
+  uniform float uPhotoReveal; // how much of the photo is painted over the model (the end of the hero)
+  uniform float uPhotoZoom;   // the final zoom on the photo (1 = no zoom)
+  uniform float uPhotoSat;    // the colour of the photo (0 = in greys: light and shadow)
+  uniform sampler2D tSketchImg; // the pencil-drawn sketch (same shot as the photo)
+  uniform sampler2D tSketchEmpty; // the same sketch with the shop empty (with the studio's architecture)
   uniform float uHasEmpty;
-  uniform sampler2D tSketchRaw; // el local como se recibe, en obra gris (antes de las aberturas, el nicho…)
+  uniform sampler2D tSketchRaw; // the shop as received, in raw grey shell (before the openings, the niche…)
   uniform float uHasRaw;
-  uniform vec4 uRegions[${DESIGN_PIECES.length}];   // dónde está cada pieza (uv de la imagen, y hacia arriba): x0, y0, x1, y1
-  uniform float uDesign[${DESIGN_PIECES.length}];   // cuánto de cada pieza está dibujado
-  uniform float uObra[${DESIGN_PIECES.length}];     // 1: pieza de obra (de la obra gris al local vacío); 0: equipamiento
-  uniform float uSketchImg;     // 1: el boceto es la imagen; 0: el filtro sobre el 3D
-  uniform vec2 uRes;      // px del canvas (con el dpr)
+  uniform vec4 uRegions[${DESIGN_PIECES.length}];   // where each piece is (image uv, y up): x0, y0, x1, y1
+  uniform float uDesign[${DESIGN_PIECES.length}];   // how much of each piece is drawn
+  uniform float uObra[${DESIGN_PIECES.length}];     // 1: building-work piece (from the raw shell to the empty shop); 0: furnishings
+  uniform float uSketchImg;     // 1: the sketch is the image; 0: the filter over the 3D
+  uniform vec2 uRes;      // canvas px (with the dpr)
   uniform float uDpr;
-  uniform float uA;       // cuánto se ve el 3D
-  uniform float uSketch;  // cuánto se ve el boceto (va encima del 3D)
-  uniform float uSketchO; // el otro estado: 1 boceto, 0 render
-  uniform float uReveal;  // cuánto del boceto está dibujado
-  uniform vec2 uCenter;   // desde dónde se pinta (0–1)
+  uniform float uA;       // how much of the 3D is seen
+  uniform float uSketch;  // how much of the sketch is seen (it goes on top of the 3D)
+  uniform float uSketchO; // the other state: 1 sketch, 0 render
+  uniform float uReveal;  // how much of the sketch is drawn
+  uniform vec2 uCenter;   // where it is painted from (0–1)
   uniform float uExposure;
-  uniform float uSplit;   // dónde corta el arrastre (0–1 en x); el otro estado va a la izquierda
-  uniform float uSplitOn; // 0 sin arrastre, 1 con
+  uniform float uSplit;   // where the drag cuts (0–1 in x); the other state goes on the left
+  uniform float uSplitOn; // 0 no drag, 1 with it
   varying vec2 vUv;
 
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -329,11 +329,11 @@ const sketchFragment = /* glsl */ `
     return v;
   }
   vec3 toSrgb(vec3 c) { return pow(max(c, 0.0), vec3(1.0 / 2.2)); }
-  // Tone mapping fílmico (ACES, aproximación de Narkowicz): las luces altas no se queman.
+  // Filmic tone mapping (ACES, Narkowicz approximation): the highlights do not burn out.
   vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
   float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
-  // Una familia de rayas en pantalla (px de CSS), con el trazo un poco tembloroso.
+  // A family of stripes on screen (CSS px), with a slightly shaky stroke.
   float hatch(vec2 p, float angle, float spacing, float width) {
     vec2 d = vec2(cos(angle), sin(angle));
     float v = dot(p, vec2(-d.y, d.x)) + (fbm(p * 0.035) - 0.5) * 6.0;
@@ -341,34 +341,34 @@ const sketchFragment = /* glsl */ `
     return 1.0 - smoothstep(width * 0.5, width * 0.5 + 0.9, f);
   }
 
-  // Una capa: el render (con tone mapping) o, según sketch, su boceto a lápiz y carbonilla.
+  // One layer: the render (with tone mapping) or, depending on sketch, its pencil and charcoal sketch.
   vec4 layer(sampler2D col, sampler2D nrm, float sketch, float reveal) {
     vec4 render = texture2D(col, vUv);
     vec3 rgb = toSrgb(aces(render.rgb * uExposure));
-    // Grano de papel sobre el 3D: la maqueta se lee impresa, no renderizada.
+    // Paper grain over the 3D: the model reads as printed, not rendered.
     vec2 gp = vUv * uRes;
     rgb *= 1.0 - (hash(floor(gp)) - 0.5) * 0.09 - (fbm(gp * 0.012) - 0.5) * 0.05;
     vec4 outColor = vec4(rgb * render.a, render.a);
     if (sketch < 0.001) return outColor;
 
     vec2 px = vUv * uRes / uDpr;
-    // El temblor de la mano: el dibujo se lee con un leve corrimiento que cambia a lo largo del trazo.
+    // The hand tremor: the drawing reads with a slight offset that changes along the stroke.
     vec2 wob = (vec2(fbm(px * 0.02), fbm(px * 0.02 + 17.0)) - 0.5) * 2.2 * uDpr / uRes;
     vec2 uv = vUv + wob;
     vec4 c = texture2D(col, uv);
     float l = lum(mix(vec3(1.0), toSrgb(c.rgb), c.a));
 
-    // Contornos: las aristas en tinta del render (lo más oscuro) y los saltos de normal (siluetas).
+    // Outlines: the ink edges of the render (the darkest) and the normal jumps (silhouettes).
     vec2 e = uDpr / uRes;
     float nEdge = length(texture2D(nrm, uv + vec2(e.x, 0.0)) - texture2D(nrm, uv - vec2(e.x, 0.0)))
       + length(texture2D(nrm, uv + vec2(0.0, e.y)) - texture2D(nrm, uv - vec2(0.0, e.y)));
     float silhouette = smoothstep(0.4, 1.0, nEdge);
     float inkLine = smoothstep(0.62, 0.3, l);
-    // El grafito no es parejo: la línea se aclara y se corta a tramos.
+    // The graphite is not even: the line lightens and breaks up in stretches.
     float pressure = mix(0.45, 1.0, smoothstep(0.25, 0.7, noise(px * vec2(0.09, 0.07))));
     float line = clamp(max(inkLine, silhouette * 0.85), 0.0, 1.0) * pressure;
 
-    // Sombreado: cuanto más oscuro, más capas de rayado; en lo más hondo, carbonilla.
+    // Shading: the darker it is, the more hatching layers; in the deepest areas, charcoal.
     float tone = clamp((0.95 - l) / 0.36, 0.0, 1.0) * (1.0 - inkLine);
     float h = hatch(px, 0.785, 6.5, 0.9) * smoothstep(0.08, 0.2, tone);
     h = max(h, hatch(px, -0.785, 6.5, 0.9) * smoothstep(0.38, 0.5, tone));
@@ -376,8 +376,8 @@ const sketchFragment = /* glsl */ `
     float charcoal = smoothstep(0.4, 1.0, tone) * (0.3 + 0.4 * fbm(px * 0.012));
     float shade = clamp(h * (0.28 + 0.42 * tone) + charcoal, 0.0, 1.0);
 
-    // Se pinta desde el centro del cuadro hacia afuera, con un borde irregular de trazo;
-    // las líneas van un poco adelante del sombreado.
+    // It is painted from the centre of the frame outwards, with an irregular stroke edge;
+    // the lines go slightly ahead of the shading.
     float dist = length((vUv - uCenter) * vec2(uRes.x / uRes.y, 1.0));
     float field = dist * 0.85 + (fbm(px * 0.006) - 0.5) * 0.45;
     float lineMask = 1.0 - smoothstep(reveal * 1.12 - 0.1, reveal * 1.12, field);
@@ -388,7 +388,7 @@ const sketchFragment = /* glsl */ `
     return mix(outColor, vec4(graphite * ink, ink), sketch);
   }
 
-  // La foto dentro del cuadro de la cámara, igualada al papel de la página y con los bordes fundidos.
+  // The photo inside the camera frame, matched to the page paper and with faded edges.
   vec4 photoAt(float zoom, float sat) {
     vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
     vec2 puv = (fuv - vec2(0.5, 0.48)) / zoom + vec2(0.5, 0.48);
@@ -397,14 +397,14 @@ const sketchFragment = /* glsl */ `
     float key = smoothstep(0.012, 0.05, distance(ph, vec3(0.937, 0.922, 0.890)));
     ph = mix(vec3(lum(ph)) * vec3(1.0, 0.985, 0.955), ph, sat);
     float edge = smoothstep(0.0, 0.07, fuv.x) * smoothstep(1.0, 0.93, fuv.x) * smoothstep(0.0, 0.08, fuv.y) * smoothstep(1.0, 0.92, fuv.y);
-    // El fondo liso de la foto se recorta (key, medido antes de quitarle el color): queda el local con
-    // su sombra, sobre el papel de la página.
+    // The plain background of the photo is cut out (key, measured before removing its colour): the shop remains with
+    // its shadow, on the page paper.
     float a = inside * edge * key;
     return vec4(ph * a, a);
   }
 
-  // El boceto a lápiz (imagen), como tinta sobre el papel de la página. Se dibuja desde el centro:
-  // primero los trazos fuertes, después los tonos suaves y el sombreado.
+  // The pencil sketch (image), like ink on the page paper. It is drawn from the centre:
+  // first the strong strokes, then the soft tones and the shading.
   vec4 sketchAt(float reveal, float zoom, float designed) {
     vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
     vec2 puv = (fuv - vec2(0.5, 0.48)) / zoom + vec2(0.5, 0.48);
@@ -413,11 +413,11 @@ const sketchFragment = /* glsl */ `
     vec2 cuv = clamp(puv, 0.0, 1.0);
     vec3 c = texture2D(tSketchImg, cuv).rgb;
     vec2 px = vUv * uRes / uDpr;
-    // El diseño, en dos capas: primero la obra (sobre el local en obra gris se dibujan el ventanal,
-    // el nicho y el cielorraso: queda el local vacío) y después el equipamiento (sobre el local vacío,
-    // cada mueble en su rectángulo). En cada pieza, primero los trazos más fuertes y después el resto,
-    // con el borde de cada trazo irregular.
-    // Sin diseñar (el arrastre): el local como se recibió.
+    // The design, in two layers: first the building work (over the shop in raw grey shell the big window,
+    // the niche and the ceiling are drawn: the empty shop remains) and then the furnishings (over the empty shop,
+    // each piece of furniture in its rectangle). In each piece, first the strongest strokes and then the rest,
+    // with an irregular edge on each stroke.
+    // Without design (the drag): the shop as it was received.
     if (uHasEmpty > 0.5 && designed < 0.5) c = uHasRaw > 0.5 ? texture2D(tSketchRaw, cuv).rgb : texture2D(tSketchEmpty, cuv).rgb;
     else if (uHasEmpty > 0.5) {
       vec3 e = texture2D(tSketchEmpty, cuv).rgb;
@@ -438,7 +438,7 @@ const sketchFragment = /* glsl */ `
       if (uHasRaw > 0.5) e = mix(texture2D(tSketchRaw, cuv).rgb, e, dObra);
       c = mix(e, c, d);
     }
-    // Cuánto grafito hay: lo que se aparta del papel del dibujo.
+    // How much graphite there is: what departs from the drawing's paper.
     float ink = clamp((0.93 - lum(c)) / 0.8, 0.0, 1.0);
     ink = smoothstep(0.03, 1.0, ink);
     float dist = length((vUv - uCenter) * vec2(uRes.x / uRes.y, 1.0));
@@ -452,11 +452,11 @@ const sketchFragment = /* glsl */ `
   }
 
   void main() {
-    // El boceto va encima del 3D: mientras el local sube desde el dibujo, el trazo se apaga.
+    // The sketch goes on top of the 3D: while the shop rises from the drawing, the stroke fades out.
     vec4 a = layer(tColor, tNormal, 0.0, 1.0) * uA;
     vec4 sk = (uSketchImg > 0.5 ? sketchAt(uReveal, uPhotoZoom, 1.0) : layer(tColorB, tNormalB, 1.0, uReveal)) * uSketch;
-    // La foto se pinta sobre la maqueta: un trazo ancho que barre de izquierda a derecha, con borde
-    // de pincel (ruido estirado a lo largo, como cerdas). El mismo trazo borra la maqueta.
+    // The photo is painted over the model: a wide stroke that sweeps from left to right, with a
+    // brush edge (noise stretched lengthwise, like bristles). The same stroke erases the model.
     float m = 0.0;
     if (uPhotoReveal > 0.001 && uPhoto > 0.5) {
       vec2 fuv = (vUv - uFrame.xy) / uFrame.zw;
@@ -466,7 +466,7 @@ const sketchFragment = /* glsl */ `
       float r = uPhotoReveal * 1.45 - 0.2;
       m = 1.0 - smoothstep(r - 0.06, r, field);
     }
-    // Debajo, el 3D (si lo hay) y la foto pintándose; encima, los trazos del boceto.
+    // Underneath, the 3D (if any) and the photo being painted; on top, the sketch strokes.
     vec4 base = a * (1.0 - m);
     if (m > 0.0) {
       vec4 ph = photoAt(uPhotoZoom, uPhotoSat);
@@ -479,9 +479,9 @@ const sketchFragment = /* glsl */ `
       if (uSketchO > 0.5 && uSketchImg > 0.5) o = sketchAt(1.0, uPhotoZoom, 0.0);
       float pxX = vUv.x * uRes.x;
       float cut = uSplit * uRes.x;
-      float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 a la izquierda del corte
+      float side = smoothstep(cut + uDpr, cut - uDpr, pxX); // 1 to the left of the cut
       vec4 mixed = mix(base, o, side);
-      // La línea del corte, en el óxido de la marca.
+      // The cut line, in the brand rust.
       float onLine = 1.0 - smoothstep(uDpr * 0.5, uDpr * 1.5, abs(pxX - cut));
       mixed = mix(mixed, vec4(vec3(0.769, 0.267, 0.122), 1.0), onLine);
       base = mix(base, mixed, uSplitOn);
@@ -499,7 +499,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(FOV, FRAME_ASPECT, 0.1, 200)
 
-  // Un material por material y por pieza: cada pieza toma su color a su turno.
+  // One material per material and per piece: each piece takes its colour in its turn.
   const baseMat = (key) =>
     key === 'glass'
       ? new THREE.MeshBasicMaterial({ color: PAPER.clone(), transparent: true, opacity: 0.25, depthWrite: false })
@@ -536,7 +536,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       }
       group.add(mesh)
     }
-    // Los objetos crecen desde su base (el centro de la huella).
+    // The objects grow from their base (the centre of the footprint).
     if (object) {
       const b = new THREE.Box3().setFromObject(group)
       const pivot = new THREE.Vector3((b.min.x + b.max.x) / 2, b.min.y, (b.min.z + b.max.z) / 2)
@@ -550,11 +550,11 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   const byId = Object.fromEntries(pieces.map((p) => [p.id, p]))
   const steps = DECOR_ORDER.map((id) => byId[id]).filter(Boolean)
   const shade = byId.lamps.mats.find((x) => x.key === 'shade').m
-  /** Lo que sube desde el dibujo, en orden: la caja primero, después los muebles. El piso y la base ya están. */
+  /** What rises from the drawing, in order: the box first, then the furniture. The floor and the base are already there. */
   const RISE_ORDER = ['walls', 'window', 'arch', 'console', 'bar', 'shelves', 'stools', 'lamps', 'rug', 'table', 'chairs', 'bench', 'plinths', 'plant']
   const risers = RISE_ORDER.map((id) => byId[id]?.group).filter(Boolean)
 
-  // Luz: cielo parejo de maqueta y un sol de la tarde que entra por la vidriera.
+  // Light: an even model sky and an afternoon sun coming in through the shop window.
   const hemi = new THREE.HemisphereLight('#ffffff', '#ece6d8', 2.1)
   const ambient = new THREE.AmbientLight('#ffffff', 0.4)
   const sun = new THREE.DirectionalLight('#fff4e2', 2.2)
@@ -565,7 +565,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 })
   sun.shadow.bias = -0.0004
   sun.shadow.normalBias = 0.025
-  sun.shadow.radius = 1.5 // sombras con borde, de ilustración
+  sun.shadow.radius = 1.5 // illustration-style soft-edged shadows
   scene.add(hemi, ambient, sun, sun.target)
   const bulbs = [6.45, 7.3, 8.15].map((x) => {
     const l = new THREE.PointLight('#ffb866', 0, 3.2, 1.6)
@@ -579,10 +579,10 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   ground.receiveShadow = true
   scene.add(ground)
 
-  // Los pases: el render (con MSAA), las normales (para las siluetas del boceto) y el filtro final.
+  // The passes: the render (with MSAA), the normals (for the sketch silhouettes) and the final filter.
   const rtColor = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
   const rtNormal = new THREE.WebGLRenderTarget(1, 1)
-  // La fuente del boceto (el local entero en blanco) y el otro estado del arrastre.
+  // The sketch source (the whole shop in white) and the other state of the drag.
   const rtColorB = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
   const rtNormalB = new THREE.WebGLRenderTarget(1, 1)
   const rtColorO = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType })
@@ -628,11 +628,11 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     depthWrite: false,
     blending: THREE.NoBlending,
   })
-  // La foto del arrastre: se carga aparte y, hasta que llega, el arrastre muestra el 3D terminado.
+  // The drag photo: it loads separately and, until it arrives, the drag shows the finished 3D.
   let photoTex = null
   if (photo) {
     new THREE.TextureLoader().load(photo, (tex) => {
-      tex.colorSpace = THREE.NoColorSpace // se muestra tal cual (el filtro escribe sRGB directo)
+      tex.colorSpace = THREE.NoColorSpace // shown as is (the filter writes sRGB directly)
       tex.minFilter = THREE.LinearMipmapLinearFilter
       tex.anisotropy = 4
       photoTex = tex
@@ -640,7 +640,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       dirty = true
     })
   }
-  // El boceto a lápiz como imagen (misma toma que la foto). Hasta que llega, el filtro sobre el 3D.
+  // The pencil sketch as an image (same shot as the photo). Until it arrives, the filter over the 3D.
   let sketchTex = null
   let emptyTex = null
   let rawTex = null
@@ -653,7 +653,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
         resolve(tex)
       }),
     )
-  // Con local vacío, el dibujo no arranca hasta tener las dos imágenes (si no, se vería amueblado).
+  // With an empty shop, the drawing does not start until both images are there (otherwise it would look furnished).
   const emptyReady = sketchEmpty
     ? loadTex(sketchEmpty).then((tex) => {
         emptyTex = tex
@@ -699,7 +699,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   const design = DESIGN_PIECES.map(() => 0)
 
   const applyFrame = () => {
-    // La cámara encuadra el rectángulo del cuadro; el resto del canvas es lo que queda alrededor.
+    // The camera frames the frame rectangle; the rest of the canvas is what is left around it.
     camera.aspect = frame.w / frame.h
     camera.setViewOffset(frame.w, frame.h, -frame.x, -frame.y, canvasW, canvasH)
     camera.updateProjectionMatrix()
@@ -720,7 +720,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
   }
 
   const update = (view = state) => {
-    // Subir: cada pieza crece desde el piso, en orden (primero los muros, después los muebles).
+    // Rise: each piece grows from the floor, in order (first the walls, then the furniture).
     const r = risers.length
     risers.forEach((g, i) => {
       const k = clamp01((view.rise * (r + 2.5) - i) / 3.5)
@@ -728,7 +728,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       g.visible = k > 0.002
       g.scale.y = Math.max(0.0001, e)
     })
-    // Decorar: cada paso tiene su tramo; una pieza toma su color, un objeto entra creciendo.
+    // Dress: each step has its stretch; a piece takes its colour, an object comes in growing.
     const n = steps.length
     let lit = 0
     steps.forEach((p, i) => {
@@ -751,8 +751,8 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     sun.intensity = THREE.MathUtils.lerp(2.2, 2.9, warm)
     sun.color.set('#fff4e2').lerp(new THREE.Color('#ffe6c2'), warm)
 
-    // La cámara: con `lift` se eleva (mira más arriba); con `camera`, se acerca. El hero las deja en
-    // 0, así la maqueta y la foto calzan con el boceto. El boceto usa la misma cámara: siempre coincide.
+    // The camera: with `lift` it rises (it looks higher); with `camera`, it moves in. The hero leaves them at
+    // 0, so the model and the photo line up with the sketch. The sketch uses the same camera: it always matches.
     const lift = smooth(0, 1, state.lift)
     const c = smooth(0, 1, state.camera)
     const polar = START.polar + lift * 0.14 + c * 0.04
@@ -768,13 +768,13 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     camera.lookAt(target)
   }
 
-  // Una pasada de la escena a su par de targets: el color y, si hay boceto, las normales.
+  // One pass of the scene to its pair of targets: the colour and, if there is a sketch, the normals.
   const pass = (colorTarget, normalTarget, withNormals) => {
     renderer.setRenderTarget(colorTarget)
     renderer.clear()
     renderer.render(scene, camera)
     if (!withNormals) return
-    // Normales: sin aristas, sin vidrio y sin el piso de sombras.
+    // Normals: without edges, without glass and without the shadow floor.
     const hidden = [ground, ...edgeLines]
     scene.traverse((o) => o.userData.glass && hidden.push(o))
     const was = hidden.map((o) => o.visible)
@@ -787,7 +787,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     hidden.forEach((o, i) => (o.visible = was[i]))
   }
 
-  /** El estado que muestra el arrastre: el local terminado mientras se ve el boceto, y al revés. */
+  /** The state the drag shows: the finished shop while the sketch is seen, and vice versa. */
   const otherView = () =>
     state.sat < 0.5 && state.decor < 0.5 ? { rise: 1, decor: 1, sketch: 0, photo: !!photoTex } : { rise: 1, decor: 0, sketch: 1, photo: false }
 
@@ -795,7 +795,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     const u = post.uniforms
     u.uSplit.value = state.split
     u.uSplitOn.value = state.splitOn
-    // El otro estado (solo mientras se arrastra).
+    // The other state (only while dragging).
     const other = otherView()
     u.uPhoto.value = photoTex ? 1 : 0
     u.uPhotoReveal.value = state.photo
@@ -806,19 +806,19 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       update({ ...state, ...other })
       pass(rtColorO, rtNormalO, other.sketch > 0.001)
     }
-    // La fuente del boceto: el local entero, sin decorar.
+    // The sketch source: the whole shop, undressed.
     if (state.sketch > 0.001 && !sketch) {
       update({ ...state, rise: 1, decor: 0 })
       pass(rtColorB, rtNormalB, true)
     }
-    // El 3D tal como está.
+    // The 3D as it is.
     const a3d = smooth(0, 0.08, state.rise)
     if (a3d > 0.001) {
       update()
       pass(rtColor, rtNormal, false)
     }
     u.uA.value = a3d
-    // Con boceto en imagen, no se muestra el filtro sobre el 3D mientras carga (no calzaría).
+    // With an image sketch, the filter over the 3D is not shown while it loads (it would not line up).
     u.uSketch.value = sketch && (!sketchTex || (sketchEmpty && !emptyTex) || (sketchRaw && !rawTex)) ? 0 : state.sketch
     for (let i = 0; i < design.length; i += 1) u.uDesign.value[i] = design[i]
     u.uReveal.value = state.reveal
@@ -838,10 +838,10 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
     setSketch: set('sketch'),
     setRise: set('rise'),
     setLift: set('lift'),
-    /** Cuánto de la foto está pintado sobre la maqueta (0–1) y el acercamiento final sobre ella (0–1). */
+    /** How much of the photo is painted over the model (0–1) and the final zoom on it (0–1). */
     setPhoto: set('photo'),
     setSat: set('sat'),
-    /** Cuánto de cada mueble está dibujado (en el orden de DESIGN_PIECES). */
+    /** How much of each piece of furniture is drawn (in the order of DESIGN_PIECES). */
     setDesign(values) {
       values.forEach((v, i) => {
         if (Math.abs(v - design[i]) > 1e-4) {
@@ -850,14 +850,14 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
         }
       })
     },
-    /** Se resuelve cuando el boceto en imagen está listo para pintarse. */
+    /** Resolves when the image sketch is ready to be painted. */
     sketchReady,
     setZoom: set('zoom'),
     setDecor: set('decor'),
     setCamera: set('camera'),
     setSplit: set('split'),
     setSplitOn: set('splitOn'),
-    /** Qué muestra el arrastre ahora: 'final' (el local terminado) o 'sketch' (el boceto). */
+    /** What the drag shows now: 'final' (the finished shop) or 'sketch' (the sketch). */
     splitShows: () => (otherView().sketch ? 'sketch' : otherView().photo ? 'photo' : 'final'),
     setPixelRatio(v) {
       dpr = v
@@ -878,7 +878,7 @@ export function createLocalScene({ canvas, phone = false, photo = null, sketch =
       applyFrame()
       dirty = true
     },
-    /** El punto del piso bajo el puntero (px del canvas), en metros del local; null si cae afuera. */
+    /** The floor point under the pointer (px of the canvas), in metres of the shop; null if it falls outside. */
     probe(x, y) {
       const ndc = new THREE.Vector2((x / canvasW) * 2 - 1, -(y / canvasH) * 2 + 1)
       const ray = new THREE.Raycaster()

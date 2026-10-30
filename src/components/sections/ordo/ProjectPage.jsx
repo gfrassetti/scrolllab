@@ -6,24 +6,24 @@ import { PROJECTS, projectBySlug } from './projects'
 import { hrefOf, navigate } from './router'
 
 /**
- * La página de un proyecto (`/proyectos/<slug>`): una tira horizontal. Al empezar, mitad y mitad: a la izquierda
- * el panel de color con el título y, a la derecha, la primera foto; el scroll vertical corre la tira hacia la
- * izquierda y van entrando los demás paneles (la descripción, las fotos con su texto, el cierre).
+ * A project page (`/projects/<slug>`): a horizontal strip. At the start, half and half: on the left
+ * the colour panel with the title and, on the right, the first photo; the vertical scroll moves the strip to the
+ * left and the other panels come in (the description, the photos with their text, the closing).
  *
- *   0 portada      el panel de color (la mitad izquierda)           1 foto       la primera foto (la mitad derecha)
- *   2 descripción  la frase, los servicios y la superficie          3 – 6 fotos  el ventanal, el nicho, el oficio…
- *   cierre         la frase del estudio y el paso al siguiente: va DEBAJO de la tira, la página sigue hacia abajo
+ *   0 cover        the colour panel (the left half)               1 photo    the first photo (the right half)
+ *   2 description  the sentence, the services and the area       3 – 6 photos  the big window, the niche, the craft…
+ *   closing        the studio's sentence and the step to the next one: it goes BELOW the strip, the page continues downwards
  *
- * Movimiento (todo atado al scroll de la tira, con `containerAnimation`):
- *   - parallax: cada foto se mueve dentro de su marco más lenta que la tira (`data-px`) y su texto va a otra
- *     velocidad (`data-pt`): se desfasan al pasar;
- *   - las fotos emergen desde abajo al entrar (el marco se abre de abajo hacia arriba);
- *   - la superficie sube desde abajo y el resto del texto se despliega de izquierda a derecha (el pincel de paint.js).
+ * Motion (all tied to the strip's scroll, with `containerAnimation`):
+ *   - parallax: each photo moves inside its frame slower than the strip (`data-px`) and its text goes at another
+ *     speed (`data-pt`): they drift out of phase as they pass;
+ *   - the photos emerge from below on entering (the frame opens from the bottom upwards);
+ *   - the area rises from below and the rest of the text unfolds from left to right (the paint.js brush).
  *
- * En el teléfono (< 768 px) y con «reducir movimiento» no hay tira: los paneles van uno debajo del otro, con los
- * mismos fundidos al llegar (y quietos con «reducir movimiento»).
+ * On the phone (< 768 px) and with "reduce motion" there is no strip: the panels go one below the other, with the
+ * same fades on arrival (and still with "reduce motion").
  *
- * El grano de película cubre toda la vista (`.od-pd-grain`).
+ * The film grain covers the whole view (`.od-pd-grain`).
  */
 
 const TO_HOME = { name: 'home' }
@@ -46,7 +46,7 @@ function Photo({ photo, px = 1, sizes = '100vw', className = '' }) {
   )
 }
 
-/** Una nota: la tarjeta de papel que acompaña a la foto. La de afuera se mueve con el scroll y la de adentro se despliega. */
+/** A note: the paper card that goes with the photo. The outer one moves with the scroll and the inner one unfolds. */
 function Note({ label, text, speed, className = '' }) {
   return (
     <div data-pt={speed} className={`od-pd-note ${className}`}>
@@ -67,7 +67,7 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
   const introRef = useRef(null)
   const project = projectBySlug(slug)
 
-  // El título de la pestaña.
+  // The tab title.
   useEffect(() => {
     if (!project) return undefined
     const prev = document.title
@@ -77,14 +77,14 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
     }
   }, [project])
 
-  // Escape vuelve a los proyectos.
+  // Escape goes back to the projects.
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && navigate(TO_HOME, { section: 'projects' })
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // El movimiento: la tira horizontal (≥ 768 px), el parallax y las entradas.
+  // The motion: the horizontal strip (≥ 768 px), the parallax and the entrances.
   useLayoutEffect(() => {
     if (calm || !project) return undefined
     const root = rootRef.current
@@ -96,12 +96,12 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
       const { wide } = ctx.conditions
       const q = (sel) => gsap.utils.toArray(sel, root)
 
-      // Lo que todavía no llegó está escondido (antes de pintar).
+      // What has not arrived yet is hidden (before painting).
       gsap.set(q('[data-reveal]'), { clipPath: 'inset(100% 0% 0% 0%)' })
       gsap.set(q('[data-rise]'), { yPercent: 112 })
       hidePaint(q('[data-sweep]'))
 
-      // La tira: el scroll vertical la corre hacia la izquierda mientras la sección queda fija.
+      // The strip: the vertical scroll moves it to the left while the section stays fixed.
       let move = null
       if (wide) {
         const dist = () => Math.max(0, track.scrollWidth - window.innerWidth)
@@ -120,12 +120,12 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
         })
       }
 
-      // Las posiciones de un disparador: en la tira, el borde izquierdo del panel; en vertical, su borde de arriba.
+      // The positions of a trigger: in the strip, the left edge of the panel; in vertical, its top edge.
       const at = wide ? { start: 'left 90%', end: 'right left' } : { start: 'top 88%', end: 'bottom top' }
       const trig = (el, extra) => ({ trigger: el, ...(move ? { containerAnimation: move } : {}), ...extra })
       const panelOf = (el) => el.closest('[data-panel]') || el
 
-      // El parallax de las fotos: se mueven dentro de su marco, más lentas que la tira.
+      // The parallax of the photos: they move inside their frame, slower than the strip.
       q('[data-px]').forEach((img) => {
         const k = Number(img.dataset.px) || 1
         const frame = panelOf(img)
@@ -139,7 +139,7 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
           },
         )
       })
-      // El parallax de los textos: van a otra velocidad (el signo decide si se adelantan o se atrasan).
+      // The parallax of the texts: they go at another speed (the sign decides whether they get ahead or lag behind).
       q('[data-pt]').forEach((el) => {
         const k = Number(el.dataset.pt) || 1
         gsap.fromTo(
@@ -153,22 +153,22 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
         )
       })
 
-      // Las entradas (la primera pantalla entra con la apertura, abajo): cada panel al llegar.
+      // The entrances (the first screen comes in with the opening, below): each panel on arrival.
       const entering = (el) => !(wide && el.closest('[data-first]'))
       const onceAt = (el, fn) => ScrollTrigger.create(trig(el, { start: at.start, once: true, onEnter: fn }))
       q('[data-panel]').forEach((panel) => {
         if (!entering(panel)) return
         onceAt(panel, () => {
-          // Las fotos emergen desde abajo.
+          // The photos emerge from below.
           gsap.to(panel.querySelectorAll('[data-reveal]'), { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power3.inOut', stagger: 0.12 })
-          // La superficie sube desde abajo.
+          // The area rises from below.
           gsap.to(panel.querySelectorAll('[data-rise]'), { yPercent: 0, duration: 1.4, ease: 'power3.out', delay: 0.15 })
-          // El resto del texto se despliega de izquierda a derecha.
+          // The rest of the text unfolds from left to right.
           paint(panel.querySelectorAll('[data-sweep]'), { duration: 1.3, stagger: 0.14, delay: 0.25 })
         })
       })
 
-      // El cierre está debajo de la tira: entra con el scroll vertical normal.
+      // The closing is below the strip: it comes in with the normal vertical scroll.
       q('[data-vpanel]').forEach((el) => {
         ScrollTrigger.create({
           trigger: el,
@@ -178,7 +178,7 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
         })
       })
 
-      // La apertura (portada y primera foto): arranca cuando la cortina se va; ver el efecto de `boarded`.
+      // The opening (cover and first photo): it starts when the curtain leaves; see the `boarded` effect.
       const first = q('[data-first]')
       const intro = gsap.timeline({ paused: true })
       first.forEach((p) => {
@@ -186,7 +186,7 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
         intro.add(() => paint(p.querySelectorAll('[data-sweep]'), { duration: 1.3, stagger: 0.12 }), 0.45)
       })
       if (!wide) {
-        // En vertical la apertura es lo primero de la página; el resto entra al scrollear (arriba, [data-panel]).
+        // In vertical the opening is the first thing on the page; the rest comes in on scrolling (above, [data-panel]).
       }
       introRef.current = intro
 
@@ -198,7 +198,7 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
     return () => mm.revert()
   }, [calm, project])
 
-  // La apertura corre al terminar el loader o la cortina.
+  // The opening runs when the loader or the curtain ends.
   useEffect(() => {
     if (calm || !boarded) return undefined
     const t = setTimeout(() => introRef.current?.play(), 450)
@@ -232,12 +232,12 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
 
   return (
     <div ref={rootRef} className={`od-pd${calm ? ' od-pd--v' : ''}`} style={{ '--clear': NAV_CLEAR }}>
-      {/* El grano de película, sobre toda la vista. */}
+      {/* The film grain, over the whole view. */}
       <div className="od-pd-grain" aria-hidden="true" />
 
       <section ref={wrapRef} className="od-pd-h" aria-labelledby="pd-title">
         <div ref={trackRef} className="od-pd-track" data-pd-track>
-          {/* 0. La portada: la mitad izquierda, el panel de color. */}
+          {/* 0. The cover: the left half, the colour panel. */}
           <div className="od-pd-p od-pd-p--cover" data-panel data-first data-spot>
             <div className="od-pd-hero__top" style={LABEL}>
               <a href={hrefOf(TO_HOME)} onClick={goBack} className="od-pd-hero__back" data-cursor="Back">
@@ -267,12 +267,12 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
             </div>
           </div>
 
-          {/* 1. La primera foto: la mitad derecha. */}
+          {/* 1. The first photo: the right half. */}
           <div className="od-pd-p od-pd-p--hero" data-panel data-first>
             <Photo photo={ph.hero} px={1} sizes="50vw" className="od-px--fill" />
           </div>
 
-          {/* 2. La descripción: la frase, los servicios y la superficie. */}
+          {/* 2. The description: the sentence, the services and the area. */}
           <div className="od-pd-p od-pd-p--intro" data-panel data-spot>
             <p data-sweep className="od-paint od-pd-intro__lede">
               {project.lede}
@@ -295,25 +295,25 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
             </p>
           </div>
 
-          {/* 3. El ventanal. */}
+          {/* 3. The big window. */}
           <figure className="od-pd-p od-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.light) }}>
             <Photo photo={ph.light} px={1} sizes="100vw" />
             <Note label={notes.light[0]} text={notes.light[1]} speed={-1.5} className="od-pd-note--bl" />
           </figure>
 
-          {/* 4. El nicho. */}
+          {/* 4. The niche. */}
           <figure className="od-pd-p od-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.colour) }}>
             <Photo photo={ph.colour} px={1.1} sizes="(min-width: 768px) 40vh, 100vw" />
             <Note label={notes.colour[0]} text={notes.colour[1]} speed={-1.3} className="od-pd-note--br" />
           </figure>
 
-          {/* 5. El oficio. */}
+          {/* 5. The craft. */}
           <figure className="od-pd-p od-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.craft) }}>
             <Photo photo={ph.craft} px={0.9} sizes="100vw" />
             <Note label={notes.craft[0]} text={notes.craft[1]} speed={-1.2} className="od-pd-note--bl" />
           </figure>
 
-          {/* 6. La foto del local entero, chica, sobre papel. */}
+          {/* 6. The photo of the whole shop, small, on paper. */}
           <div className="od-pd-p od-pd-p--small" data-panel>
             <Photo photo={ph.cover} px={1.2} sizes="(min-width: 768px) 38vw, 100vw" />
           </div>
@@ -321,7 +321,7 @@ export default function ProjectPage({ slug, calm, boarded = true }) {
         </div>
       </section>
 
-      {/* 7. El cierre: desde acá la página sigue hacia abajo (la tira horizontal terminó en la foto anterior). */}
+      {/* 7. The closing: from here the page continues downwards (the horizontal strip ended at the previous photo). */}
       <section className="od-pd-end" data-vpanel data-spot aria-label="Next">
         <p data-sweep className="od-paint od-pd-end__quote">
           {project.quote}

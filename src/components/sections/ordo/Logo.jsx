@@ -3,18 +3,18 @@ import { LOGO_FONT, C, SITE } from './brand'
 import { LOGO_PARTS, LOGO_VIEWBOX as VB, LOGO_WORD_X } from './logoPaths'
 
 /**
- * El logo de ORDO en vector: la palabra en geométrica y una tapa óxido apoyada sobre la R y la D,
- * como un dintel sobre dos columnas, visto en perspectiva. Cada pieza es un grupo con
- * `data-part="<id>"` con dos capas: el relleno y el contorno (que por defecto queda sin dibujar),
- * para que el loader trace el contorno y recién después rellene. En el encabezado se ve solo el
- * relleno. El tamaño lo manda el `font-size` del padre (1000 unidades = 1 em), así el logo del
- * loader y el del encabezado son el mismo dibujo a otra escala.
+ * The ORDO logo as a vector: the wordmark in a geometric face and a rust slab resting on the R and the D,
+ * like a lintel on two columns, seen in perspective. Each piece is a group with
+ * `data-part="<id>"` with two layers: the fill and the outline (which by default is left undrawn),
+ * so the loader traces the outline and only then fills. In the header only the
+ * fill is seen. The size is set by the parent's `font-size` (1000 units = 1 em), so the loader logo
+ * and the header logo are the same drawing at a different scale.
  */
-// El subtítulo es más chico que el logo (0.115 em): sus márgenes se miden en su propio em.
+// The subtitle is smaller than the logo (0.115 em): its margins are measured in its own em.
 const SUB = 0.115
 
-// Las letras que suben desde una línea (el loader las anima): van dentro de un recorte que las oculta
-// debajo de la línea de base.
+// The letters that rise from a line (the loader animates them): they sit inside a clip that hides them
+// below the baseline.
 const RISERS = new Set(['R', 'D', 'O2'])
 
 export default function Logo({ compact = false, hairline = false, className = '', style, ...rest }) {
@@ -40,7 +40,7 @@ export default function Logo({ compact = false, hairline = false, className = ''
         </defs>
         {LOGO_PARTS.map((part) => {
           const color = part.id === 'slab' ? C.rust : C.ink
-          // El trazo que dibuja la mira va en óxido (el color de la tapa); el relleno, en tinta.
+          // The tracing stroke is rust (the slab's colour); the fill, ink.
           const body = (
             <g data-part={part.id}>
               <path data-fill d={part.fill} fill={color} />
@@ -52,11 +52,11 @@ export default function Logo({ compact = false, hairline = false, className = ''
                   pathLength="1"
                   fill="none"
                   stroke={C.rust}
-                  // En chico (el nav) el trazo es de un px de pantalla, a cualquier tamaño.
+                  // When small (the nav) the stroke is one screen px, at any scale.
                   strokeWidth={hairline ? 1.1 : 11}
                   vectorEffect={hairline ? 'non-scaling-stroke' : undefined}
                   strokeLinejoin="round"
-                  // Sin dibujar: la raya vale 1 (el largo normalizado) y arranca desplazada un largo entero.
+                  // Undrawn: the dash is 1 (the normalised length) and starts offset by one full length.
                   strokeDasharray="1"
                   strokeDashoffset="1"
                 />

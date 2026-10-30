@@ -3,17 +3,17 @@ import { gsap } from '../../../lib/gsap'
 import { readPlanProbe } from './planProbe'
 
 /**
- * El cursor de elStudio. Solo con mouse (hover + puntero fino): en el teléfono no se monta nada.
+ * The site cursor. Mouse only (hover + fine pointer): nothing is mounted on the phone.
  *
- * En el hero es una mira de plano: una cruz roja en el puntero, dos ejes finos que cruzan toda la
- * pantalla y, al costado, las coordenadas: sobre el plano, en metros (`X:4.20M / Y:2.85M`); fuera de
- * él, en px contados desde la esquina del hero (cambian también cuando la página se mueve). Sobre un link la cruz se
- * gira a 45° (una ×). Fuera del hero es un punto de tinta con inercia, que sobre algo con
- * `data-cursor="Ver"` se vuelve un disco con esa palabra.
+ * In the hero it is a plan crosshair: a red cross at the pointer, two thin axes that run across the whole
+ * screen and, to the side, the coordinates: over the plan, in metres (`X:4.20M / Y:2.85M`); outside
+ * it, in px counted from the corner of the hero (they also change when the page moves). Over a link the cross
+ * turns 45° (an ×). Outside the hero it is an inertial dot of ink, which over something with
+ * `data-cursor="Write to us"` becomes a disc with that word.
  *
- * El cursor nativo se oculta recién con el primer movimiento, así que sin JS no se pierde el puntero.
+ * The native cursor is only hidden on the first movement, so without JS the pointer is not lost.
  */
-// Dónde se vuelve mira: solo sobre el cuadrante del dibujo (el elemento con data-cursor-zone).
+// Where it becomes a crosshair: only over the drawing quadrant (the element with data-cursor-zone).
 const ZONE = '[data-cursor-zone]'
 const DOT_STATES = {
   dot: { width: 14, height: 14, backgroundColor: '#161513', boxShadow: 'inset 0 0 0 0px #161513' },
@@ -45,7 +45,7 @@ export default function Cursor() {
     const tip = tipRef.current
 
     gsap.set([cross, root], { autoAlpha: 0 })
-    gsap.set(body, { xPercent: -50, yPercent: -50 }) // centrado sobre el puntero aunque cambie de tamaño
+    gsap.set(body, { xPercent: -50, yPercent: -50 }) // centred on the pointer even if its size changes
     gsap.set(plusEl, { xPercent: -50, yPercent: -50 })
     gsap.set(tip, { autoAlpha: 0 })
     const dotX = gsap.quickTo(root, 'x', { duration: 0.35, ease: 'power3' })
@@ -56,7 +56,7 @@ export default function Cursor() {
     let dotState = 'dot'
     let last = { x: 0, y: 0 }
     let overLink = false
-    let tipEl = null // lo que está bajo el puntero y pide un cartel (data-cursor-tip)
+    let tipEl = null // what is under the pointer and asks for a label (data-cursor-tip)
     let tipShown = ''
 
     const setMode = (next) => {
@@ -73,8 +73,8 @@ export default function Cursor() {
       gsap.to(label, { autoAlpha: next === 'label' ? 1 : 0, duration: next === 'label' ? 0.3 : 0.15, delay: next === 'label' ? 0.08 : 0 })
     }
 
-    // Pinta la mira (o el punto) en la posición del puntero. La mira vive solo dentro del cuadrante del
-    // dibujo: sus ejes llegan hasta los bordes del cuadrante y no cruzan el texto de al lado.
+    // Paints the crosshair (or the dot) at the pointer position. The crosshair lives only inside the
+    // drawing quadrant: its axes reach the edges of the quadrant and do not cross the text next to it.
     const render = () => {
       const { x, y } = last
       const rect = document.querySelector(ZONE)?.getBoundingClientRect()
@@ -84,16 +84,16 @@ export default function Cursor() {
         Object.assign(lineH.current.style, { left: `${rect.left}px`, width: `${rect.width}px`, transform: `translate3d(0, ${Math.round(y)}px, 0)` })
         Object.assign(lineV.current.style, { top: `${rect.top}px`, height: `${rect.height}px`, transform: `translate3d(${Math.round(x)}px, 0, 0)` })
         point.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
-        // Sobre el piso del local, metros reales; en el resto del cuadrante, píxeles del cuadrante.
+        // Over the shop floor, real metres; in the rest of the quadrant, quadrant pixels.
         const m = readPlanProbe(x, y)
         coords.current.textContent = m
           ? `X:${m.x.toFixed(2)}M\nY:${m.y.toFixed(2)}M`
           : `X:${Math.round(x - rect.left)}PX\nY:${Math.round(y - rect.top)}PX`
-        // Cerca de un borde del visor las coordenadas pasan al otro lado de la cruz, para no cortarse.
+        // Near an edge of the viewer the coordinates move to the other side of the cross, so they are not cut off.
         coords.current.dataset.flipX = x < rect.left + 110 ? '1' : '0'
         coords.current.dataset.flipY = y > rect.bottom - 50 ? '1' : '0'
-        // El cartel junto a la mira (al estilo de un plano anotado), si lo que está debajo lo pide.
-        // Se lee en cada cuadro: el cartel puede aparecer o irse sin que el mouse cambie de elemento.
+        // The label next to the crosshair (in the style of an annotated plan), if what is underneath asks for it.
+        // It is read on every frame: the label can appear or go away without the mouse changing element.
         const text = tipEl?.closest('[data-cursor-tip]')?.getAttribute('data-cursor-tip') || ''
         if (text !== tipShown) {
           tipShown = text
@@ -117,7 +117,7 @@ export default function Cursor() {
       }
       render()
     }
-    // Con la página moviéndose bajo el mouse (scroll) las coordenadas siguen contando.
+    // With the page moving under the mouse (scroll) the coordinates keep counting.
     const onScroll = () => shown && render()
     const onOver = (e) => {
       const target = e.target instanceof Element ? e.target : null

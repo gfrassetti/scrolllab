@@ -21,51 +21,51 @@ import { FONTS_HREF, SITE } from './brand'
 const FONT_WAIT_MS = 4000
 
 /**
- * Cómo se sale del hero (pruebas):
- *   'boceto'    al terminar, todo el hero (menos el nav) vuelve a boceto en su hoja y después sigue el
- *               scroll hacia Projects (Boceto.jsx).
- *   'proyecto'  la foto del local se despega de la lámina y aterriza en la tarjeta 01 de Proyectos.
- *   'lamina'    cambio de lámina: la hoja del hero se levanta y debajo está la de Estudio.
+ * How the hero is exited (tests):
+ *   'boceto'    when it ends, the whole hero (except the nav) goes back to a sketch on its sheet and then the
+ *               scroll continues towards Projects (Sketch.jsx).
+ *   'proyecto'  the photo of the shop peels off the sheet and lands on card 01 of Projects.
+ *   'lamina'    sheet change: the hero's sheet lifts and the Studio one is underneath.
  */
 const SALIDA = 'boceto'
 
-// Siempre se arranca arriba, en la etapa 01 del hero: al recargar, el navegador devolvía la página a
-// donde estaba (o a la sección de la dirección, #proyectos) y el hero aparecía en su última etapa.
+// It always starts at the top, in stage 01 of the hero: on reload the browser used to return the page to
+// where it was (or to the section in the address, #projects) and the hero showed up in its last stage.
 function startAtTop() {
   if (typeof window === 'undefined') return
   try {
     if ('scrollRestoration' in window.history) ScrollTrigger.clearScrollMemory('manual')
-    // Sin la sección en la dirección: si no, el navegador salta ahí al cargar.
+    // Without the section in the address: otherwise the browser jumps there on load.
     if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search)
   } catch {
-    // En un iframe con sandbox, history puede no estar disponible: alcanza con subir.
+    // In a sandboxed iframe history may not be available: scrolling up is enough.
   }
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 }
 startAtTop()
 
-/** Arriba de todo, también para Lenis (que lleva su propia posición) y para los ScrollTrigger. */
+/** To the very top, also for Lenis (which keeps its own position) and for the ScrollTriggers. */
 function toTop() {
-  // «instant»: con scroll-behavior suave (ordo.css) un scrollTo común subiría animado.
+  // "instant": with smooth scroll-behavior (ordo.css) a plain scrollTo would scroll up animated.
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   getLenis()?.scrollTo(0, { immediate: true, force: true })
   ScrollTrigger.update()
 }
 
 /*
-THESIS: una hoja de papel de dibujante. El estudio hace diseño e interiorismo: la página es el
-  plano sobre la mesa — papel con grano, tinta negra, y una sola marca de color, el óxido de la
-  tapa de mesa de su logo.
-OWN-WORLD: la tapa de mesa en perspectiva del logo (óxido), Jost para el logo y una grotesca liviana
-  de estudio de arquitectura para el resto; el cursor es un punto de tinta.
-STORY: el logo se arma pieza por pieza → la hoja sube → el logo aterriza en el encabezado → el
-  titular sale de una línea.
-FIRST VIEWPORT: el encabezado, un titular enorme en peso liviano y una sola línea de bajada.
+THESIS: a drafter's sheet of paper. The studio does design and interiors: the page is the
+  plan on the table: paper with grain, black ink and a single colour mark, the rust of the
+  table slab on its logo.
+OWN-WORLD: the logo's table slab in perspective (rust), Jost for the logo and a light grotesque
+  of an architecture studio for the rest; the cursor is a dot of ink.
+STORY: the logo is assembled piece by piece → the sheet rises → the logo lands in the header → the
+  headline comes out of a line.
+FIRST VIEWPORT: the header, a huge headline in a light weight and a single line of subtitle.
 */
 
 /**
- * elStudio — demo del Estudio para un cliente (diseño industrial e interiorismo).
- * Base: loader, cursor, papel y tipografía. En local: /estudio/elstudio.
+ * ORDO — template for an architecture and interiors studio.
+ * Base: loader, cursor, paper and typography. Locally: /templates/ordo.
  */
 export default function Site() {
   const [calm] = useState(() => prefersReducedMotion())
@@ -78,7 +78,7 @@ export default function Site() {
   const [fontsReady, setFontsReady] = useState(false)
   const [boarded, setBoarded] = useState(false)
 
-  // Las fuentes, una sola vez (el sitio publicado ya las trae en el HTML).
+  // The fonts, only once (the published site already brings them in the HTML).
   useEffect(() => {
     if ([...document.querySelectorAll('link[rel="stylesheet"]')].some((l) => l.href === FONTS_HREF)) return undefined
     const link = document.createElement('link')
@@ -88,7 +88,7 @@ export default function Site() {
     return () => link.remove()
   }, [])
 
-  // El loader espera las fuentes de verdad (el logo y el titular se miden con ellas), pero no más de unos segundos.
+  // The loader really waits for the fonts (the logo and headline are measured with them), but only a few seconds.
   useEffect(() => {
     let alive = true
     const load = Promise.allSettled([
@@ -103,8 +103,8 @@ export default function Site() {
 
   const ready = fontsReady
 
-  // Arriba también si el navegador restaura la posición tarde: al terminar de cargar, al volver con
-  // «atrás» (la página sale de la caché) y, antes de irse, se sube para que no guarde otra posición.
+  // Also to the top if the browser restores the position late: when loading finishes, on coming back with
+  // "back" (the page comes out of the cache) and, before leaving, it scrolls up so that no other position is saved.
   useEffect(() => {
     const onLoad = () => toTop()
     const onShow = (e) => e.persisted && toTop()
@@ -120,7 +120,7 @@ export default function Site() {
     }
   }, [])
 
-  // Hasta que termina el loader, la página no se mueve (y arranca arriba, en la etapa 01).
+  // Until the loader finishes, the page does not move (and starts at the top, in stage 01).
   useEffect(() => {
     const lenis = getLenis()
     if (boarded) {
@@ -130,7 +130,7 @@ export default function Site() {
   }, [boarded])
   const onDone = useCallback(() => setBoarded(true), [])
 
-  // El título de la pestaña (la página de un proyecto pone el suyo).
+  // The tab title (a project page sets its own).
   useEffect(() => {
     if (route.name !== 'home') return undefined
     const prev = document.title
@@ -140,7 +140,7 @@ export default function Site() {
     }
   }, [route.name])
 
-  // Al entrar directo a la página de un proyecto no hay hero: el logo del nav lo enciende el loader igual.
+  // On entering a project page directly there is no hero: the loader still lights up the nav logo.
   useEffect(() => {
     if (route.name !== 'project') return undefined
     bridge.current = {
@@ -154,7 +154,7 @@ export default function Site() {
     }
   }, [route.name])
 
-  // El cambio de página: una cortina de óxido sube, se cambia la ruta debajo y la cortina se va por arriba.
+  // The page change: a rust curtain rises, the route changes underneath and the curtain leaves through the top.
   useEffect(() => {
     setTransitionHandler((apply) => {
       const c = curtainRef.current
@@ -173,7 +173,7 @@ export default function Site() {
     return () => setTransitionHandler(null)
   }, [calm, boarded])
 
-  // Al cambiar de ruta: la página de un proyecto arranca arriba; la portada, en la sección a la que se pidió volver.
+  // On a route change: a project page starts at the top; the home page, at the section it was asked to return to.
   const routeKey = `${route.name}:${route.slug ?? ''}`
   const firstRoute = useRef(true)
   useLayoutEffect(() => {
@@ -187,7 +187,7 @@ export default function Site() {
     const jump = () => {
       const target = el ? document.getElementById(section).offsetTop : y
       window.scrollTo({ top: target, left: 0, behavior: 'instant' })
-      // Lenis lleva su propio límite (el de la página anterior): se le avisa que la página cambió de alto.
+      // Lenis keeps its own limit (that of the previous page): it is told that the page height changed.
       getLenis()?.resize()
       getLenis()?.scrollTo(target, { immediate: true, force: true })
     }
@@ -217,12 +217,12 @@ export default function Site() {
             </>
           )}
         </main>
-        {/* La cortina del cambio de página. */}
+        {/* The page-change curtain. */}
         <div ref={curtainRef} className="od-curtain" aria-hidden="true" />
-        {/* La barra de scroll propia: una regla vertical (reemplaza a la nativa desde que se monta). Entra con el
-            sitio, al terminar el loader. */}
+        {/* The site's own scroll bar: a vertical ruler (it replaces the native one once mounted). It comes in with the
+            site, when the loader ends. */}
         <ScrollRuler on={boarded} />
-        {/* El cursor del sitio entra recién cuando termina el loader (antes dibuja la mira del loader). */}
+        {/* The site cursor only comes in once the loader finishes (before that the loader draws its own crosshair). */}
         {boarded && <Cursor />}
       </div>
     </SmoothScrollProvider>

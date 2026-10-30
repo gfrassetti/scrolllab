@@ -1,14 +1,14 @@
 import { gsap } from '../../../lib/gsap'
 
 /**
- * «Se pinta»: un elemento aparece barrido de izquierda a derecha por un trazo de borde irregular,
- * como una pasada de lápiz o pincel (en vez de un fundido). Es una máscara CSS (`.od-paint` en
- * ordo.css) que se corre con la variable `--paint` (100 escondido → 0 entero).
+ * "Painted in": an element appears swept from left to right by a stroke with an irregular edge,
+ * like a pass of pencil or brush (instead of a fade). It is a CSS mask (`.od-paint` in
+ * ordo.css) that is moved with the `--paint` variable (100 hidden → 0 whole).
  *
- *   hidePaint(targets)                 antes de mostrar
- *   paint(targets, { stagger, delay }) lo pinta; devuelve el tween
+ *   hidePaint(targets)                 before showing
+ *   paint(targets, { stagger, delay }) paints it in; returns the tween
  *
- * Con «reducir movimiento» se ve directo, sin barrido.
+ * With "reduce motion" it shows directly, with no sweep.
  */
 export function hidePaint(targets) {
   gsap.set(targets, { '--paint': 100 })
