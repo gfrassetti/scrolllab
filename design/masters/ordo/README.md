@@ -62,3 +62,12 @@ piezas `obra`). La otra variante (`moderno-a2-obra-1.png`) tenía el piso corrid
 tomando como referencia `proyecto1-7769888c-….png` (la de la tarjeta): `p1-a-mostrador` (3:4), `p1-b-ventanal` (16:9),
 `p1-c-nicho` (3:4), `p1-d-prenda` (16:9) y `p1-e-detalle` (1:1). Sitio: `src/components/sections/ordo/assets/linho-*.webp` (y `-s`
 para pantallas chicas). Son de muestra hasta tener las del cliente (`projects.js`).
+
+## Proyectos 2 y 3 del template ORDO (2026-10-30)
+
+Casa Muralha (casa privada en el Alentejo, rammed earth) y Maré (restaurante en Lisboa, barra de azulejo azul).
+Higgsfield `gpt_image_2_5` (2k, calidad media, ~1 crédito cada una). De cada proyecto, primero la portada
+(`muralha-cover.png`, `mare-cover.png`, texto → imagen 3:2) y después las otras cinco con la portada como
+`image_references`, para que sean el mismo lugar: `-hero` (3:4), `-thumb` (1:1), `-light` (16:9), `-colour` (3:4),
+`-craft` (16:9). Los originales PNG no viajan al repo (`.gitignore`); el sitio usa los WebP de
+`src/components/sections/ordo/assets/<proyecto>-<pieza>.webp` (y `-s`, o `-900` en la portada).

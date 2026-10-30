@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * El enrutador mínimo de elStudio: una portada y una página por proyecto (`/proyectos/<slug>`).
+ * El enrutador mínimo de elStudio: una portada y una página por proyecto (`/projects/<slug>`).
  *
  * La dirección se actualiza con history.pushState (si el navegador lo permite: en un iframe con sandbox puede
  * fallar y el sitio sigue andando con el estado en memoria). Con el sitio publicado, la dirección de un proyecto
@@ -10,7 +10,7 @@ import { useSyncExternalStore } from 'react'
  * `navigate` pasa por un manejador de transición (la cortina de ElStudioPage): él decide cuándo cambiar de ruta.
  */
 
-const PROJECT_PATH = /\/proyectos\/([a-z0-9-]+)\/?$/
+const PROJECT_PATH = /\/projects\/([a-z0-9-]+)\/?$/
 
 /** La ruta actual: { name: 'home' } o { name: 'project', slug }. */
 function read() {
@@ -44,7 +44,7 @@ export function navigate(to, { section = null, push = true } = {}) {
   if (same(route, to) && !section) return
   const apply = () => {
     if (push) {
-      const path = to.name === 'project' ? `${base()}/proyectos/${to.slug}` : `${base() || ''}/`
+      const path = to.name === 'project' ? `${base()}/projects/${to.slug}` : `${base() || ''}/`
       try {
         window.history.pushState(null, '', path)
       } catch {
@@ -63,7 +63,7 @@ export const getRoute = () => route
 /** La dirección de una ruta, para los href (clic con el botón del medio, copiar enlace). */
 export function hrefOf(to) {
   if (typeof window === 'undefined') return '#'
-  return to.name === 'project' ? `${base()}/proyectos/${to.slug}` : `${base() || ''}/`
+  return to.name === 'project' ? `${base()}/projects/${to.slug}` : `${base() || ''}/`
 }
 
 /** La sección a la que hay que ir al montar la portada (una sola vez). */

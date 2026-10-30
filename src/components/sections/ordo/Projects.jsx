@@ -1,267 +1,111 @@
 import { useLayoutEffect, useRef } from 'react'
-import { gsap, ScrollTrigger } from '../../lib/gsap'
+import { gsap } from '../../../lib/gsap'
 import { LABEL } from './brand'
-import { ROOM_IN_IMAGE as RI } from './designPieces'
 import { PROJECTS } from './projects'
 import { hrefOf, navigate } from './router'
-import photoFull from './assets/foto-local.webp'
-import photoSmall from './assets/foto-local-1200.webp'
-import project1 from './assets/proyecto-1.webp'
-import project1Small from './assets/proyecto-1-900.webp'
 
 /**
- * Proyectos — por ahora, la tarjeta 01 con su ficha (el resto del contenido es un div de 1vh).
+ * Projects — the index of the studio's work: one row per project, a photo card and its fact sheet.
+ * Each card is a link to the project page (`/projects/<slug>`, ProjectPage.jsx).
  *
- * La salida del hero: el local que se acaba de diseñar es un proyecto del estudio. Al terminar el
- * hero, la foto se despega de la lámina (la del lienzo se esconde y en su lugar queda una copia en
- * DOM, exactamente encima) y, mientras la hoja del hero se va hacia arriba y Proyectos sube, la foto
- * se achica y se recorta hasta caer en la tarjeta 01. Ahí se queda (la copia se va y la tarjeta
- * muestra su foto) y entra la ficha. Volviendo hacia arriba, el camino al revés.
+ * The sheet of the hero turns back into a sketch as it leaves (Sketch.jsx) and this section follows it. Each
+ * card is revealed as it comes into view: the photo opens upwards from its lower edge while it settles from a
+ * slight zoom, and the fact sheet rises after it.
  *
- * En cada cuadro se interpola entre dos rectángulos vivos: el del local en el hero (que se mueve con
- * su hoja) y el de la tarjeta (que se mueve con el scroll); así arranca pegada a uno y termina pegada
- * al otro, sin saltos.
- *
- * Con «reducir movimiento»: la tarjeta ya tiene su foto y la ficha está a la vista.
+ * With «reduce motion»: everything is already in place, no reveal.
  */
 
-// El proyecto de muestra (projects.js): va a ser uno real del cliente (fotos y datos los pide el estudio).
-const PROJECT = { ...PROJECTS[0], area: `${PROJECTS[0].area} m²` }
-const TO_PROJECT = { name: 'project', slug: PROJECT.slug }
-const open = (e) => {
+const openProject = (project) => (e) => {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
   e.preventDefault()
-  navigate(TO_PROJECT)
+  navigate({ name: 'project', slug: project.slug })
 }
 
-const A = 2400 / 1029 // la proporción de la foto
-
-/** La foto, del tamaño justo para que el local (sin el papel de alrededor) cubra la caja. */
-function coverRoom(box) {
-  const rw = RI.x1 - RI.x0
-  const rh = RI.y1 - RI.y0
-  const w = Math.max(box.w / rw, (box.h / rh) * A)
-  const h = w / A
-  return {
-    x: box.x + box.w / 2 - (RI.x0 + rw / 2) * w,
-    y: box.y + box.h / 2 - (RI.y0 + rh / 2) * h,
-    w,
-    h,
-  }
+function Item({ project, index, total }) {
+  const to = { name: 'project', slug: project.slug }
+  const open = openProject(project)
+  const { src, small, alt } = project.photos.cover
+  return (
+    <article className="od-proj__item" data-proj-item>
+      <a className="od-proj__card" href={hrefOf(to)} onClick={open} data-cursor="View project" aria-label={`View the project ${project.name}`} data-proj-card>
+        <img
+          src={src}
+          srcSet={`${small} 900w, ${src} 1800w`}
+          sizes="(min-width: 1024px) 62vw, 100vw"
+          alt={alt}
+          className="od-proj__img od-proj__img--cover"
+          loading={index === 0 ? undefined : 'lazy'}
+          decoding="async"
+          data-proj-img
+        />
+      </a>
+      <dl className="od-proj__ficha" data-proj-ficha>
+        <div className="od-proj__row od-proj__row--name">
+          <dt className="sr-only">Project</dt>
+          <dd>
+            <span className="od-proj__n" style={LABEL}>
+              {project.n}
+            </span>
+            <a href={hrefOf(to)} onClick={open} className="od-proj__name">
+              {project.name}
+            </a>
+          </dd>
+        </div>
+        {[
+          ['Type', project.kind],
+          ['Place', project.place],
+          ['Year', project.year],
+          ['Area', `${project.area} m²`],
+        ].map(([k, v]) => (
+          <div key={k} className="od-proj__row">
+            <dt style={LABEL}>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <span className="sr-only">
+        {index + 1} of {total}
+      </span>
+    </article>
+  )
 }
 
-const lerp = (a, b, t) => a + (b - a) * t
-const lerpRect = (a, b, t) => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t) })
-const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
-const clamp01 = (v) => Math.min(1, Math.max(0, v))
+export default function Projects({ calm }) {
+  const sectionRef = useRef(null)
 
-/**
- * El contenido de Proyectos: el título, la tarjeta 01 y su ficha.
- */
-function ProyectosBody({ refs, src, titleId, own }) {
-  const localCard = useRef(null)
-  const cardRef = refs?.card ?? localCard
-  // Con la foto del hero (la del vuelo): recortada al local, en %, así acompaña los cambios de tamaño.
-  // La foto propia del proyecto cubre la tarjeta con object-fit.
   useLayoutEffect(() => {
-    if (own) return undefined
-    const card = cardRef.current
-    const fit = () => {
-      const w = card.clientWidth
-      const h = card.clientHeight
-      if (!w || !h) return
-      const r = coverRoom({ x: 0, y: 0, w, h })
-      for (const img of card.querySelectorAll('img')) {
-        Object.assign(img.style, { left: `${(r.x / w) * 100}%`, top: `${(r.y / h) * 100}%`, width: `${(r.w / w) * 100}%`, height: `${(r.h / h) * 100}%` })
-      }
-    }
-    fit()
-    const ro = new ResizeObserver(fit)
-    ro.observe(card)
-    return () => ro.disconnect()
-  }, [cardRef, own])
+    if (calm) return undefined
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray('[data-proj-item]').forEach((item) => {
+        const card = item.querySelector('[data-proj-card]')
+        const img = item.querySelector('[data-proj-img]')
+        const ficha = item.querySelector('[data-proj-ficha]')
+        gsap.set(card, { clipPath: 'inset(14% 0% 0% 0%)' })
+        gsap.set(img, { scale: 1.12 })
+        gsap.set(ficha, { autoAlpha: 0, y: 18 })
+        gsap
+          .timeline({ scrollTrigger: { trigger: item, start: 'top 82%', once: true } })
+          .to(card, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.out' }, 0)
+          .to(img, { scale: 1, duration: 1.6, ease: 'expo.out' }, 0)
+          .to(ficha, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 0.35)
+      })
+    }, sectionRef)
+    return () => ctx.revert()
+  }, [calm])
 
   return (
-    <>
-      <header className="es-proj__head">
-        <h2 id={titleId} className="es-proj__title">
-          Proyectos
+    <section ref={sectionRef} id="projects" aria-labelledby="projects-title" className="od-proj relative min-h-svh">
+      <header className="od-proj__head">
+        <h2 id="projects-title" className="od-proj__title">
+          Projects
         </h2>
-        <span className="es-proj__label" style={LABEL}>
-          {PROJECT.n} / {PROJECT.n}
+        <span className="od-proj__label" style={LABEL}>
+          {PROJECTS[0].n} — {PROJECTS[PROJECTS.length - 1].n}
         </span>
       </header>
-
-      <article className="es-proj__item">
-        <a ref={cardRef} className="es-proj__card" href={hrefOf(TO_PROJECT)} onClick={open} data-cursor="Ver proyecto" aria-label={`Ver el proyecto ${PROJECT.name}`}>
-          <img
-            ref={refs?.img}
-            src={own ? project1 : src}
-            srcSet={own ? `${project1Small} 900w, ${project1} 1800w` : undefined}
-            sizes={own ? '(min-width: 1024px) 62vw, 100vw' : undefined}
-            alt={titleId ? `${PROJECT.name}, ${PROJECT.kind.toLowerCase()} en ${PROJECT.place}` : ''}
-            className={own ? 'es-proj__img es-proj__img--cover' : 'es-proj__img'}
-            loading={own ? 'lazy' : undefined}
-            decoding="async"
-          />
-          {/* El lugar vacío donde aterriza la foto en vuelo (solo con esa salida). */}
-          {!own && <span className="es-proj__slot" aria-hidden="true" />}
-        </a>
-        <dl ref={refs?.ficha} className="es-proj__ficha">
-          <div className="es-proj__row es-proj__row--name">
-            <dt className="sr-only">Proyecto</dt>
-            <dd>
-              <span className="es-proj__n" style={LABEL}>
-                {PROJECT.n}
-              </span>
-              <a href={hrefOf(TO_PROJECT)} onClick={open} className="es-proj__name">
-                {PROJECT.name}
-              </a>
-            </dd>
-          </div>
-          {[
-            ['Tipo', PROJECT.kind],
-            ['Lugar', PROJECT.place],
-            ['Año', PROJECT.year],
-            ['Superficie', PROJECT.area],
-          ].map(([k, v]) => (
-            <div key={k} className="es-proj__row">
-              <dt style={LABEL}>{k}</dt>
-              <dd>{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </article>
-    </>
-  )
-}
-
-/** La foto de la tarjeta según la pantalla (la misma en la sección y en su folio). */
-const projectPhoto = () =>
-  typeof window !== 'undefined' && window.innerWidth * Math.min(window.devicePixelRatio || 1, 2) > 1400 ? photoFull : photoSmall
-
-/**
- * La sección. `mode`: 'proyecto' (la foto del hero vuela a la tarjeta) o cualquier otra salida (la
- * sección sigue al hero, sin vuelo).
- */
-export default function Proyectos({ calm, exit, mode = 'proyecto' }) {
-  const sectionRef = useRef(null)
-  const cardRef = useRef(null)
-  const cardImgRef = useRef(null)
-  const flyRef = useRef(null)
-  const flyImgRef = useRef(null)
-  const fichaRef = useRef(null)
-  const src = projectPhoto()
-  const flies = mode === 'proyecto'
-
-  // El vuelo.
-  useLayoutEffect(() => {
-    if (calm || !exit || !flies) return undefined
-    const fly = flyRef.current
-    const flyImg = flyImgRef.current
-    const card = cardRef.current
-    const cardImg = cardImgRef.current
-    const ficha = fichaRef.current
-    let t = 0
-    let flying = false
-    let needs = true
-    // El tamaño de base de la foto en vuelo (el de la partida). En el vuelo solo cambian transformaciones:
-    // la placa de la foto se dibuja una vez y la GPU la mueve y la escala (cambiar ancho y alto en cada
-    // cuadro la volvía a dibujar entera, a 2400 px, y el pase se trababa).
-    let base = null
-
-    // La foto, decodificada de antemano (si no, el primer cuadro del vuelo la decodifica).
-    flyImg.decode?.().catch(() => {})
-    cardImg.decode?.().catch(() => {})
-
-    const draw = () => {
-      // Primero se mide todo (el local en el hero y la tarjeta) y después se escribe.
-      const from = exit.current?.place()
-      const c = card.getBoundingClientRect()
-      const on = t > 0 && t < 1 && !!from
-      if (on !== flying) {
-        flying = on
-        fly.style.visibility = on ? 'visible' : 'hidden'
-        if (on && !base) {
-          base = { box: from.clip, img: from.img }
-          Object.assign(fly.style, { width: `${base.box.w}px`, height: `${base.box.h}px` })
-          Object.assign(flyImg.style, { width: `${base.img.w}px`, height: `${base.img.h}px` })
-        }
-      }
-      // Antes de despegar, la foto es la del lienzo; al aterrizar, la de la tarjeta.
-      exit.current?.hidePhoto(t > 0)
-      cardImg.style.visibility = t >= 1 ? 'visible' : 'hidden'
-      const k = smoothstep(0.72, 1, t)
-      ficha.style.opacity = String(k)
-      ficha.style.transform = `translate3d(0, ${(1 - k) * 14}px, 0)`
-      if (!on) return
-      const to = { x: c.left, y: c.top, w: c.width, h: c.height }
-      const e = ease(t)
-      const box = lerpRect(from.clip, to, e)
-      const img = lerpRect(from.img, coverRoom(to), e)
-      const sx = box.w / base.box.w
-      const sy = box.h / base.box.h
-      const si = img.w / base.img.w
-      fly.style.transform = `translate3d(${box.x}px, ${box.y}px, 0) scale(${sx}, ${sy})`
-      flyImg.style.transform = `translate3d(${(img.x - box.x) / sx}px, ${(img.y - box.y) / sy}px, 0) scale(${si / sx}, ${si / sy})`
-    }
-
-    // Del final del hero (esta sección asoma abajo) a esta sección arriba de todo.
-    const st = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top bottom',
-      end: 'top top',
-      onUpdate: (self) => {
-        t = clamp01(self.progress)
-        needs = true
-      },
-      onRefresh: (self) => {
-        t = clamp01(self.progress)
-        base = null
-        flying = false
-        needs = true
-      },
-    })
-    // Un solo dibujo por cuadro, y solo si el scroll se movió.
-    const tick = () => {
-      if (!needs) return
-      needs = false
-      draw()
-    }
-    gsap.ticker.add(tick)
-    return () => {
-      gsap.ticker.remove(tick)
-      st.kill()
-      fly.style.visibility = 'hidden'
-      cardImg.style.visibility = ''
-      ficha.style.opacity = ''
-      ficha.style.transform = ''
-    }
-  }, [calm, exit, flies])
-
-  return (
-    <section
-      ref={sectionRef}
-      id="proyectos"
-      aria-labelledby="proyectos-title"
-      className="es-proj relative min-h-svh"
-    >
-      <ProyectosBody refs={{ card: cardRef, img: cardImgRef, ficha: fichaRef }} src={src} titleId="proyectos-title" own={!flies} />
-
-      {/* El resto de la sección (por ahora vacío). */}
-      <div style={{ height: '1vh' }} />
-
-      {/* La foto en vuelo, del hero a la tarjeta. */}
-      {flies && (
-        <div ref={flyRef} className="es-proj__fly" aria-hidden="true">
-          <img ref={flyImgRef} src={src} alt="" decoding="async" />
-        </div>
-      )}
+      {PROJECTS.map((p, i) => (
+        <Item key={p.slug} project={p} index={i} total={PROJECTS.length} />
+      ))}
     </section>
   )
-}
-
-function smoothstep(a, b, v) {
-  const t = clamp01((v - a) / (b - a))
-  return t * t * (3 - 2 * t)
 }

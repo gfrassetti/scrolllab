@@ -3,8 +3,8 @@ import { LOGO_FONT, C, SITE } from './brand'
 import { LOGO_PARTS, LOGO_VIEWBOX as VB, LOGO_WORD_X } from './logoPaths'
 
 /**
- * El logo de elStudio en vector: «el» en itálica fina, STUDIO en geométrica y la tapa óxido
- * apoyada sobre la T, como la tapa de una mesa vista en perspectiva. Cada pieza es un grupo con
+ * El logo de ORDO en vector: la palabra en geométrica y una tapa óxido apoyada sobre la R y la D,
+ * como un dintel sobre dos columnas, visto en perspectiva. Cada pieza es un grupo con
  * `data-part="<id>"` con dos capas: el relleno y el contorno (que por defecto queda sin dibujar),
  * para que el loader trace el contorno y recién después rellene. En el encabezado se ve solo el
  * relleno. El tamaño lo manda el `font-size` del padre (1000 unidades = 1 em), así el logo del
@@ -15,7 +15,7 @@ const SUB = 0.115
 
 // Las letras que suben desde una línea (el loader las anima): van dentro de un recorte que las oculta
 // debajo de la línea de base.
-const RISERS = new Set(['T', 'U', 'D', 'I', 'O'])
+const RISERS = new Set(['R', 'D', 'O2'])
 
 export default function Logo({ compact = false, hairline = false, className = '', style, ...rest }) {
   const clipId = `${useId().replace(/:/g, '')}-clip`

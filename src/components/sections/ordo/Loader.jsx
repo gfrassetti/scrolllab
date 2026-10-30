@@ -1,24 +1,23 @@
 import { useLayoutEffect, useEffect, useRef, useState } from 'react'
-import { gsap } from '../../lib/gsap'
+import { gsap } from '../../../lib/gsap'
 import { C, DISPLAY, SITE } from './brand'
 import Logo from './Logo'
 
 /**
- * elStudio — el loader.
+ * ORDO — el loader.
  *
- * Una hoja clara donde la S de STUDIO se dibuja sola: un trazo fino va recorriendo su contorno,
- * despacio, y a su paso la letra se rellena. Después el resto del logo entra como siempre: T U D I O suben desde una línea,
- * «el» entra de costado y la tapa óxido cae sobre la T. Por último se escribe «Diseño e
- * Interiorismo», la hoja se levanta como una cortina y el logo viaja hasta su lugar en el
- * encabezado (`bridge.current.target()`).
+ * Una hoja clara donde la primera O de ORDO se dibuja sola: un trazo fino va recorriendo su contorno,
+ * despacio, y a su paso la letra se rellena. Después el resto del logo entra: R D O suben desde una línea
+ * y la tapa óxido cae sobre la R y la D. Por último se escribe «Architecture & Interiors», la hoja se
+ * levanta como una cortina y el logo viaja hasta su lugar en el encabezado (`bridge.current.target()`).
  * Abajo, una línea de tinta que sigue al dibujo. Con «reducir movimiento»: un fundido corto.
  * Sin sonido.
  */
 
-// Solo la S de STUDIO se dibuja, despacio (la firma). El resto del logo entra después con
-// el gesto de siempre: letras que suben desde una línea, «el» de costado, la tapa que cae.
-const S_SECONDS = 1.5 // lo que tarda en trazarse la S
-const RISE = ['T', 'U', 'D', 'I', 'O']
+// Solo la primera O se dibuja, despacio (la firma). El resto del logo entra después: letras que suben
+// desde una línea y la tapa que cae.
+const S_SECONDS = 1.5 // lo que tarda en trazarse la O
+const RISE = ['R', 'D', 'O2']
 
 export default function Loader({ ready, calm, bridge, onDone }) {
   const rootRef = useRef(null)
@@ -39,8 +38,8 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       return undefined
     }
     const ctx = gsap.context(() => {
-      const strokes = q('[data-part=S] [data-stroke]')
-      const fill = q('[data-part=S] [data-fill]')
+      const strokes = q('[data-part=O1] [data-stroke]')
+      const fill = q('[data-part=O1] [data-fill]')
       // El desplazamiento de la raya se escribe como atributo (GSAP le agregaría «px» y con pathLength no rinde igual).
       const setTrail = (amount) => strokes.forEach((el) => el.setAttribute('stroke-dashoffset', String(1 - amount)))
       setTrail(0)
@@ -48,8 +47,6 @@ export default function Loader({ ready, calm, bridge, onDone }) {
       gsap.set(strokes, { opacity: 1 })
       // El resto del logo, escondido hasta que termine la S (las unidades son las del dibujo: 1000 = 1 em).
       gsap.set(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 820 })
-      gsap.set(q('[data-part=e]'), { autoAlpha: 0, x: -90 })
-      gsap.set(q('[data-part=l]'), { autoAlpha: 0, x: -90 })
       gsap.set(q('[data-part=slab]'), { autoAlpha: 0, y: -520, rotation: -6, transformOrigin: '20% 100%' })
       gsap.set(q('[data-part=sub]'), { autoAlpha: 0, letterSpacing: '0.7em' })
       gsap.set(footRef.current, { autoAlpha: 0, y: 10 })
@@ -79,9 +76,7 @@ export default function Loader({ ready, calm, bridge, onDone }) {
         .to(strokes, { opacity: 0, duration: 0.5, ease: 'power1.out' }, start + S_SECONDS * 0.88)
         // El resto, como siempre.
         .to(RISE.map((id) => q(`[data-part=${id}]`)[0]), { y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.07 }, end)
-        .to(q('[data-part=e]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.45)
-        .to(q('[data-part=l]'), { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out' }, end + 0.5)
-        .to(q('[data-part=slab]'), { autoAlpha: 1, y: 0, rotation: 0, duration: 0.7, ease: 'power4.out' }, end + 0.75)
+        .to(q('[data-part=slab]'), { autoAlpha: 1, y: 0, rotation: 0, duration: 0.7, ease: 'power4.out' }, end + 0.6)
         .to(q('[data-part=sub]'), { autoAlpha: 1, letterSpacing: '0.34em', duration: 1, ease: 'expo.out' }, end + 0.8)
         .to({}, { duration: 0.1 }) // un respiro antes de salir
     }, logo)
@@ -139,8 +134,8 @@ export default function Loader({ ready, calm, bridge, onDone }) {
   }, [ready, drawn, calm, bridge, onDone])
 
   return (
-    <div ref={rootRef} className="fixed inset-0 z-50" role="status" aria-live="polite" aria-label="Cargando elStudio">
-      <div ref={sheetRef} className="es-sheet absolute inset-0" style={{ clipPath: 'inset(0% 0% 0% 0%)' }}>
+    <div ref={rootRef} className="fixed inset-0 z-50" role="status" aria-live="polite" aria-label="Loading ORDO">
+      <div ref={sheetRef} className="od-sheet absolute inset-0" style={{ clipPath: 'inset(0% 0% 0% 0%)' }}>
         <div
           ref={footRef}
           className="absolute inset-x-0 bottom-0 px-5 pb-6 text-[11px] font-medium tracking-[0.16em] uppercase sm:px-9 sm:pb-8"

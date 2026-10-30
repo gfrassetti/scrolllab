@@ -1,9 +1,9 @@
-import { gsap } from '../../lib/gsap'
+import { gsap } from '../../../lib/gsap'
 
 /**
  * «Se pinta»: un elemento aparece barrido de izquierda a derecha por un trazo de borde irregular,
- * como una pasada de lápiz o pincel (en vez de un fundido). Es una máscara CSS (`.es-paint` en
- * elstudio.css) que se corre con la variable `--paint` (100 escondido → 0 entero).
+ * como una pasada de lápiz o pincel (en vez de un fundido). Es una máscara CSS (`.od-paint` en
+ * ordo.css) que se corre con la variable `--paint` (100 escondido → 0 entero).
  *
  *   hidePaint(targets)                 antes de mostrar
  *   paint(targets, { stagger, delay }) lo pinta; devuelve el tween

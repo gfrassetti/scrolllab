@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { gsap } from '../../lib/gsap'
+import { gsap } from '../../../lib/gsap'
 import { readPlanProbe } from './planProbe'
 
 /**
@@ -112,7 +112,7 @@ export default function Cursor() {
       last = { x: e.clientX, y: e.clientY }
       if (!shown) {
         shown = true
-        html.classList.add('es-has-cursor')
+        html.classList.add('od-has-cursor')
         gsap.set(root, { x: e.clientX, y: e.clientY })
       }
       render()
@@ -160,25 +160,25 @@ export default function Cursor() {
       window.removeEventListener('pointerup', onUp)
       html.removeEventListener('mouseleave', onLeave)
       html.removeEventListener('mouseenter', onEnter)
-      html.classList.remove('es-has-cursor')
+      html.classList.remove('od-has-cursor')
       gsap.killTweensOf([cross, root, body, label, plusEl, tip])
     }
   }, [])
 
   return (
-    <div className="es-cursor" aria-hidden="true">
-      <div ref={crossRef} className="es-cross">
-        <span ref={lineH} className="es-cross__h" />
-        <span ref={lineV} className="es-cross__v" />
-        <span ref={point} className="es-cross__pt">
-          <span ref={plus} className="es-cross__plus" />
-          <span ref={coords} className="es-cross__coords" data-flip-x="0" data-flip-y="0" />
-          <span ref={tipRef} className="es-cross__tip" />
+    <div className="od-cursor" aria-hidden="true">
+      <div ref={crossRef} className="od-cross">
+        <span ref={lineH} className="od-cross__h" />
+        <span ref={lineV} className="od-cross__v" />
+        <span ref={point} className="od-cross__pt">
+          <span ref={plus} className="od-cross__plus" />
+          <span ref={coords} className="od-cross__coords" data-flip-x="0" data-flip-y="0" />
+          <span ref={tipRef} className="od-cross__tip" />
         </span>
       </div>
-      <div ref={dotRoot} className="es-cursor__dot">
-        <div ref={dotBody} className="es-cursor__body">
-          <span ref={dotLabel} className="es-cursor__label" />
+      <div ref={dotRoot} className="od-cursor__dot">
+        <div ref={dotBody} className="od-cursor__body">
+          <span ref={dotLabel} className="od-cursor__label" />
         </div>
       </div>
     </div>

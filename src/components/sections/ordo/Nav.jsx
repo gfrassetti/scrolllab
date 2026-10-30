@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { gsap } from '../../lib/gsap'
-import { getLenis, scrollToSection } from '../../hooks/useLenis'
+import { gsap } from '../../../lib/gsap'
+import { getLenis, scrollToSection } from '../../../hooks/useLenis'
 import { getRoute, navigate } from './router'
 import { hidePaint } from './paint'
 import { C, LABEL, OPEN_DELAY, OPEN_T as T, SITE } from './brand'
@@ -8,7 +8,7 @@ import Logo from './Logo'
 
 /**
  * El marco del sitio, dibujado con líneas como un plano: el nav arriba y, abajo, el borde del bloque
- * de texto del hero (su alto es --band-h, en elstudio.css).
+ * de texto del hero (su alto es --band-h, en ordo.css).
  *
  * La apertura (después de que el boceto se pinta): dos líneas finas nacen en el centro de la
  * pantalla y se estiran hasta los bordes; una sube y queda como el borde del nav, la otra baja y
@@ -20,7 +20,7 @@ import Logo from './Logo'
  * Al pasar el mouse, el logo se vuelve a escribir: de la «e» a la «O», cada letra trazada en óxido y
  * después rellena, y al final cae la tapa de la T.
  *
- * Todas las celdas miden lo mismo (--mod, elstudio.css) y las líneas de la regla, las columnas del hero y el
+ * Todas las celdas miden lo mismo (--mod, ordo.css) y las líneas de la regla, las columnas del hero y el
  * borde de su celda de texto se miden desde el borde derecho en múltiplos de ese módulo: las divisiones del nav
  * son el principio de las líneas que bajan por la página.
  *
@@ -29,11 +29,11 @@ import Logo from './Logo'
  */
 
 const LINKS = [
-  { id: 'estudio', label: 'Estudio' },
-  { id: 'proyectos', label: 'Proyectos' },
-  { id: 'servicios', label: 'Servicios' },
+  { id: 'studio', label: 'Studio' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'services', label: 'Services' },
 ]
-const MENU = [...LINKS, { id: 'contacto', label: 'Contacto', accent: true }]
+const MENU = [...LINKS, { id: 'contact', label: 'Contact', accent: true }]
 
 
 export default function Nav({ logoRef, open, calm }) {
@@ -77,7 +77,7 @@ export default function Nav({ logoRef, open, calm }) {
     if (calm || writing.current?.isActive()) return
     const svg = logoRef.current?.querySelector('svg[data-part=row]')
     if (!svg) return
-    const order = ['e', 'l', 'S', 'T', 'U', 'D', 'I', 'O', 'slab']
+    const order = ['O1', 'R', 'D', 'O2', 'slab']
     const tl = gsap.timeline({ defaults: { ease: 'power1.inOut' } })
     order.forEach((id, i) => {
       const fill = svg.querySelector(`[data-part=${id}] [data-fill]`)
@@ -129,34 +129,34 @@ export default function Nav({ logoRef, open, calm }) {
   }, [menu])
 
   return (
-    <div ref={rootRef} className="es-frame pointer-events-none fixed inset-0 z-40" style={{ color: C.ink }}>
+    <div ref={rootRef} className="od-frame pointer-events-none fixed inset-0 z-40" style={{ color: C.ink }}>
       {/* El lomo del block: papel opaco detrás del nav y la regla. Al cambiar de lámina, la hoja que se
           va pasa por debajo. */}
-      <span className="es-sheet es-frame__binding" aria-hidden="true" />
+      <span className="od-sheet od-frame__binding" aria-hidden="true" />
       {/* El nav. */}
-      <header className="es-frame__nav absolute inset-x-0 top-0 flex items-stretch justify-between">
+      <header className="od-frame__nav absolute inset-x-0 top-0 flex items-stretch justify-between">
         <a
           ref={logoRef}
-          href="#inicio"
-          onClick={go('inicio')}
+          href="#home"
+          onClick={go('home')}
           onPointerEnter={(e) => e.pointerType !== 'touch' && writeLogo()}
-          aria-label={`${SITE.name}, ir al inicio`}
+          aria-label={`${SITE.name}, go to the top`}
           className="pointer-events-auto flex items-center px-4 sm:px-9"
           style={{ fontSize: 26, opacity: 0 }}
         >
           <Logo compact hairline />
         </a>
-        <nav aria-label="Principal" className="flex items-stretch">
+        <nav aria-label="Main" className="flex items-stretch">
           {LINKS.map((l) => (
             <a
               key={l.id}
               href={`#${l.id}`}
               onClick={go(l.id)}
-              className="es-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex"
+              className="od-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:flex"
               style={LABEL}
             >
-              <span data-divider className="es-cell__divider" aria-hidden="true" />
-              <span data-in className="es-paint">{l.label}</span>
+              <span data-divider className="od-cell__divider" aria-hidden="true" />
+              <span data-in className="od-paint">{l.label}</span>
             </a>
           ))}
           <button
@@ -164,24 +164,24 @@ export default function Nav({ logoRef, open, calm }) {
             type="button"
             onClick={() => setMenu((v) => !v)}
             aria-expanded={menu}
-            aria-controls="es-menu"
-            className="es-cell pointer-events-auto relative flex w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:hidden"
+            aria-controls="od-menu"
+            className="od-cell pointer-events-auto relative flex w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase md:hidden"
             style={LABEL}
           >
-            <span data-divider className="es-cell__divider" aria-hidden="true" />
-            <span data-in className="es-paint">{menu ? 'Cerrar' : 'Menú'}</span>
-            <span data-in className={`es-paint es-menu__burger${menu ? ' is-open' : ''}`} aria-hidden="true" />
+            <span data-divider className="od-cell__divider" aria-hidden="true" />
+            <span data-in className="od-paint">{menu ? 'Close' : 'Menu'}</span>
+            <span data-in className={`od-paint od-menu__burger${menu ? ' is-open' : ''}`} aria-hidden="true" />
           </button>
           <a
-            href="#contacto"
-            onClick={go('contacto')}
-            className="es-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:flex"
+            href="#contact"
+            onClick={go('contact')}
+            className="od-cell pointer-events-auto relative hidden w-[var(--mod)] items-center px-4 text-[12px] tracking-[0.1em] uppercase sm:flex"
             style={{ ...LABEL, color: C.rust }}
-            data-cursor="Escribinos"
+            data-cursor="Get in touch"
           >
-            <span data-divider className="es-cell__divider" aria-hidden="true" />
-            <span data-in className="es-paint">Contacto</span>
-            <span data-in className="es-paint absolute right-3 bottom-2 text-[14px]" aria-hidden="true">
+            <span data-divider className="od-cell__divider" aria-hidden="true" />
+            <span data-in className="od-paint">Contact</span>
+            <span data-in className="od-paint absolute right-3 bottom-2 text-[14px]" aria-hidden="true">
               →
             </span>
           </a>
@@ -190,18 +190,18 @@ export default function Nav({ logoRef, open, calm }) {
 
       {/* El menú del teléfono: una hoja que baja desde el nav. */}
       <nav
-        id="es-menu"
+        id="od-menu"
         ref={menuRef}
-        aria-label="Menú"
-        className={`es-menu es-sheet${menu ? ' is-open pointer-events-auto' : ''}`}
+        aria-label="Menu"
+        className={`od-menu od-sheet${menu ? ' is-open pointer-events-auto' : ''}`}
         aria-hidden={!menu}
         inert={!menu}
       >
-        <ul className="es-menu__list">
+        <ul className="od-menu__list">
           {MENU.map((l, i) => (
             <li key={l.id} style={{ '--i': i }}>
-              <a href={`#${l.id}`} onClick={go(l.id)} className="es-menu__link" style={l.accent ? { color: C.rust } : undefined}>
-                <span className="es-menu__n" style={LABEL}>
+              <a href={`#${l.id}`} onClick={go(l.id)} className="od-menu__link" style={l.accent ? { color: C.rust } : undefined}>
+                <span className="od-menu__n" style={LABEL}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 {l.label}
@@ -209,21 +209,21 @@ export default function Nav({ logoRef, open, calm }) {
             </li>
           ))}
         </ul>
-        <div className="es-menu__foot" style={LABEL}>
+        <div className="od-menu__foot" style={LABEL}>
           <span>{SITE.places.join(' · ')}</span>
-          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-menu__ig">
+          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="od-menu__ig">
             {SITE.instagram.handle}
           </a>
         </div>
       </nav>
 
       {/* La línea del marco y la regla bajo el nav (la de abajo es de la hoja del hero: se va con ella). */}
-      <span data-line="top" className="es-frame__line es-frame__line--top" aria-hidden="true" />
-      <span data-ruler className="es-frame__ruler" aria-hidden="true" />
+      <span data-line="top" className="od-frame__line od-frame__line--top" aria-hidden="true" />
+      <span data-ruler className="od-frame__ruler" aria-hidden="true" />
 
       {/* Cruces de registro en las esquinas de arriba (las de abajo, también de la hoja). */}
       {['tl', 'tr'].map((k) => (
-        <span key={k} data-mark className={`es-frame__mark es-frame__mark--${k}`} aria-hidden="true" />
+        <span key={k} data-mark className={`od-frame__mark od-frame__mark--${k}`} aria-hidden="true" />
       ))}
 
     </div>

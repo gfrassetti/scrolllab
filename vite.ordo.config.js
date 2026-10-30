@@ -5,23 +5,20 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 /**
- * Build standalone de elStudio, para subir la carpeta `dist-elstudio` a un hosting estático
- * (Cloudflare Pages: docs/elstudio-cloudflare.md). Aparte del build del market: no lo toca.
- * Es una demo: no se indexa (noindex + robots cerrado) hasta que el cliente apruebe el sitio.
- *   npm run build:elstudio      el build
- *   npm run elstudio:deploy     build + subida a Cloudflare Pages (wrangler)
+ * Build standalone de ORDO, solo para mirar la demo fuera del market (`npm run build:ordo` → `dist-ordo`).
+ * Aparte del build del market: no lo toca. No se indexa.
  */
 const abs = (p) => fileURLToPath(new URL(p, import.meta.url))
 
 const finish = {
-  name: 'elstudio-finish',
+  name: 'ordo-finish',
   apply: 'build',
   closeBundle() {
-    const out = abs('./dist-elstudio')
-    fs.renameSync(`${out}/elstudio.html`, `${out}/index.html`)
+    const out = abs('./dist-ordo')
+    fs.renameSync(`${out}/ordo.html`, `${out}/index.html`)
     fs.writeFileSync(`${out}/robots.txt`, 'User-agent: *\nDisallow: /\n')
     // Sin _redirects a propósito: las Workers de Cloudflare no aceptan una regla `/* /index.html 200` y el deploy falla. Las
-    // páginas de los proyectos (/proyectos/<slug>) son del mismo index.html: con «Not found handling» en
+    // páginas de los proyectos (/projects/<slug>) son del mismo index.html: con «Not found handling» en
     // single-page-application (Workers) o sin 404.html (Pages), cualquier ruta devuelve la página.
     // Cabeceras de Cloudflare Pages: la demo no se indexa; los archivos de /assets llevan hash en el
     // nombre (cambian con cada build), así que se guardan en caché un año.
@@ -42,12 +39,12 @@ const finish = {
 
 export default defineConfig({
   // Lo que se copia tal cual (el favicon).
-  publicDir: abs('./src/studio/elstudio/public'),
+  publicDir: abs('./src/studio/ordo/public'),
   plugins: [react(), tailwindcss(), finish],
   resolve: { alias: { '@': abs('./src') } },
   build: {
-    outDir: 'dist-elstudio',
+    outDir: 'dist-ordo',
     emptyOutDir: true,
-    rollupOptions: { input: abs('./elstudio.html') },
+    rollupOptions: { input: abs('./ordo.html') },
   },
 })

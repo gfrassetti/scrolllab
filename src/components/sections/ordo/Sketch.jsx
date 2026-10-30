@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
-import { gsap, ScrollTrigger } from '../../lib/gsap'
+import { gsap, ScrollTrigger } from '../../../lib/gsap'
 import { HERO_VH } from './brand'
 
 /**
@@ -8,17 +8,17 @@ import { HERO_VH } from './brand'
  *   - la foto del local se despinta con el mismo pincel con el que se pintó (al revés) y vuelven los
  *     trazos de lápiz (en la escena, Hero.jsx → setBack);
  *   - el título queda en contorno con rayado de grafito, el texto pasa a gris lápiz y el texto y el
- *     marco tiemblan apenas, como trazados a mano (--sk y el filtro #es-pencil, elstudio.css).
+ *     marco tiemblan apenas, como trazados a mano (--sk y el filtro #od-pencil, ordo.css).
  * Después la hoja, ya en boceto, sigue con el scroll hacia abajo y queda atrás.
  *
  * Con «reducir movimiento» no hay vuelta a boceto: el hero termina y sigue Proyectos.
  */
-export default function Boceto({ calm, exit }) {
+export default function Sketch({ calm, exit }) {
   const dispRef = useRef(null)
 
   useLayoutEffect(() => {
     if (calm) return undefined
-    const hero = document.getElementById('inicio')
+    const hero = document.getElementById('home')
     let u = 0
     let needs = true
     let lastDisp = -1
@@ -63,7 +63,7 @@ export default function Boceto({ calm, exit }) {
   // El lápiz: un temblor apenas visible en los trazos del texto y del marco.
   return (
     <svg width="0" height="0" className="pointer-events-none absolute" aria-hidden="true">
-      <filter id="es-pencil" x="-2%" y="-10%" width="104%" height="120%">
+      <filter id="od-pencil" x="-2%" y="-10%" width="104%" height="120%">
         <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7" result="n" />
         <feDisplacementMap ref={dispRef} in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G" />
       </filter>

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { gsap, ScrollTrigger } from '../../lib/gsap'
+import { gsap, ScrollTrigger } from '../../../lib/gsap'
 import { LABEL, SITE } from './brand'
 import { hidePaint, paint } from './paint'
 import { PROJECTS, projectBySlug } from './projects'
@@ -23,7 +23,7 @@ import { hrefOf, navigate } from './router'
  * En el teléfono (< 768 px) y con «reducir movimiento» no hay tira: los paneles van uno debajo del otro, con los
  * mismos fundidos al llegar (y quietos con «reducir movimiento»).
  *
- * El grano de película cubre toda la vista (`.es-pd-grain`).
+ * El grano de película cubre toda la vista (`.od-pd-grain`).
  */
 
 const TO_HOME = { name: 'home' }
@@ -31,7 +31,7 @@ const NAV_CLEAR = 'calc(var(--nav-h) + 9px)'
 
 function Photo({ photo, px = 1, sizes = '100vw', className = '' }) {
   return (
-    <span className={`es-px ${className}`} data-reveal style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
+    <span className={`od-px ${className}`} data-reveal style={{ aspectRatio: `${photo.w} / ${photo.h}` }}>
       <img
         data-px={px}
         src={photo.src}
@@ -49,18 +49,18 @@ function Photo({ photo, px = 1, sizes = '100vw', className = '' }) {
 /** Una nota: la tarjeta de papel que acompaña a la foto. La de afuera se mueve con el scroll y la de adentro se despliega. */
 function Note({ label, text, speed, className = '' }) {
   return (
-    <div data-pt={speed} className={`es-pd-note ${className}`}>
-      <span data-sweep className="es-paint es-pd-note__label" style={LABEL}>
+    <div data-pt={speed} className={`od-pd-note ${className}`}>
+      <span data-sweep className="od-paint od-pd-note__label" style={LABEL}>
         {label}
       </span>
-      <p data-sweep className="es-paint es-pd-note__text">
+      <p data-sweep className="od-paint od-pd-note__text">
         {text}
       </p>
     </div>
   )
 }
 
-export default function ProyectoPage({ slug, calm, boarded = true }) {
+export default function ProjectPage({ slug, calm, boarded = true }) {
   const rootRef = useRef(null)
   const wrapRef = useRef(null)
   const trackRef = useRef(null)
@@ -79,7 +79,7 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
 
   // Escape vuelve a los proyectos.
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && navigate(TO_HOME, { section: 'proyectos' })
+    const onKey = (e) => e.key === 'Escape' && navigate(TO_HOME, { section: 'projects' })
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
@@ -207,10 +207,10 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
 
   if (!project) {
     return (
-      <section className="es-pd-missing" aria-label="Proyecto no encontrado">
-        <h1 className="es-pd-title">No encontramos ese proyecto</h1>
-        <a href={hrefOf(TO_HOME)} onClick={(e) => (e.preventDefault(), navigate(TO_HOME, { section: 'proyectos' }))} className="es-pd-back">
-          ← Ver los proyectos
+      <section className="od-pd-missing" aria-label="Project not found">
+        <h1 className="od-pd-title">We could not find that project</h1>
+        <a href={hrefOf(TO_HOME)} onClick={(e) => (e.preventDefault(), navigate(TO_HOME, { section: 'projects' }))} className="od-pd-back">
+          ← See all projects
         </a>
       </section>
     )
@@ -222,45 +222,45 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
   const toNext = next ? { name: 'project', slug: next.slug } : TO_HOME
   const goBack = (e) => {
     e.preventDefault()
-    navigate(TO_HOME, { section: 'proyectos' })
+    navigate(TO_HOME, { section: 'projects' })
   }
   const goNext = (e) => {
     e.preventDefault()
-    navigate(toNext, next ? {} : { section: 'proyectos' })
+    navigate(toNext, next ? {} : { section: 'projects' })
   }
   const ratio = (p) => p.w / p.h
 
   return (
-    <div ref={rootRef} className={`es-pd${calm ? ' es-pd--v' : ''}`} style={{ '--clear': NAV_CLEAR }}>
+    <div ref={rootRef} className={`od-pd${calm ? ' od-pd--v' : ''}`} style={{ '--clear': NAV_CLEAR }}>
       {/* El grano de película, sobre toda la vista. */}
-      <div className="es-pd-grain" aria-hidden="true" />
+      <div className="od-pd-grain" aria-hidden="true" />
 
-      <section ref={wrapRef} className="es-pd-h" aria-labelledby="pd-title">
-        <div ref={trackRef} className="es-pd-track" data-pd-track>
+      <section ref={wrapRef} className="od-pd-h" aria-labelledby="pd-title">
+        <div ref={trackRef} className="od-pd-track" data-pd-track>
           {/* 0. La portada: la mitad izquierda, el panel de color. */}
-          <div className="es-pd-p es-pd-p--cover" data-panel data-first data-spot>
-            <div className="es-pd-hero__top" style={LABEL}>
-              <a href={hrefOf(TO_HOME)} onClick={goBack} className="es-pd-hero__back" data-cursor="Volver">
-                ← Proyectos
+          <div className="od-pd-p od-pd-p--cover" data-panel data-first data-spot>
+            <div className="od-pd-hero__top" style={LABEL}>
+              <a href={hrefOf(TO_HOME)} onClick={goBack} className="od-pd-hero__back" data-cursor="Back">
+                ← Projects
               </a>
               <span>
                 {project.n} / {String(PROJECTS.length).padStart(2, '0')}
               </span>
             </div>
-            <div className="es-pd-hero__mid">
-              <span className="es-pd-hero__thumb" data-reveal>
+            <div className="od-pd-hero__mid">
+              <span className="od-pd-hero__thumb" data-reveal>
                 <img src={ph.thumb.src} srcSet={`${ph.thumb.small} 640w, ${ph.thumb.src} 1200w`} sizes="160px" alt={ph.thumb.alt} decoding="async" />
               </span>
-              <p data-sweep className="es-paint es-pd-hero__kind" style={LABEL}>
+              <p data-sweep className="od-paint od-pd-hero__kind" style={LABEL}>
                 {project.kind}
               </p>
             </div>
-            <div className="es-pd-hero__bottom">
-              <span data-sweep className="es-paint es-pd-hero__meta" style={LABEL}>
+            <div className="od-pd-hero__bottom">
+              <span data-sweep className="od-paint od-pd-hero__meta" style={LABEL}>
                 {project.place} · {project.year}
               </span>
-              <h1 id="pd-title" className="es-pd-title">
-                <span data-sweep className="es-paint">
+              <h1 id="pd-title" className="od-pd-title">
+                <span data-sweep className="od-paint">
                   {project.name}
                 </span>
               </h1>
@@ -268,53 +268,53 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
           </div>
 
           {/* 1. La primera foto: la mitad derecha. */}
-          <div className="es-pd-p es-pd-p--hero" data-panel data-first>
-            <Photo photo={ph.hero} px={1} sizes="50vw" className="es-px--fill" />
+          <div className="od-pd-p od-pd-p--hero" data-panel data-first>
+            <Photo photo={ph.hero} px={1} sizes="50vw" className="od-px--fill" />
           </div>
 
           {/* 2. La descripción: la frase, los servicios y la superficie. */}
-          <div className="es-pd-p es-pd-p--intro" data-panel data-spot>
-            <p data-sweep className="es-paint es-pd-intro__lede">
+          <div className="od-pd-p od-pd-p--intro" data-panel data-spot>
+            <p data-sweep className="od-paint od-pd-intro__lede">
               {project.lede}
             </p>
-            <ul className="es-pd-services">
+            <ul className="od-pd-services">
               {project.services.map((s, k) => (
-                <li key={s} data-sweep className="es-paint">
+                <li key={s} data-sweep className="od-paint">
                   <span>{s}</span>
                   <span style={LABEL}>{String(k + 1).padStart(2, '0')}</span>
                 </li>
               ))}
             </ul>
-            <p className="es-pd-stat__n">
-              <span className="es-pd-stat__mask">
+            <p className="od-pd-stat__n">
+              <span className="od-pd-stat__mask">
                 <span data-rise>{project.area}</span>
               </span>
-              <span className="es-pd-stat__mask es-pd-stat__mask--u">
+              <span className="od-pd-stat__mask od-pd-stat__mask--u">
                 <span data-rise>m²</span>
               </span>
             </p>
           </div>
 
           {/* 3. El ventanal. */}
-          <figure className="es-pd-p es-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.ventanal) }}>
-            <Photo photo={ph.ventanal} px={1} sizes="100vw" />
-            <Note label={notes.ventanal[0]} text={notes.ventanal[1]} speed={-1.5} className="es-pd-note--bl" />
+          <figure className="od-pd-p od-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.light) }}>
+            <Photo photo={ph.light} px={1} sizes="100vw" />
+            <Note label={notes.light[0]} text={notes.light[1]} speed={-1.5} className="od-pd-note--bl" />
           </figure>
 
           {/* 4. El nicho. */}
-          <figure className="es-pd-p es-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.nicho) }}>
-            <Photo photo={ph.nicho} px={1.1} sizes="(min-width: 768px) 40vh, 100vw" />
-            <Note label={notes.nicho[0]} text={notes.nicho[1]} speed={-1.3} className="es-pd-note--br" />
+          <figure className="od-pd-p od-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.colour) }}>
+            <Photo photo={ph.colour} px={1.1} sizes="(min-width: 768px) 40vh, 100vw" />
+            <Note label={notes.colour[0]} text={notes.colour[1]} speed={-1.3} className="od-pd-note--br" />
           </figure>
 
           {/* 5. El oficio. */}
-          <figure className="es-pd-p es-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.prenda) }}>
-            <Photo photo={ph.prenda} px={0.9} sizes="100vw" />
-            <Note label={notes.prenda[0]} text={notes.prenda[1]} speed={-1.2} className="es-pd-note--bl" />
+          <figure className="od-pd-p od-pd-p--photo" data-panel data-spot style={{ '--r': ratio(ph.craft) }}>
+            <Photo photo={ph.craft} px={0.9} sizes="100vw" />
+            <Note label={notes.craft[0]} text={notes.craft[1]} speed={-1.2} className="od-pd-note--bl" />
           </figure>
 
           {/* 6. La foto del local entero, chica, sobre papel. */}
-          <div className="es-pd-p es-pd-p--small" data-panel>
+          <div className="od-pd-p od-pd-p--small" data-panel>
             <Photo photo={ph.cover} px={1.2} sizes="(min-width: 768px) 38vw, 100vw" />
           </div>
 
@@ -322,20 +322,20 @@ export default function ProyectoPage({ slug, calm, boarded = true }) {
       </section>
 
       {/* 7. El cierre: desde acá la página sigue hacia abajo (la tira horizontal terminó en la foto anterior). */}
-      <section className="es-pd-end" data-vpanel data-spot aria-label="Siguiente">
-        <p data-sweep className="es-paint es-pd-end__quote">
+      <section className="od-pd-end" data-vpanel data-spot aria-label="Next">
+        <p data-sweep className="od-paint od-pd-end__quote">
           {project.quote}
         </p>
-        <div className="es-pd-end__foot">
-          <a href={hrefOf(toNext)} onClick={goNext} className="es-pd-end__next" data-cursor={next ? 'Siguiente' : 'Volver'}>
-            <span data-sweep className="es-paint" style={LABEL}>
-              {next ? 'Siguiente proyecto' : 'Todos los proyectos'}
+        <div className="od-pd-end__foot">
+          <a href={hrefOf(toNext)} onClick={goNext} className="od-pd-end__next" data-cursor={next ? 'Next' : 'Back'}>
+            <span data-sweep className="od-paint" style={LABEL}>
+              {next ? 'Next project' : 'All projects'}
             </span>
-            <span data-sweep className="es-paint es-pd-end__name">
-              {next ? next.name : 'Proyectos'} <span aria-hidden="true">→</span>
+            <span data-sweep className="od-paint od-pd-end__name">
+              {next ? next.name : 'Projects'} <span aria-hidden="true">→</span>
             </span>
           </a>
-          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="es-pd-end__ig" style={LABEL}>
+          <a href={SITE.instagram.href} target="_blank" rel="noreferrer" className="od-pd-end__ig" style={LABEL}>
             {SITE.instagram.handle}
           </a>
         </div>

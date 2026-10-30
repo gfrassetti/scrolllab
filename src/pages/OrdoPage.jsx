@@ -1,27 +1,26 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import SmoothScrollProvider from '../../components/SmoothScrollProvider'
-import { prefersReducedMotion } from '../../lib/motion'
-import { getLenis } from '../../hooks/useLenis'
-import { gsap, ScrollTrigger } from '../../lib/gsap'
-import './elstudio.css'
-import Loader from './Loader'
-import Cursor from './Cursor'
-import ScrollRuler from './ScrollRuler'
-import Nav from './Nav'
-import Hero from './Hero'
-import Estudio from './Estudio'
-import Proyectos from './Proyectos'
-import ProyectoPage from './ProyectoPage'
-import { setTransitionHandler, takePendingSection, useRoute } from './router'
-import Boceto from './Boceto'
-import { FONTS_HREF, SITE } from './brand'
+import SmoothScrollProvider from '../components/SmoothScrollProvider'
+import { prefersReducedMotion } from '../lib/motion'
+import { getLenis } from '../hooks/useLenis'
+import { gsap, ScrollTrigger } from '../lib/gsap'
+import '../components/sections/ordo/ordo.css'
+import Loader from '../components/sections/ordo/Loader'
+import Cursor from '../components/sections/ordo/Cursor'
+import ScrollRuler from '../components/sections/ordo/ScrollRuler'
+import Nav from '../components/sections/ordo/Nav'
+import Hero from '../components/sections/ordo/Hero'
+import Projects from '../components/sections/ordo/Projects'
+import ProjectPage from '../components/sections/ordo/ProjectPage'
+import { setTransitionHandler, takePendingSection, useRoute } from '../components/sections/ordo/router'
+import Sketch from '../components/sections/ordo/Sketch'
+import { FONTS_HREF, SITE } from '../components/sections/ordo/brand'
 
 const FONT_WAIT_MS = 4000
 
 /**
  * Cómo se sale del hero (pruebas):
  *   'boceto'    al terminar, todo el hero (menos el nav) vuelve a boceto en su hoja y después sigue el
- *               scroll hacia Proyectos (Boceto.jsx).
+ *               scroll hacia Projects (Boceto.jsx).
  *   'proyecto'  la foto del local se despega de la lámina y aterriza en la tarjeta 01 de Proyectos.
  *   'lamina'    cambio de lámina: la hoja del hero se levanta y debajo está la de Estudio.
  */
@@ -44,7 +43,7 @@ startAtTop()
 
 /** Arriba de todo, también para Lenis (que lleva su propia posición) y para los ScrollTrigger. */
 function toTop() {
-  // «instant»: con scroll-behavior suave (elstudio.css) un scrollTo común subiría animado.
+  // «instant»: con scroll-behavior suave (ordo.css) un scrollTo común subiría animado.
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   getLenis()?.scrollTo(0, { immediate: true, force: true })
   ScrollTrigger.update()
@@ -65,7 +64,7 @@ FIRST VIEWPORT: el encabezado, un titular enorme en peso liviano y una sola lín
  * elStudio — demo del Estudio para un cliente (diseño industrial e interiorismo).
  * Base: loader, cursor, papel y tipografía. En local: /estudio/elstudio.
  */
-export default function ElStudioPage() {
+export default function OrdoPage() {
   const [calm] = useState(() => prefersReducedMotion())
   const bridge = useRef({})
   const navLogoRef = useRef(null)
@@ -91,7 +90,6 @@ export default function ElStudioPage() {
     let alive = true
     const load = Promise.allSettled([
       document.fonts.load('500 1em Jost'),
-      document.fonts.load('italic 300 1em Jost'),
     ])
     const timeout = new Promise((r) => setTimeout(r, FONT_WAIT_MS))
     Promise.race([load, timeout]).then(() => alive && setFontsReady(true))
@@ -181,7 +179,7 @@ export default function ElStudioPage() {
       return
     }
     const section = route.name === 'home' ? takePendingSection() : null
-    const el = section && section !== 'inicio' ? document.getElementById(section) : null
+    const el = section && section !== 'home' ? document.getElementById(section) : null
     const y = el ? el.offsetTop : 0
     const jump = () => {
       const target = el ? document.getElementById(section).offsetTop : y
@@ -199,22 +197,22 @@ export default function ElStudioPage() {
 
   return (
     <SmoothScrollProvider>
-      <div className="es-root min-h-svh">
+      <div className="od-root min-h-svh">
         <Loader ready={ready} calm={calm} bridge={bridge} onDone={onDone} />
         <Nav logoRef={navLogoRef} open={boarded} calm={calm} />
         <main id="contenido" tabIndex={-1} className="outline-none">
           {route.name === 'project' ? (
-            <ProyectoPage key={route.slug} slug={route.slug} calm={calm} boarded={boarded} />
+            <ProjectPage key={route.slug} slug={route.slug} calm={calm} boarded={boarded} />
           ) : (
             <>
               <Hero boarded={boarded} calm={calm} bridge={bridge} navLogoRef={navLogoRef} exit={heroExit} boceto={SALIDA === 'boceto'} />
-              {SALIDA === 'boceto' && <Boceto calm={calm} exit={heroExit} />}
-              {SALIDA === 'lamina' ? <Estudio calm={calm} /> : <Proyectos calm={calm} exit={heroExit} mode={SALIDA} />}
+              {SALIDA === 'boceto' && <Sketch calm={calm} exit={heroExit} />}
+              <Projects calm={calm} />
             </>
           )}
         </main>
         {/* La cortina del cambio de página. */}
-        <div ref={curtainRef} className="es-curtain" aria-hidden="true" />
+        <div ref={curtainRef} className="od-curtain" aria-hidden="true" />
         {/* La barra de scroll propia: una regla vertical (reemplaza a la nativa desde que se monta). Entra con el
             sitio, al terminar el loader. */}
         <ScrollRuler on={boarded} />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ScrollTrigger } from '../../lib/gsap'
-import { getLenis } from '../../hooks/useLenis'
+import { ScrollTrigger } from '../../../lib/gsap'
+import { getLenis } from '../../../hooks/useLenis'
 import { LABEL } from './brand'
 
 const FINE_POINTER = '(hover: hover) and (pointer: fine)'
@@ -47,8 +47,8 @@ export default function ScrollRuler({ on }) {
       // La página de un proyecto marca sus paneles (data-spot): en la tira horizontal, según cuánto scroll lleva
       // cada uno; en vertical, donde empieza cada uno. La portada y la de un solo scroll, sus secciones.
       const marked = [...document.querySelectorAll('[data-spot]')]
-      const wrap = document.querySelector('.es-pd-h')
-      // La tira horizontal (ProyectoPage): su disparador da dónde empieza y cuánto dura (se lee en vivo, no una copia).
+      const wrap = document.querySelector('.od-pd-h')
+      // La tira horizontal (ProjectPage): su disparador da dónde empieza y cuánto dura (se lee en vivo, no una copia).
       const pin = wrap ? ScrollTrigger.getAll().find((t) => t.pin === wrap) : null
       const dist = pin ? pin.end - pin.start : 0
       let spots
@@ -164,18 +164,18 @@ export default function ScrollRuler({ on }) {
   }, [fine])
 
   return (
-    <div ref={rulerRef} className="es-ruler" data-on={on ? '' : undefined} data-fine={fine ? '' : undefined} aria-hidden="true">
-      <span className="es-ruler__ticks" />
-      <span className="es-ruler__lens" />
+    <div ref={rulerRef} className="od-ruler" data-on={on ? '' : undefined} data-fine={fine ? '' : undefined} aria-hidden="true">
+      <span className="od-ruler__ticks" />
+      <span className="od-ruler__lens" />
       {marks.map((m) => (
-        <span key={m.n} className="es-ruler__wp" style={{ top: `${m.f * 100}%` }}>
-          <span className="es-ruler__wpn" style={LABEL}>
+        <span key={m.n} className="od-ruler__wp" style={{ top: `${m.f * 100}%` }}>
+          <span className="od-ruler__wpn" style={LABEL}>
             {m.n}
           </span>
         </span>
       ))}
-      <span ref={markRef} className="es-ruler__mark">
-        <span ref={tagRef} className="es-ruler__tag" style={LABEL}>
+      <span ref={markRef} className="od-ruler__mark">
+        <span ref={tagRef} className="od-ruler__tag" style={LABEL}>
           01
         </span>
       </span>

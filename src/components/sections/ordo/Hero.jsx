@@ -1,18 +1,18 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { gsap, ScrollTrigger } from '../../lib/gsap'
-import { createFrameBudget } from '../../lib/motion'
+import { gsap, ScrollTrigger } from '../../../lib/gsap'
+import { createFrameBudget } from '../../../lib/motion'
 import { C, HERO_VH, LABEL, NAV_H, OPEN_DELAY, OPEN_T as T, SITE, STAGE_AT } from './brand'
 import { hidePaint, paint } from './paint'
 import { setPlanProbe } from './planProbe'
 import { createLocalScene, FRAME_ASPECT } from './localScene'
-import photoFull from './assets/foto-local.webp'
-import photoSmall from './assets/foto-local-1200.webp'
-import sketchFull from './assets/boceto-local.webp'
-import sketchSmall from './assets/boceto-local-1200.webp'
-import emptyFull from './assets/boceto-vacio.webp'
-import emptySmall from './assets/boceto-vacio-1200.webp'
-import rawFull from './assets/boceto-obra.webp'
-import rawSmall from './assets/boceto-obra-1200.webp'
+import photoFull from './assets/room-photo.webp'
+import photoSmall from './assets/room-photo-1200.webp'
+import sketchFull from './assets/sketch-room.webp'
+import sketchSmall from './assets/sketch-room-1200.webp'
+import emptyFull from './assets/sketch-empty.webp'
+import emptySmall from './assets/sketch-empty-1200.webp'
+import rawFull from './assets/sketch-raw.webp'
+import rawSmall from './assets/sketch-raw-1200.webp'
 import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
 
 /**
@@ -21,7 +21,7 @@ import { DESIGN_PIECES, IMG, ROOM_IN_IMAGE as RI } from './designPieces'
  * La disposición (como la de un hero de plano): arriba, tres cuartos de la pantalla para el cuadrante
  * del dibujo (un alzado, 21:9), a todo el ancho, con la etapa y la lámina en sus esquinas; abajo, una
  * franja baja como la de heronaiapp.com: el título grande a la izquierda y, a la derecha, una celda
- * con el texto de cada etapa. El alto de esa franja es --band-h (elstudio.css).
+ * con el texto de cada etapa. El alto de esa franja es --band-h (ordo.css).
  * Al terminar el loader, un local (café / showroom, minimal cálido) se dibuja a lápiz. Al scrollear
  * (el hero queda fijo):
  *   01 El espacio   el local como se recibe, en obra gris (ventana chica, parches, el caño y la lamparita).
@@ -53,12 +53,12 @@ const REVEAL_SECONDS = 3.8 * T
 // Lo que dice la celda de la derecha en cada hoja del plano (la primera es también el subtítulo fijo,
 // para los buscadores: ABOUT).
 const ABOUT =
-  'Estudio multidisciplinario de diseño e interiorismo, enfocado en la experiencia de usuario. Desde la Patagonia y Buenos Aires, para cualquier lugar.'
+  'An architecture and interiors studio in Lisbon. We design every space whole, from the first line to the last joint.'
 const STAGES = [
-  { n: '01', title: 'El espacio', text: ABOUT },
-  { n: '02', title: 'Diseño', text: 'Proyectamos el local entero, pieza por pieza: aberturas, cielorraso, revestimientos, carpintería y mobiliario.' },
-  { n: '03', title: 'Materia y luz', text: 'De tu idea a lo concreto: materiales, luz y color pensados para cómo se va a vivir.' },
-  { n: '04', title: 'Experiencia', text: 'Tu proyecto, con cara propia: un espacio listo para recibir a tu gente.' },
+  { n: '01', title: 'The space', text: ABOUT },
+  { n: '02', title: 'Design', text: 'We draw the whole space, piece by piece: openings, ceiling, finishes, joinery and furniture.' },
+  { n: '03', title: 'Matter & light', text: 'From the idea to the built: materials, light and colour chosen for how the place will be lived in.' },
+  { n: '04', title: 'Experience', text: 'The finished project, with a face of its own: a space ready to welcome its people.' },
 ]
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
@@ -84,7 +84,7 @@ const PHOTO_END_ZOOM = 1
 const PIECE_DUR = 0.09
 const pieceAt = (k) => 0.06 + (k * (0.52 - 0.06 - PIECE_DUR)) / Math.max(1, DESIGN_PIECES.length - 1)
 /** El cartel del cursor en la última etapa, cuando se puede arrastrar. */
-const DRAG_TIP = 'Clic y arrastre'
+const DRAG_TIP = 'Click and drag'
 /** Lo que no es fondo en la foto (el local con su base y su sombra), en fracciones de la imagen. */
 const PHOTO_IN = { x0: 0.03, x1: 0.97, y0: 0.085, y1: 0.87 }
 
@@ -129,8 +129,8 @@ function cameraFrame(p) {
  */
 function Chunk({ text, hidden }) {
   return (
-    <span data-chunk className="es-chunk">
-      <span className="es-chunk__ink" style={hidden ? { opacity: 0, visibility: 'hidden' } : undefined}>
+    <span data-chunk className="od-chunk">
+      <span className="od-chunk__ink" style={hidden ? { opacity: 0, visibility: 'hidden' } : undefined}>
         {text}
       </span>
     </span>
@@ -244,7 +244,7 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
       scene.setFrame(frame.x, frame.y, frame.w, frame.h)
     }
     // Las partes del título: la tinta se descubre con el scroll (solo se escribe lo que cambió).
-    const chunks = [...stageEl.querySelectorAll('[data-chunk]')].map((el, i) => ({ ink: el.querySelector('.es-chunk__ink'), on: calm || i === 0 }))
+    const chunks = [...stageEl.querySelectorAll('[data-chunk]')].map((el, i) => ({ ink: el.querySelector('.od-chunk__ink'), on: calm || i === 0 }))
     const apply = (p) => {
       if (!lastKey) {
         lastKey = 'set'
@@ -480,10 +480,10 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
   const st = STAGES[stage]
 
   return (
-    <section ref={sectionRef} id="inicio" aria-label="Inicio" className={`relative z-[2] ${boceto ? 'h-[580vh]' : 'h-[480vh]'} calm:h-svh`}>
-      <div ref={stageRef} data-hero-sheet className="es-lamina es-sheet es-sk sticky top-0 h-svh overflow-hidden">
+    <section ref={sectionRef} id="home" aria-label="Home" className={`relative z-[2] ${boceto ? 'h-[580vh]' : 'h-[480vh]'} calm:h-svh`}>
+      <div ref={stageRef} data-hero-sheet className="od-lamina od-sheet od-sk sticky top-0 h-svh overflow-hidden">
         {/* La grilla de columnas, a la vista. */}
-        <div ref={colsRef} className="es-cols" aria-hidden="true" style={{ '--cols': cols }}>
+        <div ref={colsRef} className="od-cols" aria-hidden="true" style={{ '--cols': cols }}>
           {Array.from({ length: cols }, (_, i) => (
             <span key={i} data-col style={{ '--i': i + 1 }} />
           ))}
@@ -493,76 +493,76 @@ export default function Hero({ boarded, calm, bridge, navLogoRef, exit, boceto =
           ref={canvasRef}
           className="absolute inset-0 block h-full w-full"
           role="img"
-          aria-label="Alzado de un local en obra gris dibujado a lápiz que se va proyectando, de las aberturas y los revestimientos a cada mueble, hasta la foto del local terminado"
+          aria-label="Elevation of a shop shell drawn in pencil that gets designed piece by piece, from the openings and finishes to each piece of furniture, until it becomes the photograph of the finished space"
           data-cursor-tip={stage === 3 ? DRAG_TIP : undefined}
         />
 
         {/* El marco del cuadrante: cuatro bordes que se dibujan y sus datos. */}
-        <div ref={panelRef} className="es-panel" data-cursor-zone aria-hidden="true">
-          <span data-panel-edge className="es-panel__edge es-panel__edge--t" />
-          <span data-panel-edge className="es-panel__edge es-panel__edge--r" />
-          <span data-panel-edge className="es-panel__edge es-panel__edge--b" />
-          <span data-panel-edge className="es-panel__edge es-panel__edge--l" />
-          <span data-paint data-paint-stage className="es-paint es-panel__label es-panel__label--tl" style={LABEL}>
+        <div ref={panelRef} className="od-panel" data-cursor-zone aria-hidden="true">
+          <span data-panel-edge className="od-panel__edge od-panel__edge--t" />
+          <span data-panel-edge className="od-panel__edge od-panel__edge--r" />
+          <span data-panel-edge className="od-panel__edge od-panel__edge--b" />
+          <span data-panel-edge className="od-panel__edge od-panel__edge--l" />
+          <span data-paint data-paint-stage className="od-paint od-panel__label od-panel__label--tl" style={LABEL}>
             {st.n} — {st.title}
           </span>
-          <span data-paint data-paint-stage className="es-paint es-panel__label es-panel__label--tr hidden sm:block" style={LABEL}>
-            Alzado · Esc. 1:50 · Lámina {st.n} / 04
+          <span data-paint data-paint-stage className="od-paint od-panel__label od-panel__label--tr hidden sm:block" style={LABEL}>
+            Elevation · Scale 1:50 · Sheet {st.n} / 04
           </span>
         </div>
 
         {/* Las líneas de construcción (con el mouse). */}
-        <div className="es-guides" aria-hidden="true">
-          <span className="es-guide es-guide--h" style={{ top: 'var(--py)' }} />
-          <span className="es-guide es-guide--h" style={{ top: 'calc(var(--py) + var(--ph) / 3)' }} />
-          <span className="es-guide es-guide--h" style={{ top: 'calc(var(--py) + var(--ph) * 2 / 3)' }} />
-          <span className="es-guide es-guide--h" style={{ top: 'calc(var(--py) + var(--ph))' }} />
-          <span className="es-guide es-guide--v" style={{ left: 'var(--px)' }} />
-          <span className="es-guide es-guide--v" style={{ left: 'calc(var(--px) + var(--pw) / 2)' }} />
-          <span className="es-guide es-guide--v" style={{ left: 'calc(var(--px) + var(--pw))' }} />
-          <span className="es-guide es-guide--rust-v" />
-          <span className="es-guide es-guide--rust-h" />
+        <div className="od-guides" aria-hidden="true">
+          <span className="od-guide od-guide--h" style={{ top: 'var(--py)' }} />
+          <span className="od-guide od-guide--h" style={{ top: 'calc(var(--py) + var(--ph) / 3)' }} />
+          <span className="od-guide od-guide--h" style={{ top: 'calc(var(--py) + var(--ph) * 2 / 3)' }} />
+          <span className="od-guide od-guide--h" style={{ top: 'calc(var(--py) + var(--ph))' }} />
+          <span className="od-guide od-guide--v" style={{ left: 'var(--px)' }} />
+          <span className="od-guide od-guide--v" style={{ left: 'calc(var(--px) + var(--pw) / 2)' }} />
+          <span className="od-guide od-guide--v" style={{ left: 'calc(var(--px) + var(--pw))' }} />
+          <span className="od-guide od-guide--rust-v" />
+          <span className="od-guide od-guide--rust-h" />
         </div>
 
         {/* El borde de la franja de abajo y sus cruces: el marco de esta hoja (se va con ella). */}
-        <span data-frame-line className="es-frame__line es-frame__line--bottom" aria-hidden="true" />
+        <span data-frame-line className="od-frame__line od-frame__line--bottom" aria-hidden="true" />
         {['bl', 'br'].map((k) => (
-          <span key={k} data-frame-mark className={`es-frame__mark es-frame__mark--${k}`} aria-hidden="true" />
+          <span key={k} data-frame-mark className={`od-frame__mark od-frame__mark--${k}`} aria-hidden="true" />
         ))}
 
         {/* La franja de abajo: el título grande y, a la derecha, el texto de la etapa. */}
-        <div ref={infoRef} className="es-info" style={{ color: C.ink }}>
-          <h1 className="es-info__title">
+        <div ref={infoRef} className="od-info" style={{ color: C.ink }}>
+          <h1 className="od-info__title">
             <span className="sr-only">{SITE.name} — </span>
-            <span data-paint className="es-paint es-info__line">
-              <Chunk text="Diseño" /> <Chunk text="e interiorismo" hidden={!calm} />
+            <span data-paint className="od-paint od-info__line">
+              <Chunk text="Architecture" /> <Chunk text="& interiors" hidden={!calm} />
             </span>
-            <span data-paint className="es-paint es-info__line">
-              <Chunk text="para quien" hidden={!calm} /> <Chunk text="lo vive" hidden={!calm} />
+            <span data-paint className="od-paint od-info__line">
+              <Chunk text="for the people" hidden={!calm} /> <Chunk text="who live in them" hidden={!calm} />
             </span>
           </h1>
           {/* La señal de scroll: la palabra y una flecha dibujada a mano que se traza una y otra vez. */}
-          <div ref={cueRef} className="es-scrollcue" aria-hidden="true">
-            <span className="es-scrollcue__label" style={LABEL}>
+          <div ref={cueRef} className="od-scrollcue" aria-hidden="true">
+            <span className="od-scrollcue__label" style={LABEL}>
               Scroll
             </span>
-            <svg className="es-scrollcue__arrow" viewBox="0 0 30 64" fill="none">
-              <path className="es-scrollcue__s1" pathLength="1" d="M15.2 2 C14.4 14, 16.3 24, 15 36 S14.6 50, 15.4 58.5" />
-              <path className="es-scrollcue__s2" pathLength="1" d="M16.4 4.5 C15.6 18, 16.8 30, 15.9 42 S15.6 52, 15.8 57" />
-              <path className="es-scrollcue__h1" pathLength="1" d="M5.5 46.5 C9 50.5, 12.4 54.6, 15.3 59.4" />
-              <path className="es-scrollcue__h2" pathLength="1" d="M25.2 45.4 C21.6 50, 18.4 54.4, 15.1 59.6 L14.2 61" />
+            <svg className="od-scrollcue__arrow" viewBox="0 0 30 64" fill="none">
+              <path className="od-scrollcue__s1" pathLength="1" d="M15.2 2 C14.4 14, 16.3 24, 15 36 S14.6 50, 15.4 58.5" />
+              <path className="od-scrollcue__s2" pathLength="1" d="M16.4 4.5 C15.6 18, 16.8 30, 15.9 42 S15.6 52, 15.8 57" />
+              <path className="od-scrollcue__h1" pathLength="1" d="M5.5 46.5 C9 50.5, 12.4 54.6, 15.3 59.4" />
+              <path className="od-scrollcue__h2" pathLength="1" d="M25.2 45.4 C21.6 50, 18.4 54.4, 15.1 59.6 L14.2 61" />
             </svg>
           </div>
 
-          <div className="es-info__side">
+          <div className="od-info__side">
             {/* La línea que separa el titular del texto: se traza de arriba abajo al abrir (data-vline). */}
-            <span data-vline className="es-info__vline" aria-hidden="true" />
+            <span data-vline className="od-info__vline" aria-hidden="true" />
             <h2 className="sr-only">{ABOUT}</h2>
             {/* El número de la hoja: el mismo de la lámina del cuadrante («Lámina 02 / 04»). */}
-            <span data-paint data-paint-stage className="es-paint es-info__step" style={LABEL} aria-hidden="true">
+            <span data-paint data-paint-stage className="od-paint od-info__step" style={LABEL} aria-hidden="true">
               {st.n} / 04
             </span>
-            <p data-paint data-paint-stage className="es-paint es-info__copy" aria-live="polite">
+            <p data-paint data-paint-stage className="od-paint od-info__copy" aria-live="polite">
               {st.text}
             </p>
           </div>

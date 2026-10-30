@@ -10,8 +10,7 @@
     "build": "vite build && node scripts/gen-share-pages.mjs",
     "build:capsula33": "vite build --config vite.capsula33.config.js",
     "build:capsula33:public": "vite build --config vite.capsula33.config.js --mode public",
-    "build:elstudio": "vite build --config vite.elstudio.config.js",
-    "elstudio:deploy": "npm run build:elstudio && npx wrangler pages deploy dist-elstudio --project-name=elstudio --branch=main",
+    "build:ordo": "vite build --config vite.ordo.config.js",
     "build:embed": "vite build --config embed/vite.config.js && node embed/build-loader.mjs",
     "build:loader": "node embed/build-loader.mjs",
     "lint": "eslint .",
@@ -62,8 +61,7 @@
     "test": "node scripts/run-tests.mjs",
     "fold:reel": "node scripts/fold-reel.mjs",
     "fold:phone": "node scripts/fold-phone-tier.mjs",
-    "fold:deploy": "wrangler deploy --config wrangler.fold.jsonc",
-    "elstudio:deploy:workers": "npm run build:elstudio && npx wrangler deploy -c wrangler.elstudio.jsonc"
+    "fold:deploy": "wrangler deploy --config wrangler.fold.jsonc"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
