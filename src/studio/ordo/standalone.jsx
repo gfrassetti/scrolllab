@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../../index.css'
-import ElStudioPage from './ElStudioPage'
+import OrdoPage from '../../pages/OrdoPage'
 
 /**
  * Entrada propia de elStudio para publicar solo esta página (`npm run build:elstudio`):
@@ -11,6 +11,6 @@ import ElStudioPage from './ElStudioPage'
  */
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ElStudioPage />
+    <OrdoPage />
   </StrictMode>,
 )
