@@ -9,54 +9,54 @@ import { navLinks, MENU_BUTTON, LEGAL_HELP } from '../helpers.js'
  */
 export const ATRIUM_FIELDS = {
   'atrium/NavAtrium': [
-    { key: 'lineOne', label: 'Line 1', type: 'text' },
-    { key: 'lineTwo', label: 'Line 2', type: 'text' },
+    { key: 'lineOne', label: 'Línea 1', type: 'text' },
+    { key: 'lineTwo', label: 'Línea 2', type: 'text' },
     navLinks(),
     ...MENU_BUTTON,
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/HeroMassing': [
-    { key: 'lineOne', label: 'Line 1', type: 'text' },
-    { key: 'lineTwo', label: 'Line 2', type: 'text' },
-    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'lineOne', label: 'Línea 1', type: 'text' },
+    { key: 'lineTwo', label: 'Línea 2', type: 'text' },
+    { key: 'hint', label: 'Pista', type: 'text' },
     { key: 'img', label: 'Foto de fondo', type: 'image' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ManifestoType': [
-    { key: 'lineOne', label: 'Line 1', type: 'text' },
-    { key: 'lineTwo', label: 'Line 2', type: 'text' },
-    { key: 'left', label: 'Left column', type: 'textarea' },
-    { key: 'right', label: 'Right column', type: 'textarea' },
+    { key: 'lineOne', label: 'Línea 1', type: 'text' },
+    { key: 'lineTwo', label: 'Línea 2', type: 'text' },
+    { key: 'left', label: 'Columna izquierda', type: 'textarea' },
+    { key: 'right', label: 'Columna derecha', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ScopeSerif': [
-    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'body', label: 'Texto', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ClarityPair': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
-    { key: 'left', label: 'Left headline', type: 'text' },
-    { key: 'right', label: 'Right headline', type: 'text' },
-    { key: 'bodyLeft', label: 'Left body', type: 'textarea' },
-    { key: 'bodyRight', label: 'Right body', type: 'textarea' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
+    { key: 'left', label: 'Titular izquierdo', type: 'text' },
+    { key: 'right', label: 'Titular derecho', type: 'text' },
+    { key: 'bodyLeft', label: 'Texto izquierdo', type: 'textarea' },
+    { key: 'bodyRight', label: 'Texto derecho', type: 'textarea' },
     { key: 'bg', label: 'Color claro (el fondo del principio)', type: 'color' },
     { key: 'fg', label: 'Color oscuro (el fondo del final)', type: 'color' },
   ],
   'atrium/BlueprintDraw': [
     { key: 'kicker', label: 'Rótulo', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
-    { key: 'body', label: 'Body', type: 'textarea' },
-    { key: 'caption', label: 'Caption', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'body', label: 'Texto', type: 'textarea' },
+    { key: 'caption', label: 'Epígrafe', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ProjectRail': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     {
       key: 'works',
       label: 'Proyectos',
@@ -72,7 +72,7 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ProcessPin': [
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     {
       key: 'scenes',
       label: 'Etapas',
@@ -89,8 +89,8 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/PeopleScatter': [
-    { key: 'label', label: 'Label', type: 'text' },
-    { key: 'title', label: 'Title', type: 'textarea' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'textarea' },
     {
       key: 'plates',
       label: 'Fotos dispersas (en orden)',
@@ -117,7 +117,7 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/StatField': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
     {
       key: 'stats',
       label: 'Cifras',
@@ -134,8 +134,8 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/AwardsPress': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     {
       key: 'items',
       label: 'Premios y prensa',
@@ -152,7 +152,7 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/ClientVoice': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
     { key: 'quote', label: 'Cita', type: 'textarea' },
     { key: 'name', label: 'Nombre', type: 'text' },
     { key: 'role', label: 'Proyecto o cargo', type: 'text' },
@@ -161,8 +161,8 @@ export const ATRIUM_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atrium/JournalList': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     { key: 'readLabel', label: 'Texto de leer', type: 'text' },
     {
       key: 'posts',
@@ -190,7 +190,7 @@ export const ATRIUM_FIELDS = {
     { key: 'legalHref', label: 'Legal — enlace (#legal abre el panel)', type: 'href', help: LEGAL_HELP },
     { key: 'legalText', label: 'Legal — contenido del panel', type: 'textarea' },
     { key: 'legalCloseLabel', label: 'Panel legal — botón cerrar', type: 'text' },
-    { key: 'year', label: 'Year', type: 'text' },
+    { key: 'year', label: 'Año', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],

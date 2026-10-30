@@ -9,7 +9,7 @@ import { navLinks, CHAPTER_LABEL, MENU_BUTTON, toggle } from '../helpers.js'
  */
 export const CHAPTERS_FIELDS = {
   'chapters/NavMinimal': [
-    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'brand', label: 'Marca', type: 'text' },
     navLinks(),
     ...MENU_BUTTON,
     { key: 'bg', label: 'Menú móvil — color de fondo', type: 'color' },
@@ -22,9 +22,9 @@ export const CHAPTERS_FIELDS = {
     { key: 'lineOne', label: 'Linea 1', type: 'text' },
     { key: 'lineTwo', label: 'Linea 2', type: 'text' },
     { key: 'lineThree', label: 'Linea 3', type: 'text' },
-    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
     { key: 'meta', label: 'Meta', type: 'text' },
-    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'hint', label: 'Pista', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     { key: 'accent', label: 'Color de acento', type: 'color' },
@@ -35,7 +35,7 @@ export const CHAPTERS_FIELDS = {
     CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     {
       key: 'text',
       label: 'Texto del manifiesto',
@@ -56,8 +56,8 @@ export const CHAPTERS_FIELDS = {
     CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
-    { key: 'quote', label: 'Quote', type: 'textarea' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
+    { key: 'quote', label: 'Cita', type: 'textarea' },
     { key: 'attribution', label: 'Attribution', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
@@ -67,7 +67,7 @@ export const CHAPTERS_FIELDS = {
     CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'ghostWord', label: 'Palabra de fondo', type: 'text' },
     {
       key: 'figures',
@@ -118,8 +118,8 @@ export const CHAPTERS_FIELDS = {
     CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
-    { key: 'heading', label: 'Heading', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
+    { key: 'heading', label: 'Encabezado', type: 'text' },
     {
       key: 'panels',
       label: 'Paneles',
@@ -163,14 +163,14 @@ export const CHAPTERS_FIELDS = {
     CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     {
       key: 'scenes',
       label: 'Escenas (una foto por escena; sin foto usa la de ejemplo)',
       type: 'list',
       max: 6,
       item: [
-        { key: 'kicker', label: 'Kicker', type: 'text' },
+        { key: 'kicker', label: 'Sobretítulo', type: 'text' },
         { key: 'title', label: 'Título', type: 'text' },
         { key: 'body', label: 'Texto', type: 'textarea' },
         { key: 'img', label: 'Imagen (URL)', type: 'image' },
@@ -184,7 +184,7 @@ export const CHAPTERS_FIELDS = {
     CHAPTER_LABEL,
     { key: 'chapter', label: 'Chapter', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     {
       key: 'cards',
       label: 'Cartas (el contraste alterna como en el ejemplo)',

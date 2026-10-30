@@ -16,9 +16,9 @@ import ColorField from './ColorField'
  */
 
 const inputCls =
-  'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink'
+  'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink max-sm:min-h-11'
 const selectCls =
-  'mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink'
+  'mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink max-sm:min-h-11'
 
 /** Tipos que el editor valida: lo tipeado puede no guardarse todavía. */
 const VALIDATED = new Set(['color', 'href', 'url', 'image', 'price'])
@@ -244,15 +244,15 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
 
     return (
       <div className="block">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/65">
           {field.label}
         </span>
-        {hint ? <span className="mt-1 block text-xs text-ink/45">{hint}</span> : null}
+        {hint ? <span className="mt-1 block text-xs text-ink/60">{hint}</span> : null}
         <div className="mt-2 space-y-3">
           {items.map((it, i) => (
             <div key={i} className="border border-ink/15 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-ink/40">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-ink/40">
                   {i + 1}
                 </span>
                 <span className="flex gap-1">
@@ -287,7 +287,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
               <div className="space-y-2">
                 {sub.map((sf) => (
                   <label key={sf.key} className="block">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-ink/45">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-ink/60">
                       {sf.label}
                     </span>
                     <Scalar
@@ -318,7 +318,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
   return (
     <div className="block">
       <label className="block">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/65">
           {field.label}
         </span>
         <Scalar
@@ -328,7 +328,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
           absoluteUrls={absoluteUrls}
         />
         {field.type === 'href' || hint ? (
-          <span className="mt-1 block text-xs text-ink/45">
+          <span className="mt-1 block text-xs text-ink/60">
             {hint || t('builder.hrefHint')}
           </span>
         ) : null}

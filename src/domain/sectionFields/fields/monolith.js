@@ -9,7 +9,7 @@ import { model3dHelp, navLinks, MENU_BUTTON, toggle } from '../helpers.js'
  */
 export const MONOLITH_FIELDS = {
   'monolith/NavBrutal': [
-    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'brand', label: 'Marca', type: 'text' },
     navLinks(),
     ...MENU_BUTTON,
     { key: 'bg', label: 'Color de fondo', type: 'color' },
@@ -17,10 +17,10 @@ export const MONOLITH_FIELDS = {
     { key: 'accent', label: 'Color de acento', type: 'color' },
   ],
   'monolith/HeroThree': [
-    { key: 'title', label: 'Title', type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'textarea' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'subtitle', label: 'Subtítulo', type: 'textarea' },
     { key: 'meta', label: 'Meta', type: 'text' },
-    { key: 'hint', label: 'Hint', type: 'text' },
+    { key: 'hint', label: 'Pista', type: 'text' },
     {
       key: 'shape',
       label: 'Objeto 3D — forma (si no ponés un modelo propio)',
@@ -51,7 +51,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -67,7 +67,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Etiqueta de unidad', type: 'text' },
     { key: 'unit', label: 'Unidad', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     {
       key: 'specs',
       label: 'Filas',
@@ -85,7 +85,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -105,7 +105,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
     {
@@ -128,7 +128,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'title', label: 'Titular', type: 'text' },
     {
       key: 'layers',
@@ -148,7 +148,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'title', label: 'Titular', type: 'text' },
     {
       key: 'stats',
@@ -167,7 +167,7 @@ export const MONOLITH_FIELDS = {
     { key: 'unitLabel', label: 'Numeración — rótulo', type: 'text' },
     { key: 'unit', label: 'Unit', type: 'text' },
     { key: 'total', label: 'Total', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     { key: 'title', label: 'Titular', type: 'text' },
     { key: 'cureLabel', label: 'Molde — rótulo', type: 'text' },
     {
@@ -187,9 +187,9 @@ export const MONOLITH_FIELDS = {
     toggle('showMould', 'Molde que se llena de hormigón'),
   ],
   'monolith/FooterBrutal': [
-    { key: 'ctaWord', label: 'CTA', type: 'text' },
+    { key: 'ctaWord', label: 'Botón', type: 'text' },
     { key: 'email', label: 'Email', type: 'text' },
-    { key: 'ctaHref', label: 'CTA — enlace (si no, usa el email)', type: 'href' },
+    { key: 'ctaHref', label: 'Botón — enlace (si no, usa el email)', type: 'href' },
     { key: 'legal', label: 'Legal', type: 'text' },
     { key: 'backToTop', label: 'Volver arriba — texto', type: 'text' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },

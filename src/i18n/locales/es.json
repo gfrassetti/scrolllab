@@ -1945,7 +1945,8 @@
       "bone": "Hueso",
       "white": "Blanco",
       "custom": "Otro color",
-      "typed": "código del color"
+      "typed": "código del color",
+      "example": "Ej.: #0e0e11"
     }
   },
   "prefs": {

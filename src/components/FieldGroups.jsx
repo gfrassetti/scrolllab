@@ -69,7 +69,7 @@ function Group({ group, count, open, onOpen, switchOn, onSwitch, children }) {
           >
             <Chevron open={open} />
             <span className="truncate">{group.title}</span>
-            <span className="text-xs font-normal text-ink/45 tabular-nums">{count}</span>
+            <span className="text-xs font-normal text-ink/60 tabular-nums">{count}</span>
           </button>
         )}
         {switchable ? <Switch on={switchOn} label={group.title} onToggle={onSwitch} /> : null}

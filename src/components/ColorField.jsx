@@ -77,10 +77,10 @@ export default function ColorField({ label, value = '', draft = '', onChange, wa
         <input
           type="text"
           value={draft}
-          placeholder="#0e0e11 · rgba(14,14,17,.9)"
+          placeholder={t('fields.swatch.example')}
           aria-label={`${label} — ${t('fields.swatch.typed')}`}
           onChange={(e) => onChange(e.target.value)}
-          className="min-h-9 min-w-0 flex-1 basis-32 border border-ink/20 bg-transparent px-2.5 py-1.5 font-mono text-xs text-ink outline-none focus:border-ink"
+          className="min-h-9 max-sm:min-h-11 min-w-0 flex-1 basis-32 border border-ink/20 bg-transparent px-2.5 py-1.5 font-mono text-xs text-ink outline-none focus:border-ink"
         />
       </div>
       {warning}

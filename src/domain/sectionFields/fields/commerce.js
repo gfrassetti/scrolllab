@@ -34,7 +34,7 @@ export const COMMERCE_FIELDS = {
   'commerce/ProductGrid': [
     {
       key: 'theme',
-      label: 'Color',
+      label: 'Paleta de colores',
       type: 'select',
       options: [
         { value: 'auto', label: 'Auto (sección de al lado)' },
@@ -73,9 +73,9 @@ export const COMMERCE_FIELDS = {
         { value: 'GBP', label: 'Libras (GBP)' },
       ],
     },
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
-    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'body', label: 'Texto', type: 'textarea' },
     { key: 'addLabel', label: 'Botón de agregar rápido', type: 'text' },
     { key: 'soldOutLabel', label: 'Producto agotado — texto del botón', type: 'text' },
     { key: 'variantHint', label: 'Pista bajo el botón en productos con talle o color ({label} = el nombre de la variante)', type: 'text' },
@@ -136,7 +136,7 @@ export const COMMERCE_FIELDS = {
         { value: 'centered', label: 'Centrada: foto arriba y texto centrado' },
       ],
     },
-    { key: 'detailEyebrow', label: 'Ficha · Eyebrow', type: 'text' },
+    { key: 'detailEyebrow', label: 'Ficha · Sobretítulo', type: 'text' },
     { key: 'detailCta', label: 'Ficha · Agregar al carrito', type: 'text' },
     { key: 'detailBackLabel', label: 'Ficha · Volver', type: 'text' },
     { key: 'detailFallbackTitle', label: 'Ficha · Producto no encontrado', type: 'text' },
@@ -153,9 +153,9 @@ export const COMMERCE_FIELDS = {
     toggle('detailShowRelated', 'Ficha · Mostrar otros productos al pie'),
     // El checkout es una ruta (/checkout), no una sección seleccionable:
     // sus textos se editan desde acá y viajan como props `checkout*`.
-    { key: 'checkoutEyebrow', label: 'Checkout · Eyebrow', type: 'text' },
-    { key: 'checkoutTitle', label: 'Checkout · Title', type: 'text' },
-    { key: 'checkoutBody', label: 'Checkout · Body', type: 'textarea' },
+    { key: 'checkoutEyebrow', label: 'Checkout · Sobretítulo', type: 'text' },
+    { key: 'checkoutTitle', label: 'Checkout · Título', type: 'text' },
+    { key: 'checkoutBody', label: 'Checkout · Texto', type: 'textarea' },
     {
       key: 'checkoutStepsText',
       label: 'Checkout · Pasos (uno por línea)',

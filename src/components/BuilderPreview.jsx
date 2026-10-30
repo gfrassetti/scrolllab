@@ -142,7 +142,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
       data-sl-ui
       data-native-cursor
       onClick={() => setEditingUid((uid) => (uid === shopItem.uid ? null : shopItem.uid))}
-      className={`fixed bottom-[4.75rem] left-3 z-[60] min-h-11 border px-4 py-2 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors max-sm:bottom-[8.5rem] ${
+      className={`fixed bottom-[4.75rem] left-3 z-[60] min-h-11 border px-4 py-2 text-[11px] uppercase tracking-[0.2em] shadow-sm transition-colors max-sm:bottom-[8.5rem] ${
         editingUid === shopItem.uid
           ? 'border-accent bg-accent text-bone'
           : 'border-ink/30 bg-bone/90 text-ink hover:border-ink'
@@ -166,7 +166,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
               onClick={() =>
                 setEditingUid((uid) => (uid === item.uid ? null : item.uid))
               }
-              className={`absolute z-[60] min-h-9 border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
+              className={`absolute z-[60] min-h-11 border px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
                 section.kind === 'nav' ? CHIP_POSITION.nav : CHIP_POSITION.section
               } ${
                 active
@@ -218,14 +218,14 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
         >
           <div className="flex items-center justify-between border-b border-ink/15 px-5 py-4">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/65">
                 {t('builder.editPanel')}
               </p>
               <p className="mt-1 text-sm font-medium">
                 {editingSection.name}
               </p>
               {editingSection.beat && (
-                <p className="mt-2 max-w-[36ch] text-xs leading-relaxed text-ink/50">
+                <p className="mt-2 max-w-[36ch] text-xs leading-relaxed text-ink/65">
                   {t('builder.beatEditHint')}
                 </p>
               )}
@@ -233,7 +233,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
             <button
               type="button"
               onClick={() => setEditingUid(null)}
-              className="min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/50 hover:text-ink"
+              className="min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/65 hover:text-ink"
             >
               {t('common.close')}
             </button>

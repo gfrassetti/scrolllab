@@ -1945,7 +1945,8 @@
       "bone": "Bone",
       "white": "White",
       "custom": "Other color",
-      "typed": "color code"
+      "typed": "color code",
+      "example": "e.g. #0e0e11"
     }
   },
   "prefs": {

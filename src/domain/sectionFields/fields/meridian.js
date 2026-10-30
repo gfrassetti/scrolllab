@@ -9,14 +9,14 @@ import { FORM_ENDPOINT_HELP, LEGAL_HELP } from '../helpers.js'
  */
 export const MERIDIAN_FIELDS = {
   'meridian/Concept': [
-    { key: 'kicker', label: 'Kicker', type: 'text' },
+    { key: 'kicker', label: 'Sobretítulo', type: 'text' },
     { key: 'text', label: 'Statement', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'meridian/Contact': [
-    { key: 'eyebrow', label: 'Eyebrow (vacío = según idioma)', type: 'text' },
-    { key: 'title', label: 'Title (vacío = según idioma)', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo (vacío = según idioma)', type: 'text' },
+    { key: 'title', label: 'Título (vacío = según idioma)', type: 'text' },
     { key: 'body', label: 'Texto (vacío = según idioma)', type: 'textarea' },
     { key: 'submitLabel', label: 'Botón (vacío = según idioma)', type: 'text' },
     { key: 'note', label: 'Nota (vacío = según idioma)', type: 'text' },
@@ -88,8 +88,8 @@ export const MERIDIAN_FIELDS = {
     { key: 'accent', label: 'Color de los lotes resaltados', type: 'color' },
   ],
   'meridian/Amenities': [
-    { key: 'title', label: 'Title', type: 'text' },
-    { key: 'label', label: 'Label', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'label', label: 'Rótulo', type: 'text' },
     {
       key: 'items',
       label: 'Amenities',
@@ -107,9 +107,9 @@ export const MERIDIAN_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'meridian/Panorama': [
-    { key: 'title', label: 'Title', type: 'text' },
-    { key: 'ctaLabel', label: 'CTA — texto', type: 'text' },
-    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'ctaLabel', label: 'Botón — texto', type: 'text' },
+    { key: 'ctaHref', label: 'Botón — enlace', type: 'href' },
     { key: 'image', label: 'Imagen (URL)', type: 'image' },
     { key: 'bg', label: 'Color de fondo (detrás de la foto)', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
@@ -143,9 +143,9 @@ export const MERIDIAN_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'meridian/Location': [
-    { key: 'title', label: 'Title', type: 'textarea' },
-    { key: 'ctaLabel', label: 'CTA — texto', type: 'text' },
-    { key: 'ctaHref', label: 'CTA — enlace', type: 'href' },
+    { key: 'title', label: 'Título', type: 'textarea' },
+    { key: 'ctaLabel', label: 'Botón — texto', type: 'text' },
+    { key: 'ctaHref', label: 'Botón — enlace', type: 'href' },
     { key: 'location', label: 'Location label', type: 'text' },
     {
       key: 'places',
@@ -183,11 +183,11 @@ export const MERIDIAN_FIELDS = {
   ],
   'meridian/Hero': [
     { key: 'wordmark', label: 'Wordmark', type: 'text' },
-    { key: 'menuLabel', label: 'Nav — Menu label', type: 'text' },
+    { key: 'menuLabel', label: 'Nav — Rótulo del menú', type: 'text' },
     { key: 'floorPlansLabel', label: 'Nav — link label', type: 'text' },
-    { key: 'welcomeText', label: 'Welcome copy', type: 'textarea' },
-    { key: 'quoteKicker', label: 'Quote — kicker', type: 'text' },
-    { key: 'quoteTitle', label: 'Quote — headline', type: 'textarea' },
+    { key: 'welcomeText', label: 'Texto de bienvenida', type: 'textarea' },
+    { key: 'quoteKicker', label: 'Cita — sobretítulo', type: 'text' },
+    { key: 'quoteTitle', label: 'Cita — titular', type: 'textarea' },
     { key: 'inviteKicker', label: 'Invite — kicker', type: 'text' },
     {
       key: 'inviteTitle',
@@ -195,8 +195,8 @@ export const MERIDIAN_FIELDS = {
       type: 'text',
     },
     { key: 'inviteBody', label: 'Invite — location', type: 'text' },
-    { key: 'inviteCta', label: 'Invite — CTA', type: 'text' },
-    { key: 'inviteCtaHref', label: 'Invite — CTA — enlace', type: 'href' },
+    { key: 'inviteCta', label: 'Invitación — botón', type: 'text' },
+    { key: 'inviteCtaHref', label: 'Invitación — botón — enlace', type: 'href' },
     { key: 'floorPlansHref', label: 'Nav — link — enlace', type: 'href' },
     { key: 'closeLabel', label: 'Nav — Close label (vacío = según idioma)', type: 'text' },
     { key: 'scrollLabel', label: 'Scroll — texto (vacío = según idioma)', type: 'text' },
