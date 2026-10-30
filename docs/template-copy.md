@@ -53,3 +53,4 @@ Así que cada template de SCROLLLAB es el sitio de un negocio que inventamos par
 | MERIDIAN | **Meridian Villas** — 24 villas cerradas sobre la ladera, frente al mar | Costa del Sol | el menú apuntaba a secciones que no existían (#residences, #about, #portal): ahora a #interior, #concept, #masterplan; folleto por mail |
 | KIN | **Kin Kunsthal** — museo de arte contemporáneo gratis, en una ex cordelería del puerto | Oslo | el footer tenía `id="visit"` repetido con la sección Visit: ahora es `#contact` |
 | COMIC | **Haven Farm Sanctuary** — santuario de animales de granja que cuenta la historia de Dusty (perro) y Pip (cerdita) | Somerset | sin campos del builder (solo código); Privacidad y «Charity details» en LegalSheet |
+| ORDO | **ORDO** — estudio de arquitectura e interiorismo (y dirección creativa), 14 personas, 68 obras | Lisboa | tres proyectos (Linho, Casa Muralha, Maré); Privacy / Terms en LegalSheet; mail y teléfono de ficción (`+351 21 555 0142`) |
