@@ -1,4 +1,5 @@
-import { useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
+import { gsap } from '../../../lib/gsap'
 import { LABEL } from './brand'
 import { useReveal } from './reveal'
 import { rows, sectionVars } from './vars'
@@ -10,8 +11,25 @@ import './ordo.css'
  * Every text is a prop (the builder edits them); the defaults are the demo copy.
  */
 
+// Words between asterisks are marked with a rust bar under them.
 const LEAD =
-  'ORDO designs buildings and the rooms inside them. We draw every project whole, structure, light and furniture, so that nothing in it is an afterthought.'
+  'ORDO designs *buildings* and *the rooms inside them*. We draw every project whole, structure, light and furniture, so that nothing in it is an afterthought.'
+
+/** The sentence as words, each with its own «marked» flag (`*like this*`). */
+function words(text) {
+  const out = []
+  String(text ?? '')
+    .split(/(\*[^*]+\*)/)
+    .forEach((part) => {
+      const marked = /^\*[^*]+\*$/.test(part)
+      const raw = marked ? part.slice(1, -1) : part
+      raw
+        .split(/\s+/)
+        .filter(Boolean)
+        .forEach((w) => out.push({ w, marked }))
+    })
+  return out
+}
 
 const FIGURES = [
   { value: '68', caption: 'Projects built' },
@@ -28,7 +46,10 @@ const PRINCIPLES = [
 export default function Studio({
   title = 'Studio',
   label = 'Lisbon — Est. 2014',
+  tag = 'The practice',
+  dimLabel = '14.33 m — scale 1:50',
   lead = LEAD,
+  showMarks = 'on',
   figures,
   principles,
   bg,
@@ -37,7 +58,26 @@ export default function Studio({
   calm,
 }) {
   const ref = useRef(null)
+  const leadRef = useRef(null)
   useReveal(ref, calm)
+  const leadWords = words(lead)
+
+  // The sentence is read with the scroll: each word goes from faint to full ink, one after the other.
+  useLayoutEffect(() => {
+    if (calm || !leadRef.current) return undefined
+    const ctx = gsap.context(() => {
+      const ws = leadRef.current.querySelectorAll('[data-w]')
+      gsap.set(ws, { opacity: 0.14 })
+      gsap.to(ws, {
+        opacity: 1,
+        ease: 'none',
+        stagger: 0.12,
+        scrollTrigger: { trigger: leadRef.current, start: 'top 82%', end: 'bottom 48%', scrub: 0.5 },
+      })
+    }, leadRef)
+    return () => ctx.revert()
+  }, [calm, lead])
+
   const figureRows = rows(figures, FIGURES)
   const principleRows = rows(principles, PRINCIPLES)
   return (
@@ -51,9 +91,25 @@ export default function Studio({
         </span>
       </header>
 
-      <div data-group>
-        <p data-sweep className="od-paint od-studio__lead">
-          {lead}
+      <div className={`od-studio__lede${showMarks === 'off' ? ' od-studio__lede--plain' : ''}`}>
+        {showMarks !== 'off' && (
+          <div className="od-studio__marks" data-group>
+            <span className="od-tag od-crop" style={LABEL} data-up>
+              {tag}
+            </span>
+            <span className="od-dim" style={LABEL} aria-hidden="true" data-up>
+              <i />
+              <span>{dimLabel}</span>
+              <i />
+            </span>
+          </div>
+        )}
+        <p ref={leadRef} className="od-studio__lead">
+          {leadWords.map((x, i) => (
+            <span key={i} data-w className={x.marked ? 'od-w od-w--mark' : 'od-w'}>
+              {x.w}{' '}
+            </span>
+          ))}
         </p>
       </div>
 
