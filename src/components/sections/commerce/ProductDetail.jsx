@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { defaultVariant, formatShopPrice } from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
@@ -126,6 +126,12 @@ export default function ProductDetail({
     setVariant(defaultVariant(product))
     setQty(1)
   }, [productId, product])
+
+  // Each product opens at the top. The router keeps the scroll of the page you
+  // came from, so the grid (or a related product) opened the ficha halfway down.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [productId])
 
   const related = showRelated !== 'off' && product ? catalog.filter((p) => p.id !== product.id).slice(0, 3) : []
   const images = product ? (product.images?.length ? product.images : [product.img]) : []

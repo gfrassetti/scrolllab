@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { useId, useLayoutEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { formatShopPrice } from '../../../lib/shop/products'
 import { useShopCart } from '../../../lib/shop/cartStore'
@@ -136,6 +136,11 @@ export default function Checkout({
   /** Con Shopify: la nota en lugar de los formularios (envío y pago van en Shopify). */
   shopifyNote = 'Contact, shipping, taxes and discount codes come on the next step: Shopify’s secure checkout, where you pay.',
 }) {
+  // The checkout opens at the top, not at the scroll of the page you came from.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   const shopify = useShopify()
   const uid = useId()
   const lines = useShopCart((s) => s.lines)
