@@ -156,6 +156,7 @@ const BY_MODEL = {
     Hero: 'hero',
     Projects: 'section',
     Studio: 'section',
+    Process: 'section',
     Services: 'section',
     Contact: 'footer',
   },

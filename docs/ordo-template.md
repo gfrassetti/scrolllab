@@ -27,7 +27,7 @@ Contacto de ficción: `hello@ordo.studio`, `+351 21 555 0142`, Rua do Poço 14. 
 
 ## Qué tiene
 
-Orden de la home: **Loader → Nav → Hero (cuatro hojas) → Sketch (salida a boceto) → Projects → Studio → Services → Contact**.
+Orden de la home: **Loader → Nav → Hero (cuatro hojas) → Sketch (salida a boceto) → Projects → Studio → Process → Services → Contact**.
 Cada proyecto es una página (`/projects/<slug>`): tira horizontal con parallax (≥ 768 px), vertical en teléfono.
 
 - **Loader** (`Loader.jsx`, `Logo.jsx`, `logoPaths.js`): la primera O de ORDO se dibuja con un trazo (stroke-dashoffset) y se
@@ -48,6 +48,15 @@ Cada proyecto es una página (`/projects/<slug>`): tira horizontal con parallax 
 - **Studio / Services / Contact**: copy al principio de cada archivo; `reveal.js` los entra con el pincel (`paint.js`).
 - **Studio — frase con cotas**: la frase se lee con el scroll (cada palabra pasa de tenue a tinta, GSAP scrub); las palabras entre
   `*asteriscos*` llevan una barra de óxido; arriba una etiqueta con marcas de corte (`.od-crop`) y abajo una cota (`.od-dim`).
+- **Process** (`Process.jsx`): fija en pantalla (pin + scrub + snap, como Projects). Un plano en SVG con cinco capas (terreno, relevamiento,
+  tabiques, planos con mobiliario y ejes, obra con la tapa de óxido y el cajetín) que se dibuja con el scroll; la lista de pasos
+  enciende el activo, el texto cambia y las capas que acaba de sumar el paso van en óxido. Con otra cantidad de pasos las capas se
+  reparten parejo. Las líneas se dibujan con `pathLength=1` + `strokeDashoffset` (`draw.jsx`, `drawing.js`; las discontinuas y los
+  rótulos entran con fundido). Los rótulos chicos del SVG se ocultan en teléfono (quedarían a 6 px). Con «reducir movimiento»: plano
+  completo y los pasos en lista.
+- **Services — láminas** (`Services.jsx`): fijas; cada servicio es una lámina con su figura (cuatro dibujos en código: alzado, planta,
+  grilla de identidad, encuentro de carpintería; del quinto en adelante se repiten) que se dibuja al entrar; la nueva sube sobre la
+  anterior y las de abajo quedan asomando, más arriba y más chicas. Sin pin en calma: láminas en lista con la figura completa.
 - **Contact — llamada + pie alto**: la llamada (frase grande sobre la tapa, botón con marcas de corte, el email debajo) y un pie
   rayado como plano: frase y registro, cuatro columnas de enlaces (`Texto | #sección` por renglón), boletín (valida, estados, honeypot;
   sin `endpoint` simula el éxito, con uno hace POST `{ formType: 'newsletter', email }`), tres bloques de datos, el nombre gigante
@@ -76,6 +85,7 @@ ORDO tiene cinco secciones en el builder, todas con todo editable (`src/domain/s
 | `ordo/Hero` | loader + nav + el dibujo en cuatro hojas + salida a boceto + regla de scroll + cursor (`Hero.jsx` arma el conjunto; el dibujo es `Drawing.jsx`) | marca y bajada, línea de lugar, links del nav (hasta 3), botón de contacto, red social, las cuatro hojas (título y texto), las cuatro partes del titular, rótulos, las cuatro capas del dibujo (imágenes), 4 interruptores (loader, cursor, regla, líneas de construcción), colores |
 | `ordo/Projects` | una etapa **fija** (pin de GSAP): los proyectos (hasta 6) se apilan en el mismo lugar y el scroll cambia el que se ve: la foto nueva se abre desde abajo, la ficha anterior se hunde, el scroll se pega a cada proyecto; con «reducir movimiento», una lista | nombre, tipo, lugar, año, m², foto, descripción de la foto y enlace por fila; rótulos; grano; colores |
 | `ordo/Studio` | frase con cotas, tres cifras, tres principios | todos los textos; marcas y cota (interruptor); colores |
+| `ordo/Process` | cómo se trabaja: plano que se dibuja | titular, pasos (2–6: nombre, texto, plazo), nota y cajetín del plano; interruptor del plano; colores |
 | `ordo/Services` | hasta 6 disciplinas | nombre, descripción, etiquetas; tapa al pasar el mouse; colores |
 | `ordo/Contact` | cierre: llamada + pie alto | frase, botón, email, columnas de enlaces, boletín, cuatro bloques, nombre gigante, reloj, derechos, Privacy / Terms (panel), «volver arriba»; interruptores (tapa, marcas, boletín, registro, nombre, reloj); colores |
 

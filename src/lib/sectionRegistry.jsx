@@ -118,6 +118,7 @@ import ApexFooter from '../components/sections/apex/Footer'
 import OrdoHero from '../components/sections/ordo/Hero'
 import OrdoProjects from '../components/sections/ordo/Projects'
 import OrdoStudio from '../components/sections/ordo/Studio'
+import OrdoProcess from '../components/sections/ordo/Process'
 import OrdoServices from '../components/sections/ordo/Services'
 import OrdoContact from '../components/sections/ordo/Contact'
 import NavSignal from '../components/sections/signal/NavSignal'
@@ -367,7 +368,8 @@ const allModels = [
       { id: 'ordo/Hero', name: 'Hero', kind: 'hero', component: OrdoHero, blurb: 'A drafter\'s sheet: its own loader draws the logo, then a shop is designed piece by piece from the raw shell to the photograph of the finished space, and the sheet turns back into a sketch as it leaves; framed nav, scroll ruler and crosshair cursor.' },
       { id: 'ordo/Projects', name: 'Projects', kind: 'section', component: OrdoProjects, blurb: 'The studio\'s work as one row per project: a photo card that opens upwards from its lower edge and a ruled fact sheet.' },
       { id: 'ordo/Studio', name: 'Studio', kind: 'section', component: OrdoStudio, blurb: 'One sentence about how the studio works, three large figures and three numbered principles on the ruled sheet.' },
-      { id: 'ordo/Services', name: 'Services', kind: 'section', component: OrdoServices, blurb: 'The disciplines as ruled rows at poster scale; the rust slab of the logo slides in beside the name under the pointer.' },
+      { id: 'ordo/Process', name: 'Process', kind: 'section', component: OrdoProcess, blurb: 'How a project goes from brief to building as a plan that draws itself: pinned, each step of the scroll adds a layer (lot, survey, partitions, drawings, built) while the step list lights up and its text swaps.' },
+      { id: 'ordo/Services', name: 'Services', kind: 'section', component: OrdoServices, blurb: 'The disciplines as stacked plates, pinned: the scroll slides a new plate over the last one and its figure draws itself, with the rust slab of the logo on the corner.' },
       { id: 'ordo/Contact', name: 'Contact', kind: 'footer', component: OrdoContact, blurb: 'Closing sheet: one huge sentence over a rust slab, the email as the way in, plain blocks of details and a legal line whose Privacy and Terms open in a panel.' },
     ],
     sectionsDir: 'src/components/sections/ordo',

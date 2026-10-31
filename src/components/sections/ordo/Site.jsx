@@ -11,6 +11,7 @@ import Nav from './Nav'
 import Drawing from './Drawing'
 import Projects from './Projects'
 import Studio from './Studio'
+import Process from './Process'
 import Services from './Services'
 import Contact from './Contact'
 import ProjectPage from './ProjectPage'
@@ -212,6 +213,7 @@ export default function Site() {
               {SALIDA === 'boceto' && <Sketch calm={calm} exit={heroExit} />}
               <Projects calm={calm} routed />
               <Studio calm={calm} />
+              <Process calm={calm} />
               <Services calm={calm} />
               <Contact calm={calm} />
             </>

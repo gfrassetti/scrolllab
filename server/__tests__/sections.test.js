@@ -130,6 +130,7 @@ const APPROVED = [
   'ordo/Hero',
   'ordo/Projects',
   'ordo/Studio',
+  'ordo/Process',
   'ordo/Services',
   'ordo/Contact',
   'contact/ContactForm',

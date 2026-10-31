@@ -1864,18 +1864,30 @@
   }
 }
 
-/* ── Services ──────────────────────────────────────────────────────── */
-.od-svc__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-bottom: 1px solid var(--line);
+/* ── Services: plates stacked on one stage (Services.jsx) ───────────── */
+.od-svc {
+  padding: calc(var(--nav-h) + 22px) 16px clamp(40px, 6vw, 88px);
 }
-.od-svc__row {
+.od-svc__plates {
   display: grid;
-  gap: 8px;
-  padding: 22px 0 26px;
-  border-top: 1px solid var(--line);
+  gap: 16px;
+}
+.od-svc__plate {
+  position: relative;
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  padding: 28px 20px 22px;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--od-paper) 93%, var(--od-ink));
+  border: 1px solid var(--line);
+  transform-origin: 50% 0;
+}
+.od-svc__body {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
 }
 .od-svc__n {
   font-size: 12px;
@@ -1883,29 +1895,21 @@
   color: var(--od-rust);
 }
 .od-svc__name {
-  position: relative;
   margin: 0;
-  font-size: clamp(30px, 4.4vw, 62px);
+  font-size: clamp(32px, 9vw, 72px);
   font-weight: var(--od-title-weight);
-  line-height: 1.04;
+  line-height: 1.02;
   letter-spacing: -0.03em;
-  transition: transform 0.7s var(--od-ease);
 }
-/* The logo's slab, small: it grows out of the left edge on hover. */
+/* The logo's slab, small: the corner tab of the plate. */
 .od-svc__slab {
   position: absolute;
-  left: -0.05em;
-  top: 50%;
-  width: 0.62em;
-  height: 0.1em;
+  top: -1px;
+  right: 20px;
+  width: 54px;
+  height: 9px;
   background: var(--od-rust);
-  clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
-  transform: translate(-100%, -50%) scaleX(0);
-  transform-origin: right center;
-  opacity: 0;
-  transition:
-    transform 0.7s var(--od-ease),
-    opacity 0.4s var(--od-ease);
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
 }
 .od-svc__text {
   margin: 0;
@@ -1920,29 +1924,91 @@
   text-transform: uppercase;
   color: var(--od-mute);
 }
+.od-svc__fig {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+}
+.od-fig {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  overflow: visible;
+}
+.od-svc__fig figcaption {
+  margin-top: 8px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+
+.od-svc.od-svc--pin {
+  padding: 0;
+}
+.od-svc--pin .od-svc__stage {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: calc(var(--nav-h) + 22px) 16px 18px;
+}
+.od-svc--pin .od-svc__head {
+  margin-bottom: 0;
+}
+.od-svc--pin .od-svc__plates {
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+  padding-top: 52px;
+}
+.od-svc--pin .od-svc__plate {
+  grid-area: 1 / 1;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+.od-svc--pin .od-svc__fig {
+  justify-content: center;
+}
+@media (min-width: 640px) {
+  .od-svc--pin .od-svc__stage {
+    padding: calc(var(--nav-h) + 28px) 36px 26px;
+  }
+  .od-svc__plate {
+    padding: 34px 32px 28px;
+  }
+  .od-svc__slab {
+    right: 32px;
+  }
+}
 @media (min-width: 900px) {
-  .od-svc__row {
-    grid-template-columns: 56px minmax(0, 1.15fr) minmax(0, 1.2fr) minmax(0, 0.8fr);
-    align-items: baseline;
-    column-gap: 28px;
-    padding: 30px 0 34px;
+  .od-svc__plate {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 56px;
+    align-items: center;
+    padding: 44px 48px 36px;
   }
-  .od-svc__tags {
-    text-align: right;
+  .od-svc--pin .od-svc__plate {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .od-svc__body {
+    gap: 16px;
+  }
+  .od-svc__name {
+    font-size: clamp(48px, 6.4vw, 104px);
+  }
+  .od-svc__text {
+    font-size: 17px;
   }
 }
-/* Without the slab (`showSlab` off) the hover only moves the name. */
-.od-svc[data-slab='off'] .od-svc__slab {
-  display: none;
-}
-@media (hover: hover) {
-  .od-svc__row:hover .od-svc__name {
-    transform: translateX(0.5em);
-  }
-  .od-svc__row:hover .od-svc__slab {
-    transform: translate(-100%, -50%) scaleX(1);
-    opacity: 1;
-  }
+/* Without the slab (showSlab off) the plate has no tab. */
+.od-svc__plate:not(:has(.od-svc__slab)) {
+  padding-top: 28px;
 }
 
 /* ── Contact ───────────────────────────────────────────────────────── */
@@ -2365,4 +2431,229 @@
 .od-contact__alt {
   margin: 14px 0 0;
   font-size: 15px;
+}
+
+/* ── Self-drawing SVG (draw.jsx): plan of Process and figures of Services ── */
+.od-proc__svg path,
+.od-fig path {
+  fill: none;
+  stroke: var(--od-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.od-proc__svg .od-thin,
+.od-fig .od-thin {
+  stroke-width: 1;
+}
+.od-proc__svg .od-wall,
+.od-fig .od-wall {
+  stroke-width: 3.2;
+}
+.od-proc__svg .od-heavy {
+  stroke-width: 4;
+}
+.od-proc__svg .od-dim-line,
+.od-fig .od-dim-line {
+  stroke: var(--od-mute);
+  stroke-width: 1;
+  stroke-dasharray: 7 5;
+}
+.od-proc__svg path.od-fill,
+.od-fig path.od-fill {
+  stroke: none;
+  fill: var(--od-rust);
+}
+.od-fig path.od-rust {
+  stroke: var(--od-rust);
+}
+/* The layers the current step just added are drawn in rust; the next step turns them to ink. */
+.od-proc__svg .od-new path:not(.od-dim-line):not(.od-fill) {
+  stroke: var(--od-rust);
+  stroke-width: 2.2;
+}
+.od-proc__svg g path {
+  transition: stroke 0.5s var(--od-ease);
+}
+/* The small labels of a drawing would be unreadably small on a phone: they are left out there. */
+@media (max-width: 639px) {
+  .od-proc__svg .od-note,
+  .od-fig .od-note {
+    display: none;
+  }
+}
+.od-proc__svg .od-note,
+.od-fig .od-note {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  fill: var(--od-mute);
+  stroke: none;
+}
+
+/* ── Process: a pinned stage, the plan on one side and the steps on the other ── */
+.od-proc {
+  padding: calc(var(--nav-h) + 22px) 16px clamp(40px, 6vw, 88px);
+}
+.od-proc__body {
+  display: grid;
+  gap: 24px;
+}
+.od-proc__plan {
+  margin: 0;
+  min-width: 0;
+}
+.od-proc__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.od-proc__plan figcaption {
+  margin-top: 10px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-proc__side {
+  min-width: 0;
+}
+.od-proc__list {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.od-proc__steps {
+  display: grid;
+  gap: 28px;
+}
+.od-proc__step {
+  min-width: 0;
+}
+.od-proc__sh {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 8vw, 44px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.od-proc__sh span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-rust);
+}
+.od-proc__st {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--od-soft);
+}
+.od-proc__meta {
+  display: block;
+  margin-top: 14px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-proc--noplan .od-proc__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.od-proc.od-proc--pin {
+  padding: 0;
+}
+.od-proc--pin .od-proc__stage {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: calc(var(--nav-h) + 22px) 16px 18px;
+}
+.od-proc--pin .od-proc__head {
+  margin-bottom: 0;
+}
+.od-proc--pin .od-proc__body {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: auto auto;
+  align-content: center;
+  row-gap: 28px;
+}
+/* On a phone the plan sits above the text and fills what is left; the text block has the height of the tallest step. */
+.od-proc--pin .od-proc__plan {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+.od-proc--pin .od-proc__side {
+  grid-row: 2;
+}
+.od-proc--pin .od-proc__steps {
+  display: grid;
+  gap: 0;
+}
+.od-proc--pin .od-proc__step {
+  grid-area: 1 / 1;
+}
+.od-proc--pin .od-proc__sh {
+  font-size: clamp(30px, 9vw, 44px);
+}
+@media (min-width: 640px) {
+  .od-proc--pin .od-proc__stage {
+    padding: calc(var(--nav-h) + 28px) 36px 26px;
+  }
+}
+@media (min-width: 1024px) {
+  .od-proc__body {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 64px;
+    align-items: center;
+  }
+  .od-proc--pin .od-proc__body {
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    align-content: stretch;
+  }
+  .od-proc--pin .od-proc__plan,
+  .od-proc--pin .od-proc__side {
+    grid-row: 1;
+  }
+  .od-proc--pin .od-proc__side {
+    grid-column: 1;
+  }
+  .od-proc--pin .od-proc__plan {
+    grid-column: 2;
+  }
+  .od-proc--pin .od-proc__list {
+    display: block;
+    margin-bottom: 36px;
+    border-top: 1px solid var(--line);
+  }
+  .od-proc__li {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .od-proc__n {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--od-rust);
+  }
+  .od-proc__ln {
+    font-size: clamp(22px, 2.2vw, 30px);
+    letter-spacing: -0.02em;
+  }
+  /* The list already shows the number and the name; the step repeats them only without it (reduce motion, phone). */
+  .od-proc--pin .od-proc__sh {
+    display: none;
+  }
 }

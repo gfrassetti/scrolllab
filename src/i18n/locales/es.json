@@ -1319,7 +1319,8 @@
         "Hero": { "name": "Hero", "blurb": "Una hoja de dibujante: su propio loader dibuja el logo, después se proyecta un local pieza por pieza, de la obra gris a la foto del espacio terminado, y la hoja vuelve a boceto al salir; nav enmarcado, regla de scroll y cursor de mira." },
         "Projects": { "name": "Projects", "blurb": "La obra del estudio, una fila por proyecto: una tarjeta de foto que se abre hacia arriba desde su borde de abajo y una ficha con líneas." },
         "Studio": { "name": "Studio", "blurb": "Una frase sobre cómo trabaja el estudio, tres cifras grandes y tres principios numerados sobre la hoja rayada." },
-        "Services": { "name": "Services", "blurb": "Las disciplinas como filas a escala de afiche; la tapa de óxido del logo entra al lado del nombre que toca el puntero." },
+        "Process": { "name": "Process", "blurb": "Cómo un proyecto va del encargo a la obra, como un plano que se dibuja solo: fijo en pantalla, cada paso del scroll suma una capa (terreno, relevamiento, tabiques, planos, obra) mientras se enciende el paso de la lista y cambia su texto." },
+        "Services": { "name": "Services", "blurb": "Las disciplinas como láminas apiladas, fijas en pantalla: con el scroll entra una lámina nueva sobre la anterior y su figura se dibuja sola, con la tapa de óxido del logo en la esquina." },
         "Contact": { "name": "Contact", "blurb": "Hoja de cierre: una frase enorme sobre una tapa de óxido, el email como puerta de entrada, bloques de datos y una línea legal cuyos Privacy y Terms se abren en un panel." }
       }
     },
