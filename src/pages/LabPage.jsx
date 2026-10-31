@@ -8,6 +8,7 @@ import LabDemoCopy from '../components/LabDemoCopy'
 import LabDemoPaste from '../components/LabDemoPaste'
 import FaqAccordion from '../components/FaqAccordion'
 import HostedPlans from '../components/HostedPlans'
+import PlatformLogo, { PLATFORM_LOGOS } from '../components/PlatformLogo'
 import { api } from '../lib/api'
 import SnippetBox from '../components/SnippetBox'
 import Tabs, { TabPanel } from '../components/Tabs'
@@ -156,6 +157,18 @@ export default function LabPage({ qa = false }) {
 
   const faq = t('lab.faq')
   const platforms = t('lab.platforms')
+  const platformList = Array.isArray(platforms) ? platforms : []
+  // La guía de la plataforma que se tocó en el hero: se abre y se baja hasta ella.
+  const [openPlatform, setOpenPlatform] = useState(-1)
+  const openPlatformHelp = (e, index) => {
+    e.preventDefault()
+    setOpenPlatform(index)
+    requestAnimationFrame(() =>
+      document.getElementById('ayuda')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    )
+  }
+  const platformIndex = (name) =>
+    platformList.findIndex((item) => String(item.q).toLowerCase() === name.toLowerCase())
 
   // Plan gratis publicable (HOSTED_FREE_QUOTA, 0 = LAB 100% de pago): el hero
   // solo promete "empezá gratis" si de verdad existe.
@@ -467,6 +480,33 @@ export default function LabPage({ qa = false }) {
               </Link>
               {t('lab.siteSplitAfter')}
             </p>
+            {/* Dónde funciona: cada logo abre su guía (sección «ayuda», más abajo). */}
+            <div data-lab-hero-meta className="mt-9">
+              <p className="text-body-sm text-ink/55">{t('lab.worksOn')}</p>
+              <ul className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                {Object.entries(PLATFORM_LOGOS).map(([id, logo]) => (
+                  <li key={id}>
+                    <a
+                      href="#ayuda"
+                      onClick={(e) => openPlatformHelp(e, platformIndex(logo.name))}
+                      className="inline-flex min-h-11 items-center gap-2 text-body-sm text-ink/75 transition-colors hover:text-accent"
+                    >
+                      <PlatformLogo id={id} className="h-5 w-5" />
+                      {logo.name}
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href="#ayuda"
+                    onClick={(e) => openPlatformHelp(e, platformList.length - 1)}
+                    className="inline-flex min-h-11 items-center text-body-sm text-ink/55 underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent"
+                  >
+                    {t('lab.worksOnAny')}
+                  </a>
+                </li>
+              </ul>
+            </div>
             {/* Con cuenta y sin plan: la guía queda, pero tus widgets a un toque. */}
             {user && (
               <p data-lab-hero-meta className="mt-4 text-body-sm">
@@ -781,22 +821,30 @@ export default function LabPage({ qa = false }) {
           )}
         </section>
 
-        {/* Guías por plataforma: dónde se pega el mismo snippet en cada una. */}
-        <section id="ayuda" className="mt-20 scroll-mt-24 border-t border-ink/15 pt-12 md:mt-28">
-          <h2 className="text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
-          <p className="mt-2 max-w-[60ch] text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
-          <div className="mt-6 max-w-[68ch]">
-            <FaqAccordion items={Array.isArray(platforms) ? platforms : []} />
-          </div>
-        </section>
+        {/* Ayuda: cómo pegarlo en cada plataforma y las preguntas, lado a lado. */}
+        <div className="mt-20 grid gap-16 border-t border-ink/15 pt-12 md:mt-28 lg:grid-cols-2 lg:gap-0">
+          <section id="ayuda" className="scroll-mt-24 lg:sticky lg:top-28 lg:self-start lg:pr-16">
+            <h2 className="text-title-sm font-medium">{t('lab.platformsTitle')}</h2>
+            <p className="mt-2 max-w-[52ch] text-body-sm text-ink/60">{t('lab.platformsNote')}</p>
+            <Link
+              to="/lab/shopify"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 text-body-sm font-medium text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+            >
+              <PlatformLogo id="shopify" className="h-4 w-4" />
+              {t('lab.shopifyGuide')}
+            </Link>
+            <div className="mt-6">
+              <FaqAccordion items={platformList} openIndex={openPlatform} />
+            </div>
+          </section>
 
-        {/* FAQ. */}
-        <section className="mt-20 border-t border-ink/15 pt-12 md:mt-28">
-          <h2 className="text-title-sm font-medium">{t('lab.faqTitle')}</h2>
-          <div className="mt-6 max-w-[68ch]">
-            <FaqAccordion items={Array.isArray(faq) ? faq : []} />
-          </div>
-        </section>
+          <section className="lg:border-l lg:border-ink/15 lg:pl-16">
+            <h2 className="text-title-sm font-medium">{t('lab.faqTitle')}</h2>
+            <div className="mt-6">
+              <FaqAccordion items={Array.isArray(faq) ? faq : []} />
+            </div>
+          </section>
+        </div>
 
         <p className={`mt-16 max-w-[56ch] text-body-sm text-ink/60 ${appMode ? 'hidden' : ''}`}>
           {t('lab.footnote')}{' '}

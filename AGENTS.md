@@ -437,9 +437,14 @@ hace cumplir); las rutas no tienen reglas de negocio; los servicios no conocen `
 compararla después (ver [ADR 0005](docs/adr/0005-refactors-con-foto.md)). Con otras sesiones trabajando en el mismo
 árbol, nunca `git stash`/`checkout`/`add -A`: para comparar contra `HEAD` limpio, una copia con `git archive`.
 
+**Kit de tienda (Commerce):** cada comprador conecta SU tienda Shopify (Storefront API, sin backend nuestro).
+Sin Shopify, el checkout del kit es de ejemplo y **no cobra**: el cobro lo conecta el comprador en el código que
+descarga; ScrollLab no ofrece un checkout propio y eso se dice, corto, en cada lugar donde se vende el kit
+(nota de la bóveda arriba).
+
 Los templates fijos tienen precio de lista; la composición del builder va **por
 tramos**: base de USD 549 con 8 secciones incluidas, USD 25 por cada sección
-extra hasta 30, más USD 59 si la receta trae commerce (2026-10-10: 389 / 15 / 39 → 690 / 29 / 79, el
+extra hasta 30, más USD 99 si la receta trae commerce (59 hasta el 2026-10-28, cuando sumó el conector con Shopify; 2026-10-10: 389 / 15 / 39 → 690 / 29 / 79, el
 mismo día bajado a esta opción moderada porque 690 quedó muy caro).
 El builder muestra el ancla «comprar por separado los modelos que usás» (`separateModelsPriceUsd`). Cuenta cada entrada de la
 receta (nav, footer y repeticiones incluidas). RATIO (Beat) lista USD 269 pero
@@ -636,6 +641,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 | Revisar el estándar del producto | `Storytelling pages — características canónicas` (canon v1 y v2) |
 | Probar un template o una sección (builder y LAB) | `Probar secciones — builder y LAB (procedimiento)` (el comando, qué corre solo, las trampas que encontró APEX) |
 | Tocar la tipografía global del builder o probar el builder en el Chrome del usuario | `Builder — tipografía global (cómo está hecha y cómo se probó)` (la fuente viaja en la receta; trampas de la extensión de Chrome) |
+| Tocar el kit de tienda (Commerce), el conector con Shopify o el panel de campos del builder | `Builder — kit de tienda con Shopify (cómo está hecho y qué dice)` (cada comprador conecta SU Shopify; sin Shopify el checkout es de ejemplo y el cobro lo conecta él; grupos plegables; dónde se dice) |
 | Mejorar un template existente o sumarle 3D / capas / secciones | `Templates — segunda pasada award-level (2026-10-18)` (el listón del dueño: cambios que se vean, 3D realista; trampas: text-stroke con currentColor, pin en la raíz, autoAlpha e innerText) |
 | Retomar ORDO (template de arquitectura e interiorismo, en obra) o rehacer algo parecido: sitio de cliente → template, logo con fontTools, colores con `color-mix`, builder con rutas | `ORDO — template de arquitectura e interiorismo (2026-10-30)` (y `docs/ordo-template.md`) |
 

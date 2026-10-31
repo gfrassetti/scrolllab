@@ -284,6 +284,12 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
      * borde de arriba de la pantalla, más ancho que la mitad y más bajo que un
      * tercio. Se mide al entrar en PIN y en cada resize (no en cada cuadro: un
      * cambio de alto del iframe obliga al frame a recalcular todo).
+     *
+     * También cuenta un header `sticky` con `top: 0` que todavía no se pegó
+     * porque arriba tiene otra cosa (una barra de anuncios: el caso de Shopify
+     * con el tema Horizon). Al scrollear queda arriba de todo y taparía el
+     * widget, así que se mira un poco más abajo del borde (hasta ~22% de la
+     * pantalla) y se usa su alto.
      */
     function measureTopOffset() {
       if (!document.elementsFromPoint) return 0
@@ -291,18 +297,29 @@ import { anchorTarget, clamp, resolveFrameBase, sameOriginUrl } from './lib.js'
       var vh = window.innerHeight || document.documentElement.clientHeight
       var best = 0
       var xs = [0.1, 0.5, 0.9]
-      for (var i = 0; i < xs.length; i++) {
-        var stack = document.elementsFromPoint(vw * xs[i], 1)
-        for (var j = 0; j < stack.length; j++) {
-          for (var n = stack[j]; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
-            if (n === wrap || n === iframe) break
-            var pos = getComputedStyle(n).position
-            if (pos !== 'fixed' && pos !== 'sticky') continue
-            var r = n.getBoundingClientRect()
-            if (r.top <= 1 && r.bottom > 0 && r.height < vh * 0.35 && r.width >= vw * 0.5) {
-              best = Math.max(best, r.bottom)
+      var ys = [1, Math.round(vh * 0.05), Math.round(vh * 0.1), Math.round(vh * 0.16), Math.round(vh * 0.22)]
+      for (var k = 0; k < ys.length; k++) {
+        for (var i = 0; i < xs.length; i++) {
+          var stack = document.elementsFromPoint(vw * xs[i], ys[k])
+          for (var j = 0; j < stack.length; j++) {
+            for (var n = stack[j]; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+              if (n === wrap || n === iframe) break
+              var cs = getComputedStyle(n)
+              var pos = cs.position
+              if (pos !== 'fixed' && pos !== 'sticky') continue
+              var r = n.getBoundingClientRect()
+              if (r.height < vh * 0.35 && r.width >= vw * 0.5) {
+                if (r.top <= 1 && r.bottom > 0) {
+                  // Ya está arriba de todo.
+                  best = Math.max(best, r.bottom)
+                } else if (pos === 'sticky' && r.top < vh * 0.3) {
+                  // Sticky que se va a pegar arriba cuando el sitio scrollee.
+                  var stuck = parseFloat(cs.top)
+                  if (stuck === stuck && stuck <= 1) best = Math.max(best, r.height + Math.max(0, stuck))
+                }
+              }
+              break
             }
-            break
           }
         }
       }

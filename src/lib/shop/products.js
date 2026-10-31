@@ -59,9 +59,12 @@ export function getProduct(id) {
   return DEMO_PRODUCTS.find((p) => p.id === id) || DEMO_PRODUCTS[0]
 }
 
-/** First option of a product's variant picker, or null if it has none. */
+/** First option of a product's variant picker that is in stock (or the first), null if it has none. */
 export function defaultVariant(product) {
-  return product?.variants?.options?.[0] ?? null
+  const options = product?.variants?.options
+  if (!options?.length) return null
+  const out = product.soldOutOptions || []
+  return options.find((o) => !out.includes(o)) ?? options[0]
 }
 
 /** Stable key for a cart line: same product + different variant = different line. */

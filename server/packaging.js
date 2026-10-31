@@ -22,6 +22,7 @@ import {
   SHOP_ROUTE_PREFIXES,
   shopColorsFromItems,
   shopCurrencyFromItems,
+  shopifyConfigFromItems,
 } from '../src/domain/checkoutProps.js'
 // El mismo fondo por modelo que pinta el preview del builder.
 import { modelWrapperClass } from '../src/domain/modelWrappers.js'
@@ -450,12 +451,31 @@ function appendWebglIfNeeded(archive, sources, prefix = '') {
   }
 }
 
+const CHECKOUT_PAYMENTS_NOTE = `Checkout ships in **mock** mode: it takes no payments, and Scroll Lab does not provide a checkout or payment backend of its own. Taking payments is up to you, in two ways:
+
+1. **Shopify** (no backend): pass \`shopify={{ domain, token, collection }}\` to \`<ShopCatalogProvider>\` in \`src/App.jsx\`. Products, prices, variants and stock then come from your Shopify store, and checkout is Shopify's. Setup steps at the top of \`src/lib/shop/shopify.js\`.
+2. **Your own provider**: open \`src/lib/shop/checkoutAdapter.js\`, replace \`createCheckout\` with your Mercado Pago / Stripe backend call and keep the same return shape: \`{ ok, orderId, message, mode }\`.
+`
+
+const SHOPIFY_CONNECTED_NOTE = `### Shopify
+
+This shop is connected to a Shopify store (the \`shopify\` prop of \`<ShopCatalogProvider>\` in \`src/App.jsx\`). Shopify is the source of truth: products, prices, variants (size, colour…), stock and photos are edited in the Shopify admin and show up here on the next page load. The builder products and the shipping / discount props of \`<Checkout />\` are not used.
+
+- The page reads the store with the Storefront API (\`src/lib/shop/shopify.js\`) using the store's **public** Storefront token: read-only, made to live in browser code.
+- \`collection\` (a collection handle) limits the grid to that collection; empty = the first products of the store.
+- The cart sends Shopify only variant ids and quantities (\`cartCreate\`). Shopify prices the order, adds shipping, taxes and discount codes, and takes the payment on its own checkout. The money goes straight to the store's Shopify account.
+- If the store can't be reached, the page keeps the builder's catalog on screen and logs a warning in the console.
+
+To change stores, edit \`domain\` and \`token\`. To go back to the mock checkout, delete the \`shopify\` prop.
+`
+
 const SHOP_FILES = [
   'src/lib/shop/products.js',
   'src/lib/shop/catalog.js',
   'src/lib/shop/ShopCatalog.jsx',
   'src/lib/shop/cartStore.js',
   'src/lib/shop/checkoutAdapter.js',
+  'src/lib/shop/shopify.js',
   'src/lib/shop/theme.js',
   'src/lib/shop/ShopTheme.jsx',
 ]
@@ -1140,6 +1160,7 @@ function appendCustomProject(archive, recipe, prefix = '', licenseMeta = null) {
   const detailAttrs = needsShop ? propsToJsx(detailPropsFromItems(entries)) : ''
   const shopColors = needsShop ? shopColorsFromItems(entries) : {}
   const shopCurrency = needsShop ? shopCurrencyFromItems(entries) : ''
+  const shopify = needsShop ? shopifyConfigFromItems(entries) : null
 
   const dataBlock = dataConsts.length ? `\n${dataConsts.join('\n\n')}\n` : ''
 
@@ -1173,7 +1194,8 @@ export default function App() {
         colors={${JSON.stringify(shopColors)}}` : ''}
         className="min-h-svh bg-[color:var(--shop-bg)] text-[color:var(--shop-fg)]"
       >
-        <ShopCatalogProvider${shopProducts ? ` products={${shopProducts}}` : ''}${shopCurrency ? ` currency="${shopCurrency}"` : ''}>
+        <ShopCatalogProvider${shopProducts ? ` products={${shopProducts}}` : ''}${shopCurrency ? ` currency="${shopCurrency}"` : ''}${shopify ? `
+          shopify={${JSON.stringify(shopify)}}` : ''}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route
@@ -1254,7 +1276,7 @@ document.documentElement.style.setProperty('--user-font', ${JSON.stringify(globa
     const productsNote = shopProducts
       ? `Products: the ones you edited in the builder are \`${shopProducts}\` in \`src/App.jsx\`, passed to \`<ProductGrid products>\` and to \`<ShopCatalogProvider products>\` (the product page, cart and checkout read it from there).`
       : 'Products: the demo catalog in `src/lib/shop/products.js`. To use yours, pass the same list to `<ProductGrid products>` and `<ShopCatalogProvider products>` in `src/App.jsx`.'
-    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\n${productsNote} Each product: \`{ name, price, blurb, img }\`; size or colour pickers use \`variants\` (see \`src/lib/shop/products.js\`).\n\nFiles: \`src/lib/shop/\` + commerce components.\n\nCheckout ships in **mock** mode. To connect payments:\n\n1. Open \`src/lib/shop/checkoutAdapter.js\`\n2. Replace \`createCheckout\` with your Mercado Pago / Stripe backend call\n3. Keep the same return shape: \`{ ok, orderId, message, mode }\`\n`
+    readme += `\n## Commerce kit\n\nThe scroll page includes the product grid. Shop flows use routes:\n\n- \`/\` — story + ProductGrid\n- \`/product/:productId\` — PDP\n- Cart — overlay drawer (Cart button)\n- \`/checkout\` — contact + shipping + delivery + payment on the left, sticky order summary with thumbnails, quantity steppers and discount code on the right\n\nEvery label on \`/checkout\` is a prop of \`<Checkout />\` in \`src/App.jsx\` (copy, steps, countries, shipping costs, discount code, trust list). Shipping math: flat rate, express rate and free-shipping threshold.\n\n${productsNote} Each product: \`{ name, price, blurb, img }\`; size or colour pickers use \`variants\` (see \`src/lib/shop/products.js\`).\n\nFiles: \`src/lib/shop/\` + commerce components.\n\n${shopify ? SHOPIFY_CONNECTED_NOTE : CHECKOUT_PAYMENTS_NOTE}`
   }
 
   if (prefix) readme += '\nSee LICENSE.txt at the root of this ZIP for usage terms.\n'

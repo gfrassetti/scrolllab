@@ -16,9 +16,9 @@ import ColorField from './ColorField'
  */
 
 const inputCls =
-  'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink'
+  'mt-2 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none focus:border-ink max-sm:min-h-11'
 const selectCls =
-  'mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink'
+  'mt-2 w-full border border-ink/20 bg-[#f2efe9] px-3 py-2 text-sm text-[#1a1a1a] outline-none focus:border-ink max-sm:min-h-11'
 
 /** Tipos que el editor valida: lo tipeado puede no guardarse todavía. */
 const VALIDATED = new Set(['color', 'href', 'url', 'image', 'price'])
@@ -94,7 +94,7 @@ function Scalar({ field, value, onChange, absoluteUrls = false }) {
         className={selectCls}
         style={{ colorScheme: 'light' }}
       >
-        {(field.options || []).map((o) => (
+        {(field.options || []).filter((o) => !o.retired || o.value === value).map((o) => (
           <option
             key={o.value}
             value={o.value}
@@ -201,6 +201,26 @@ function FieldHelp({ help, absoluteUrls = false }) {
   )
 }
 
+/**
+ * `field.example`: un botón que completa el campo con un valor de prueba (la
+ * tienda de ejemplo de Shopify). Con ese valor puesto, dice qué se está viendo.
+ */
+function FieldExample({ example, value, onChange }) {
+  if (!example) return null
+  if (value === example.value) {
+    return <p className="mt-2 text-xs leading-relaxed text-ink/60">{example.active}</p>
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(example.value)}
+      className="ui-press mt-2 inline-flex min-h-11 items-center border border-ink/25 px-3 py-2 text-left text-[11px] uppercase tracking-[0.16em] text-ink/80 transition-colors hover:border-ink hover:text-ink"
+    >
+      {example.label}
+    </button>
+  )
+}
+
 export default function SectionFieldRow({ field, value, onChange, hint, absoluteUrls = false }) {
   const { t } = useI18n()
 
@@ -224,15 +244,15 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
 
     return (
       <div className="block">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/65">
           {field.label}
         </span>
-        {hint ? <span className="mt-1 block text-xs text-ink/45">{hint}</span> : null}
+        {hint ? <span className="mt-1 block text-xs text-ink/60">{hint}</span> : null}
         <div className="mt-2 space-y-3">
           {items.map((it, i) => (
             <div key={i} className="border border-ink/15 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-ink/40">
+                <span className="text-[11px] uppercase tracking-[0.2em] text-ink/40">
                   {i + 1}
                 </span>
                 <span className="flex gap-1">
@@ -267,7 +287,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
               <div className="space-y-2">
                 {sub.map((sf) => (
                   <label key={sf.key} className="block">
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-ink/45">
+                    <span className="text-[11px] uppercase tracking-[0.2em] text-ink/60">
                       {sf.label}
                     </span>
                     <Scalar
@@ -298,7 +318,7 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
   return (
     <div className="block">
       <label className="block">
-        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/50">
+        <span className="text-[11px] uppercase tracking-[0.2em] text-ink/65">
           {field.label}
         </span>
         <Scalar
@@ -308,11 +328,12 @@ export default function SectionFieldRow({ field, value, onChange, hint, absolute
           absoluteUrls={absoluteUrls}
         />
         {field.type === 'href' || hint ? (
-          <span className="mt-1 block text-xs text-ink/45">
+          <span className="mt-1 block text-xs text-ink/60">
             {hint || t('builder.hrefHint')}
           </span>
         ) : null}
       </label>
+      <FieldExample example={field.example} value={value} onChange={onChange} />
       <FieldHelp help={field.help} absoluteUrls={absoluteUrls} />
     </div>
   )

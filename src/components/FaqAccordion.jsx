@@ -7,8 +7,8 @@ import { prefersReducedMotion } from '../lib/motion'
  * navegadores, así que acá el panel es un div medido con GSAP
  * (`height: 'auto'`) — abre/cierra suave y respeta reduced-motion.
  */
-function FaqItem({ q, a }) {
-  const [open, setOpen] = useState(false)
+function FaqItem({ q, a, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen)
   const panelRef = useRef(null)
   const tweenRef = useRef(null)
 
@@ -78,11 +78,20 @@ function FaqItem({ q, a }) {
   )
 }
 
-export default function FaqAccordion({ items }) {
+/**
+ * `openIndex`: el item que arranca abierto. Cambiarlo lo abre (el item se vuelve
+ * a montar), así un link de afuera puede llevar directo a una respuesta.
+ */
+export default function FaqAccordion({ items, openIndex = -1 }) {
   return (
     <div className="divide-y divide-ink/10 border-y border-ink/10">
       {items.map((item, i) => (
-        <FaqItem key={i} q={item.q} a={item.a} />
+        <FaqItem
+          key={i === openIndex ? `${i}-open` : i}
+          q={item.q}
+          a={item.a}
+          defaultOpen={i === openIndex}
+        />
       ))}
     </div>
   )

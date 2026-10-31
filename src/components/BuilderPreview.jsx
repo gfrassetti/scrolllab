@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getSection } from '../lib/sectionRegistry'
-import { getSectionFields, sanitizeProps } from '../lib/sectionFields'
+import { getSectionFields, sanitizeProps, sectionFieldLayout } from '../lib/sectionFields'
 import { recipeHasCommerce } from '../lib/composition'
 import { resolveSectionTheme } from '../lib/sectionTheme'
 import { commerceThemeFromItems } from '../lib/shop/theme'
@@ -9,6 +9,8 @@ import { productsFromItems } from '../lib/shop/catalog'
 import CompositionCanvas from './CompositionCanvas'
 import CompositionShopShell from './CompositionShopShell'
 import SectionFieldRow from './SectionFieldRow'
+import FieldGroups from './FieldGroups'
+import { useShopCart } from '../lib/shop/cartStore'
 import ModelTryout from './ModelTryout'
 import FontPicker from './FontPicker'
 import Collapse from './Collapse'
@@ -42,14 +44,22 @@ const CHIP_POSITION = {
  * Live composition preview with a side panel to edit text props per section.
  * When the recipe includes commerce/ProductGrid, shop routes run in a nested router.
  */
-export default function BuilderPreview({ items, font = null, onChangeFont = null, onChangeProps, onExit }) {
+export default function BuilderPreview({ items, font = null, onChangeFont = null, onChangeProps, onExit, initialEditingUid = null }) {
   const t = useT()
-  const [editingUid, setEditingUid] = useState(null)
+  const [editingUid, setEditingUid] = useState(initialEditingUid)
+  const [fieldQuery, setFieldQuery] = useState('')
+  const panelRef = useRef(null)
+  // La pantalla de la tienda en la que está el preview ('/', '/product/…', '/checkout').
+  const [shopRoute, setShopRoute] = useState('/')
+  const cartOpen = useShopCart((s) => s.drawerOpen)
   const [fontOpen, setFontOpen] = useState(false)
   const fontChoice = fontChoiceById(font)
   const editing = items.find((item) => item.uid === editingUid)
   const editingSection = editing ? getSection(editing.sectionId) : null
-  const fields = editing ? getSectionFields(editing.sectionId) : []
+  // Secciones con muchos campos: grupos plegables (propios o por tipo).
+  const { groups: fieldGroups, fields } = editing
+    ? sectionFieldLayout(editing.sectionId, getSectionFields(editing.sectionId))
+    : { groups: null, fields: [] }
   // La ayuda de imágenes va una vez por panel, no repetida en cada campo.
   const firstAssetKey = fields.find((f) => f.type === 'image')?.key
   // Un .glb de la computadora probado en el panel: solo cambia lo que se ve acá
@@ -66,10 +76,57 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
       ),
     [items, localModels],
   )
+  // Cada sección que se abre arranca con la búsqueda vacía.
+  useEffect(() => setFieldQuery(''), [editingUid])
+
+  // Escape cierra el panel; el foco entra en él al abrir y vuelve a donde estaba al cerrar.
+  useEffect(() => {
+    if (!editingUid) return undefined
+    const onKey = (event) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) setEditingUid(null)
+    }
+    const back = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const raf = window.requestAnimationFrame(() => panelRef.current?.focus({ preventScroll: true }))
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.cancelAnimationFrame(raf)
+      window.removeEventListener('keydown', onKey)
+      back?.focus?.({ preventScroll: true })
+    }
+  }, [editingUid])
+
+  // Desde el «Editar» de la lista: el preview abre en esa sección (la nav es fija: no hay a dónde bajar).
+  useEffect(() => {
+    if (!initialEditingUid) return undefined
+    const target = items.find((item) => item.uid === initialEditingUid)
+    if (!target || getSection(target.sectionId)?.kind === 'nav') return undefined
+    const timer = window.setTimeout(() => {
+      document
+        .querySelector(`[data-section-uid="${CSS.escape(initialEditingUid)}"]`)
+        ?.scrollIntoView({ block: 'start' })
+    }, 450)
+    return () => window.clearTimeout(timer)
+    // Solo al montar: después el usuario scrollea donde quiera.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const hasCommerce = recipeHasCommerce(items.map((i) => i.sectionId))
   const shopTheme = commerceThemeFromItems(items, resolveSectionTheme)
   const checkoutProps = checkoutPropsFromItems(items)
   const shopProducts = productsFromItems(items)
+  const shopItem = items.find((item) => item.sectionId === 'commerce/ProductGrid')
+  const onShopScreen = shopRoute !== '/'
+  // El panel abre el grupo de la pantalla que se está viendo (carrito, ficha, checkout).
+  const focusGroup =
+    editing?.sectionId === 'commerce/ProductGrid'
+      ? cartOpen
+        ? 'cart'
+        : shopRoute === '/checkout'
+          ? 'checkout'
+          : shopRoute.startsWith('/product/')
+            ? 'detail'
+            : null
+      : null
 
   const editLabelFor = (section) => {
     if (section.kind === 'nav') return t('builder.editNav')
@@ -77,6 +134,23 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
     if (section.kind === 'footer') return t('builder.editFooter')
     return t('builder.editSection')
   }
+
+  // En la ficha y el checkout no hay chips «Editar»: este es el de la tienda.
+  const shopEditChip = shopItem ? (
+    <button
+      type="button"
+      data-sl-ui
+      data-native-cursor
+      onClick={() => setEditingUid((uid) => (uid === shopItem.uid ? null : shopItem.uid))}
+      className={`fixed bottom-[4.75rem] left-3 z-[60] min-h-11 border px-4 py-2 text-[11px] uppercase tracking-[0.2em] shadow-sm transition-colors max-sm:bottom-[8.5rem] ${
+        editingUid === shopItem.uid
+          ? 'border-accent bg-accent text-bone'
+          : 'border-ink/30 bg-bone/90 text-ink hover:border-ink'
+      }`}
+    >
+      {editingUid === shopItem.uid ? t('builder.editing') : t('builder.editShop')}
+    </button>
+  ) : null
 
   const home = (
     <CompositionCanvas
@@ -92,7 +166,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
               onClick={() =>
                 setEditingUid((uid) => (uid === item.uid ? null : item.uid))
               }
-              className={`absolute z-[60] min-h-9 border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
+              className={`absolute z-[60] min-h-11 border px-3 py-1.5 text-[11px] uppercase tracking-[0.2em] shadow-sm transition-colors ${
                 section.kind === 'nav' ? CHIP_POSITION.nav : CHIP_POSITION.section
               } ${
                 active
@@ -116,7 +190,7 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
   )
 
   return (
-    <div className="relative">
+    <div className={`relative ${editing ? 'builder-panel-open' : ''}`}>
       {hasCommerce ? (
         <CompositionShopShell
           font={font}
@@ -125,6 +199,9 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
           checkoutProps={checkoutProps}
           items={items}
           products={shopProducts}
+          syncHistory
+          onRoute={setShopRoute}
+          routeChrome={shopEditChip}
         />
       ) : (
         home
@@ -132,19 +209,23 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
 
       {editing && editingSection && fields.length > 0 && (
         <aside
+          ref={panelRef}
+          role="dialog"
+          aria-label={`${t('builder.editPanel')}: ${editingSection.name}`}
+          tabIndex={-1}
           data-native-cursor
-          className="fixed inset-x-0 bottom-0 z-9998 flex max-h-[62svh] flex-col border-t border-ink/20 bg-bone text-ink shadow-xl md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-md md:border-t-0 md:border-l"
+          className="fixed inset-x-0 bottom-0 z-9998 flex max-h-[62svh] flex-col border-t border-ink/20 bg-bone text-ink shadow-xl outline-none md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-md md:border-t-0 md:border-l"
         >
           <div className="flex items-center justify-between border-b border-ink/15 px-5 py-4">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/50">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-ink/65">
                 {t('builder.editPanel')}
               </p>
               <p className="mt-1 text-sm font-medium">
                 {editingSection.name}
               </p>
               {editingSection.beat && (
-                <p className="mt-2 max-w-[36ch] text-xs leading-relaxed text-ink/50">
+                <p className="mt-2 max-w-[36ch] text-xs leading-relaxed text-ink/65">
                   {t('builder.beatEditHint')}
                 </p>
               )}
@@ -152,44 +233,85 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
             <button
               type="button"
               onClick={() => setEditingUid(null)}
-              className="min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/50 hover:text-ink"
+              className="min-h-11 px-2 text-[11px] uppercase tracking-[0.2em] text-ink/65 hover:text-ink"
             >
               {t('common.close')}
             </button>
           </div>
+          {fieldGroups ? (
+            <div className="border-b border-ink/15 px-5 py-3">
+              <input
+                type="search"
+                value={fieldQuery}
+                onChange={(e) => setFieldQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  // Escape borra la búsqueda; con la búsqueda vacía cierra el panel.
+                  if (e.key === 'Escape' && fieldQuery) {
+                    e.stopPropagation()
+                    setFieldQuery('')
+                  }
+                }}
+                placeholder={t('builder.fieldSearch')}
+                aria-label={t('builder.fieldSearch')}
+                className="min-h-11 w-full border border-ink/20 bg-transparent px-3 py-2 text-sm text-ink outline-none placeholder:text-ink/45 focus:border-ink"
+              />
+            </div>
+          ) : null}
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-            {fields.map((field) => {
-              const value =
-                editing.props?.[field.key] ??
-                (field.type === 'select' ? field.options?.[0]?.value : '') ??
-                ''
-              const onFieldChange = (nextValue) => {
-                const nextProps = sanitizeProps(editing.sectionId, {
-                  ...(editing.props || {}),
-                  [field.key]: nextValue,
-                })
-                onChangeProps(editing.uid, nextProps)
-              }
+            {(() => {
+              const renderField = (field) => {
+                const value =
+                  editing.props?.[field.key] ??
+                  (field.type === 'select' ? field.options?.[0]?.value : '') ??
+                  ''
+                const onFieldChange = (nextValue) => {
+                  const nextProps = sanitizeProps(editing.sectionId, {
+                    ...(editing.props || {}),
+                    [field.key]: nextValue,
+                  })
+                  onChangeProps(editing.uid, nextProps)
+                }
 
-              return (
-                <div key={field.key} className="space-y-2">
-                  <SectionFieldRow
-                    field={field}
-                    value={value}
-                    onChange={onFieldChange}
-                    hint={
-                      FIELD_HINT_KEY[field.type] &&
-                      (field.type === 'list' || field.key === firstAssetKey)
-                        ? t(FIELD_HINT_KEY[field.type])
-                        : undefined
-                    }
-                  />
-                  {field.key === 'modelUrl' && field.type === 'url' ? (
-                    <ModelTryout uid={editing.uid} value={value} onUseRoute={onFieldChange} />
-                  ) : null}
-                </div>
+                return (
+                  <div key={field.key} className="space-y-2">
+                    <SectionFieldRow
+                      field={field}
+                      value={value}
+                      onChange={onFieldChange}
+                      hint={
+                        FIELD_HINT_KEY[field.type] &&
+                        (field.type === 'list' || field.key === firstAssetKey)
+                          ? t(FIELD_HINT_KEY[field.type])
+                          : undefined
+                      }
+                    />
+                    {field.key === 'modelUrl' && field.type === 'url' ? (
+                      <ModelTryout uid={editing.uid} value={value} onUseRoute={onFieldChange} />
+                    ) : null}
+                  </div>
+                )
+              }
+              const editField = (key, nextValue) =>
+                onChangeProps(
+                  editing.uid,
+                  sanitizeProps(editing.sectionId, { ...(editing.props || {}), [key]: nextValue }),
+                )
+              return fieldGroups ? (
+                <FieldGroups
+                  key={editing.uid}
+                  focusGroup={focusGroup}
+                  query={fieldQuery}
+                  emptyText={t('builder.fieldSearchEmpty')}
+                  groups={fieldGroups}
+                  fields={fields}
+                  props={editing.props}
+                  renderField={renderField}
+                  onSwitch={editField}
+                />
+              ) : (
+                fields.map(renderField)
               )
-            })}
+            })()}
           </div>
         </aside>
       )}
@@ -241,12 +363,14 @@ export default function BuilderPreview({ items, font = null, onChangeFont = null
       <button
         type="button"
         data-native-cursor
-        onClick={onExit}
+        onClick={() => (hasCommerce && onShopScreen ? window.history.back() : onExit())}
+        // Centrado en lo que se ve: sin el ancho del panel de edición (md+).
+        style={{ left: 'calc((100% - var(--builder-panel, 0px)) / 2)' }}
         className={`fixed left-1/2 z-9999 -translate-x-1/2 border-2 border-ink bg-bone px-6 py-3 text-xs font-medium uppercase tracking-[0.25em] text-ink shadow-lg transition-colors duration-300 hover:bg-ink hover:text-bone ${
           hasCommerce ? 'bottom-20 sm:bottom-5' : 'bottom-5'
         } ${editing ? 'max-md:hidden' : ''}`}
       >
-        {t('builder.exitPreview')} ({items.length})
+        {hasCommerce && onShopScreen ? t('builder.backToShop') : `${t('builder.exitPreview')} (${items.length})`}
       </button>
     </div>
   )

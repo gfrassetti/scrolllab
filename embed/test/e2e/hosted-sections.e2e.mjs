@@ -954,6 +954,53 @@ describe('embed e2e — todas las HOSTABLE_SECTIONS', () => {
     }
   })
 
+  // --- PIN con un header sticky que arranca debajo de una barra de anuncios ---
+  // Shopify (tema Horizon): arriba de todo hay una barra de anuncios y el header
+  // es `position: sticky; top: 0` justo debajo. Al scrollear el header se pega
+  // arriba y el widget pineado quedaba DEBAJO de él (le tapaba la franja de arriba).
+  it('chapters/StackingCards — con un header sticky bajo una barra de anuncios, se pega debajo del header', async () => {
+    const { id, key } = await seed('chapters/StackingCards', { chapterLabel: 'MKSTICKY' })
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'no-preference' })
+    const page = await context.newPage()
+    const url = 'http://localhost:4178/__sticky-header-host.html'
+    await page.route(url, (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: `<!doctype html><html><body style="margin:0">
+          <div style="height:43px;background:#eee">Anuncio</div>
+          <header style="position:sticky;top:0;height:64px;z-index:5;background:#111"></header>
+          <div style="height:100vh"></div>
+          <script src="http://localhost:4178/embed-dist/v1/loader.js" data-scrolllab data-key="${key}"
+            data-frame="http://localhost:4179/embed-dist/v1" data-api="${API}" async></script>
+          <div style="height:200vh"></div>
+        </body></html>`,
+      }),
+    )
+    try {
+      await page.goto(url)
+      await waitFrame(page)
+      const wrap = page.locator('[data-scrolllab-pin]')
+      await wrap.waitFor({ state: 'attached', timeout: 15_000 })
+      await sleep(800)
+      const { top, height } = await wrap.evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, height: el.offsetHeight }))
+      await page.evaluate((y) => window.scrollTo(0, y), top + (height - 900) / 2)
+      let state = null
+      for (let i = 0; i < 20; i++) {
+        await sleep(150)
+        state = await page.locator('iframe[data-scrolllab-frame]').evaluate((el) => {
+          const r = el.getBoundingClientRect()
+          return { top: Math.round(r.top), height: Math.round(r.height) }
+        })
+        if (state.top === 64) break
+      }
+      assert.equal(state.top, 64, `el iframe no se pega debajo del header sticky (top ${state.top})`)
+      assert.equal(state.height, 900 - 64, `el iframe no mide la pantalla menos el header (${state.height})`)
+    } finally {
+      await context.close()
+      await unseed(id)
+    }
+  })
+
   // --- PIN en un plan pago: sin la tira del plan gratis ---
   // Regresión: el frame medía `end: '+=280%'` contra un iframe en 0px y el
   // recorrido quedaba en 0; con la tira «Hecho con Scroll Lab» (~30px) el

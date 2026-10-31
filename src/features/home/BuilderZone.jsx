@@ -2,6 +2,7 @@ import ZoneHeadline from './ZoneHeadline.jsx'
 import BuilderDemo from '../../components/BuilderDemo'
 import { Link } from 'react-router-dom'
 import Logo from '../../components/Logo'
+import PlatformLogo from '../../components/PlatformLogo'
 import { formatPriceFromUsd, CUSTOM_BASE_PRICE_USD, CUSTOM_BASE_SECTIONS, formatNextSectionPrice, bundleListPriceUsd, bundleDiscountPct, BUNDLE_PRICE_USD } from '../../lib/pricing'
 import FirstPurchasePrice, { FirstPurchaseTag } from '../../components/FirstPurchasePrice'
 
@@ -85,6 +86,14 @@ export default function BuilderZone({ t, locale, currency, rate, addItem, buying
             className="mt-5 max-w-[48ch] text-body leading-relaxed text-bone/70 group-hover:text-on-accent/80"
           >
             {t('home.builderBody')}
+          </p>
+          {/* El kit de tienda se conecta a la tienda Shopify del comprador. */}
+          <p
+            data-cta-bit
+            className="mt-3 flex max-w-[52ch] items-start gap-2.5 text-body-sm leading-relaxed text-bone/70 group-hover:text-on-accent/80"
+          >
+            <PlatformLogo id="shopify" className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{t('home.builderShop')}</span>
           </p>
           <p
             data-cta-bit

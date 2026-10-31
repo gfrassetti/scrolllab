@@ -19,6 +19,7 @@ import {
   renderSharePage,
 } from '../src/lib/sharePages.js'
 import { productPageData, renderProductPage } from '../src/lib/productPages.js'
+import { LAB_SHOPIFY, renderLabShopifyPage } from '../src/lib/labShopifyPage.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const dist = path.join(root, 'dist')
@@ -68,3 +69,14 @@ for (const data of products) {
 }
 
 console.log(`product pages: ${products.length} rutas → ${products.map((p) => p.path).join(', ')}`)
+
+// /lab/shopify: la guía de LAB para tiendas Shopify (src/lib/labShopifyPage.js).
+for (const img of [LAB_SHOPIFY.hero, LAB_SHOPIFY.editor, LAB_SHOPIFY.gridImage]) {
+  if (!fs.existsSync(path.join(dist, img.src))) {
+    throw new Error(`Falta public${img.src}: la muestra /lab/shopify.`)
+  }
+}
+const labShopifyOut = path.join(dist, LAB_SHOPIFY.path, 'index.html')
+fs.mkdirSync(path.dirname(labShopifyOut), { recursive: true })
+fs.writeFileSync(labShopifyOut, renderLabShopifyPage(base))
+console.log(`lab shopify: ${LAB_SHOPIFY.path}`)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import es from '../i18n/locales/es.json'
 import SiteHeader from '../components/SiteHeader'
@@ -8,6 +8,7 @@ import { useCart } from '../lib/cart'
 import { useFxRate } from '../lib/fx'
 import { formatPriceFromUsd } from '../lib/pricing'
 import FirstPurchasePrice, { FirstPurchaseTag } from '../components/FirstPurchasePrice'
+import SpecIcon from '../components/SpecIcon'
 import { useCurrency } from '../lib/currency'
 import { isProductSku, productPageData } from '../lib/productPages'
 import { startCheckout } from '../lib/startCheckout'
@@ -74,6 +75,65 @@ function BuyActions({ data }) {
   )
 }
 
+/**
+ * Compartir la ficha: la hoja nativa del teléfono si existe; si no (o si la
+ * cierran sin elegir), copia el link y lo dice al lado del ícono un momento.
+ */
+function ShareButton({ data }) {
+  const c = data.copy
+  const [copied, setCopied] = useState(false)
+  const timer = useRef(0)
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  const share = async () => {
+    const url = data.url
+    if (navigator.share && window.matchMedia?.('(pointer: coarse)').matches) {
+      try {
+        await navigator.share({ title: data.title, url })
+        return
+      } catch (err) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      clearTimeout(timer.current)
+      timer.current = window.setTimeout(() => setCopied(false), 2200)
+    } catch {
+      window.prompt(c.share, url)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={share}
+      className="ui-press inline-flex min-h-11 items-center gap-2 text-eyebrow uppercase text-ink/60 transition-colors hover:text-accent"
+    >
+      <SpecIcon name="share" className="h-4 w-4" />
+      <span aria-live="polite">{copied ? c.shareCopied : c.share}</span>
+    </button>
+  )
+}
+
+/** La ficha técnica: dos columnas de dato con su ícono, sobre una regla fina. */
+function SpecList({ specs, title }) {
+  return (
+    <div className="mt-10 border-t border-ink/15 pt-6">
+      <h2 className="sr-only">{title}</h2>
+      <ul className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+        {specs.map((s) => (
+          <li key={s.key} className="flex min-w-0 items-center gap-3 text-body-sm text-ink/80">
+            <SpecIcon name={s.key} className="h-5 w-5 shrink-0 text-ink/55" />
+            <span className="min-w-0">{s.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function ProductView({ data }) {
   const c = data.copy
   const { rate } = useFxRate()
@@ -93,6 +153,7 @@ function ProductView({ data }) {
     <div className="min-h-svh bg-bone text-ink">
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-5 pt-28 pb-20 md:px-10 md:pt-36">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <nav
           aria-label="Ruta"
           className="flex flex-wrap items-center gap-x-2 text-eyebrow uppercase text-ink/50"
@@ -107,8 +168,10 @@ function ProductView({ data }) {
           <span aria-hidden="true">/</span>
           <span className="text-ink">{data.name}</span>
         </nav>
+        <ShareButton data={data} />
+        </div>
 
-        <header className="mt-10 grid gap-10 md:grid-cols-[1.05fr_1fr] md:items-end md:gap-14">
+        <header className="mt-10 grid gap-10 md:grid-cols-[1.05fr_1fr] md:items-start md:gap-14">
           <div>
             <p className="text-eyebrow uppercase text-accent">{data.vibe}</p>
             <h1 className="mt-4">
@@ -137,9 +200,28 @@ function ProductView({ data }) {
             <p className="mt-2 max-w-[52ch] text-body-sm text-ink/55">{data.priceLine}</p>
 
             <BuyActions data={data} />
+            <p className="mt-4 text-body-sm text-ink/60">
+              {c.licenseLine} ·{' '}
+              <Link
+                to="/legal/license"
+                className="text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+              >
+                {c.licenseMore}
+              </Link>
+            </p>
+            <p className="mt-1.5 text-body-sm text-ink/60">
+              {c.refundLine} ·{' '}
+              <Link
+                to="/arrepentimiento"
+                className="text-ink underline decoration-ink/25 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+              >
+                {c.refundMore}
+              </Link>
+            </p>
+            <SpecList specs={data.specs} title={c.specsTitle} />
           </div>
 
-          <div className="relative aspect-4/3 overflow-hidden border border-ink/15 bg-ink">
+          <div className="relative aspect-4/3 overflow-hidden border border-ink/15 bg-ink md:sticky md:top-28">
             <img
               src={data.poster}
               alt={c.posterAlt(data.name)}
@@ -177,12 +259,10 @@ function ProductView({ data }) {
 
         <section className="mt-24">
           <h2 className="text-title-sm font-medium tracking-[-0.02em]">{c.includesTitle}</h2>
-          <ul className="mt-6 max-w-2xl space-y-3">
+          <ul className="mt-6 grid gap-x-12 gap-y-4 md:grid-cols-2">
             {c.includes.map((text) => (
               <li key={text} className="flex gap-3 text-body text-ink/80">
-                <span aria-hidden="true" className="text-accent">
-                  →
-                </span>
+                <SpecIcon name="check" className="mt-1 h-4 w-4 shrink-0 text-accent" />
                 <span>{text}</span>
               </li>
             ))}

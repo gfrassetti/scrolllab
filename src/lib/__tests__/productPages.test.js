@@ -7,6 +7,7 @@ import { TEMPLATE_PRICES_USD } from '../pricing.js'
 import { publicDemoSkus } from '../sharePages.js'
 import {
   PRODUCT_COPY,
+  PRODUCT_TECH,
   isProductSku,
   productJsonLd,
   productPageData,
@@ -128,6 +129,49 @@ describe('productPageData — cada template en venta', () => {
     const html = renderProductPage(indexHtml, d)
     assert.ok(!html.includes(PRODUCT_COPY.sectionsTitle), 'quedó el título de secciones sin secciones')
     assert.ok(html.includes(PRODUCT_COPY.effectsTitle), 'se perdieron los efectos destacados')
+  })
+})
+
+describe('ficha técnica (productSpecs)', () => {
+  const sectionFiles = (sku) => {
+    const dir = fromRoot(`src/components/sections/${sku}`)
+    if (!fs.existsSync(dir)) return []
+    return fs.readdirSync(dir, { recursive: true })
+      .filter((f) => /\.(jsx?|mjs)$/.test(f))
+      .map((f) => fs.readFileSync(`${dir}/${f}`, 'utf8'))
+  }
+
+  it('el 3D y los formularios que anuncia salen del código de cada template (ni de más ni de menos)', () => {
+    for (const sku of skus) {
+      const code = sectionFiles(sku).join(' ')
+      const has = {
+        webgl: /WebGLRenderer|from ['"]three['"]/.test(code),
+        form: /<form[\s>]/.test(code),
+      }
+      const declared = PRODUCT_TECH[sku] || []
+      for (const k of Object.keys(has)) {
+        assert.equal(declared.includes(k), has[k], `${sku}: ${k} ${has[k] ? 'está en el código y falta en PRODUCT_TECH' : 'está en PRODUCT_TECH y no en el código'}`)
+      }
+    }
+  })
+
+  it('cada template lleva lo común, y el builder solo si se puede editar ahí', () => {
+    for (const sku of skus) {
+      const d = productPageData(sku, es)
+      const keys = d.specs.map((s) => s.key)
+      for (const k of ['stack', 'motion', 'responsive', 'docs', 'calm']) assert.ok(keys.includes(k), `${sku} sin ${k}`)
+      assert.equal(keys.includes('builder'), d.sections.length > 0, `${sku}: builder`)
+      if (d.sections.length) assert.ok(d.specs.some((s) => s.label === `${d.sections.length} secciones`), sku)
+      assert.equal(new Set(keys).size, keys.length, `${sku}: datos repetidos`)
+    }
+  })
+
+  it('la página emitida trae la ficha y la línea de licencia (lo lee el buscador)', () => {
+    const d = productPageData('fizz', es)
+    const html = renderProductPage(indexHtml, d)
+    assert.ok(html.includes(PRODUCT_COPY.specsTitle))
+    assert.ok(html.includes(PRODUCT_COPY.specs.webgl))
+    assert.ok(html.includes(PRODUCT_COPY.licenseLine))
   })
 })
 

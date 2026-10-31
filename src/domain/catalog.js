@@ -89,7 +89,12 @@ export const MAX_CART_COMPOSITIONS = 5
 /** Tope de secciones de una receta (el builder lo muestra, el checkout lo aplica). */
 export const MAX_CUSTOM_SECTIONS = 30
 
-export const COMMERCE_PACK_SURCHARGE_USD = 59
+/**
+ * Lo que suma el kit de tienda (ficha, carrito y checkout) a una composición.
+ * 59 → 99 el 2026-10-28 (decisión del dueño): desde el conector con Shopify el
+ * kit cobra de verdad (productos, stock y checkout de la tienda del comprador).
+ */
+export const COMMERCE_PACK_SURCHARGE_USD = 99
 
 /** Redondeo del monto en pesos: al millar de arriba, para no perder en el cambio. */
 export const ARS_ROUNDING = 1000

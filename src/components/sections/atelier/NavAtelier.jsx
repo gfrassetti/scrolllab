@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useMobileMenu } from '../../../hooks/useMobileMenu'
 import { parseNavLinks } from '../../../lib/navLinks'
+import { readableInk } from '../../../lib/themeVars'
 
 /**
  * NavAtelier — fixed header in the practice's own voice: the wordmark on the
@@ -21,6 +22,10 @@ export default function NavAtelier({
   /** El menú del teléfono: fondo y texto (la barra se invierte sola). */
   bg,
   fg,
+  /** Fondo de la barra. Vacío: transparente y su color sigue a lo que hay debajo. */
+  barBg,
+  /** Color del texto de la barra con fondo. */
+  barColor,
 }) {
   const items = parseNavLinks(links, linksText)
   const { open, close, panelProps, triggerProps } = useMobileMenu()
@@ -49,15 +54,24 @@ export default function NavAtelier({
       if (raf) cancelAnimationFrame(raf)
     }
   }, [])
-  const ink = tone === 'light' && !open
+  // Con fondo propio la barra es sólida: sin mix-blend ni lectura de lo de abajo.
+  const solid = Boolean(barBg) && !open
+  const solidInk = solid ? barColor || readableInk(barBg) || '#f2efe9' : undefined
+  const ink = solid ? /^#(0|1)/i.test(solidInk) : tone === 'light' && !open
 
   return (
     <>
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-          open ? 'text-current' : ink ? '' : 'text-white'
-        } ${tone === 'mixed' && !open ? 'mix-blend-difference !text-white' : ''}`}
-        style={open || ink ? { color: fg || '#111111' } : undefined}
+          open ? 'text-current' : solid || ink ? '' : 'text-white'
+        } ${tone === 'mixed' && !open && !solid ? 'mix-blend-difference !text-white' : ''}`}
+        style={
+          solid
+            ? { backgroundColor: barBg, color: solidInk }
+            : open || ink
+              ? { color: fg || '#111111' }
+              : undefined
+        }
       >
         <nav className="grid grid-cols-[1fr_auto] items-center px-5 py-5 md:grid-cols-[1fr_auto_1fr] md:px-8 md:py-6">
           <a href="#top" className="tpl-hit relative text-xl font-medium tracking-[-0.03em] md:text-2xl">

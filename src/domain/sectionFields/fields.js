@@ -12,7 +12,7 @@ import { KIN_FIELDS } from './fields/kin.js'
 import { APEX_FIELDS } from './fields/apex.js'
 import { ORDO_FIELDS } from './fields/ordo.js'
 import { CONTACT_FIELDS } from './fields/contact.js'
-import { COMMERCE_FIELDS } from './fields/commerce.js'
+import { COMMERCE_FIELDS, PRODUCT_GRID_GROUPS } from './fields/commerce.js'
 
 /** @typedef {import('./types.js').SectionField} SectionField */
 
@@ -63,4 +63,56 @@ export const SECTIONS_WITHOUT_COLOR = Object.freeze({
 
 export function getSectionFields(sectionId) {
   return SECTION_FIELDS[sectionId] || []
+}
+
+/**
+ * Grupos plegables del panel, para las secciones con muchos campos. Sin grupos
+ * el panel muestra la lista de siempre.
+ * @type {Record<string, import('./types.js').SectionFieldGroup[]>}
+ */
+export const SECTION_FIELD_GROUPS = {
+  'commerce/ProductGrid': PRODUCT_GRID_GROUPS,
+}
+
+export function getSectionFieldGroups(sectionId) {
+  return SECTION_FIELD_GROUPS[sectionId] || null
+}
+
+/** Desde cuántos campos el panel agrupa solo una sección sin grupos propios. */
+export const AUTO_GROUP_MIN_FIELDS = 12
+
+/** Los grupos automáticos, por tipo de campo: predecibles en cualquier sección. */
+export const AUTO_FIELD_GROUPS = Object.freeze([
+  { id: 'content', title: 'Textos', open: true },
+  { id: 'media', title: 'Fotos y video' },
+  { id: 'links', title: 'Links' },
+  { id: 'colors', title: 'Colores' },
+  { id: 'layers', title: 'Capas y efectos' },
+])
+
+/** @param {import('./types.js').SectionField} field */
+export function autoGroupOf(field) {
+  if (field.type === 'color' || (field.type === 'select' && field.key === 'theme')) return 'colors'
+  if (field.type === 'href' || (field.type === 'url' && /endpoint/i.test(field.key))) return 'links'
+  if (field.type === 'image' || field.type === 'url') return 'media'
+  if (field.type === 'toggle') return 'layers'
+  return 'content'
+}
+
+/**
+ * Cómo se arma el panel de una sección: sus grupos propios (la tienda), grupos
+ * automáticos por tipo si tiene muchos campos, o la lista de siempre.
+ * `fields` es la lista ya filtrada (LAB oculta algunos campos).
+ * @param {string} sectionId
+ * @param {import('./types.js').SectionField[]} fields
+ * @returns {{ groups: import('./types.js').SectionFieldGroup[] | null, fields: import('./types.js').SectionField[] }}
+ */
+export function sectionFieldLayout(sectionId, fields) {
+  const own = SECTION_FIELD_GROUPS[sectionId]
+  if (own) return { groups: own, fields }
+  if (fields.length < AUTO_GROUP_MIN_FIELDS) return { groups: null, fields }
+  const grouped = fields.map((field) => ({ ...field, group: autoGroupOf(field) }))
+  const used = new Set(grouped.map((field) => field.group))
+  const groups = AUTO_FIELD_GROUPS.filter((group) => used.has(group.id))
+  return groups.length > 1 ? { groups, fields: grouped } : { groups: null, fields }
 }

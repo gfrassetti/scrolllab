@@ -9,14 +9,16 @@ import { navLinks, toggle } from '../helpers.js'
  */
 export const ATELIER_FIELDS = {
   'atelier/NavAtelier': [
-    { key: 'brand', label: 'Brand', type: 'text' },
+    { key: 'brand', label: 'Marca', type: 'text' },
     { key: 'cta', label: 'Botón (derecha)', type: 'text' },
     { key: 'ctaHref', label: 'Botón — enlace', type: 'href' },
-    { key: 'menuLabel', label: 'Menu label', type: 'text' },
-    { key: 'closeLabel', label: 'Close label', type: 'text' },
+    { key: 'menuLabel', label: 'Rótulo del menú', type: 'text' },
+    { key: 'closeLabel', label: 'Rótulo de cerrar', type: 'text' },
     navLinks(),
     { key: 'bg', label: 'Menú del teléfono — color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto (barra sobre fondo claro y menú del teléfono)', type: 'color' },
+    { key: 'barBg', label: 'Barra — color de fondo (vacío: transparente)', type: 'color' },
+    { key: 'barColor', label: 'Barra — color del texto (con fondo)', type: 'color' },
   ],
   'atelier/HeroMeaning': [
     { key: 'intro', label: 'Texto de presentación', type: 'text' },
@@ -51,15 +53,15 @@ export const ATELIER_FIELDS = {
     toggle('showShade', 'Degradado oscuro bajo el texto'),
   ],
   'atelier/AboutClarity': [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
     { key: 'lead', label: 'Párrafo principal', type: 'textarea' },
     { key: 'body', label: 'Segundo párrafo', type: 'textarea' },
     { key: 'bg', label: 'Color de fondo', type: 'color' },
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/ServicesStone': [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     { key: 'linkLabel', label: 'Texto del enlace de cada fila', type: 'text' },
     {
       key: 'areas',
@@ -84,8 +86,8 @@ export const ATELIER_FIELDS = {
     { key: 'fg', label: 'Color de las columnas (y con el que cierra: el de Proyectos)', type: 'color' },
   ],
   'atelier/SelectedWork': [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     { key: 'ctaLabel', label: 'Botón de arriba', type: 'text' },
     { key: 'ctaHref', label: 'Botón de arriba — enlace', type: 'href' },
     { key: 'linkLabel', label: 'Texto del enlace de cada proyecto', type: 'text' },
@@ -107,8 +109,8 @@ export const ATELIER_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/KeyFacts': [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     { key: 'linkLabel', label: 'Enlace', type: 'text' },
     { key: 'linkHref', label: 'Enlace — destino', type: 'href' },
     { key: 'img', label: 'Foto de fondo (vacío = la de la demo)', type: 'image' },
@@ -127,7 +129,7 @@ export const ATELIER_FIELDS = {
     toggle('showShade', 'Oscurecer la foto'),
   ],
   'atelier/Testimonial': [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
     { key: 'quote', label: 'Cita', type: 'textarea' },
     { key: 'name', label: 'Nombre', type: 'text' },
     { key: 'role', label: 'Cargo o proyecto', type: 'text' },
@@ -135,8 +137,8 @@ export const ATELIER_FIELDS = {
     { key: 'fg', label: 'Color de texto', type: 'color' },
   ],
   'atelier/StudioCards': [
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
     { key: 'readLabel', label: 'Texto de «leer»', type: 'text' },
     {
       key: 'cards',

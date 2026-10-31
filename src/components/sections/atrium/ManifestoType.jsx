@@ -76,7 +76,7 @@ export default function ManifestoType({
 
       <div
         data-manifesto-cols
-        className="atrium-note mx-auto mt-[26svh] grid w-full max-w-4xl gap-10 text-atrium-ink/65 md:mt-[34svh] md:grid-cols-2 md:gap-24"
+        className="atrium-note max-sm:text-[14px]! mx-auto mt-[26svh] grid w-full max-w-4xl gap-10 text-atrium-ink/65 md:mt-[34svh] md:grid-cols-2 md:gap-24"
       >
         <p data-manifesto-col className="md:max-w-[34ch]">
           {left}

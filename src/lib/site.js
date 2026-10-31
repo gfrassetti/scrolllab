@@ -80,7 +80,7 @@ export const SITE_SEO = {
 export const BUILDER_SEO = {
   title: 'Scroll Lab — Builder | Armado de páginas con código fuente',
   description:
-    'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente, editable.',
+    'Mezclá secciones de todos los modelos, previsualizá el scroll en vivo y descargá el código fuente. Con tienda opcional conectada a tu Shopify.',
 }
 
 /**
@@ -90,9 +90,16 @@ export const BUILDER_SEO = {
  * en el boot de index.html.
  */
 export const LAB_SEO = {
-  title: 'Scroll Lab — LAB | Online widgets',
+  title: 'Scroll Lab — LAB | Widgets animados para Shopify y WordPress',
   description:
-    'Una sección con nuestro nivel de diseño, lista para insertar en cualquier sitio con un script, sin bajar código. La editás desde un panel. Empezá gratis.',
+    'Secciones animadas de nivel award para tu sitio o tu tienda Shopify o WordPress: pegás una línea de código y las editás desde un panel, sin programar. Empezá gratis.',
+}
+
+/** /lab/shopify: la guía de LAB para tiendas Shopify (src/lib/labShopifyPage.js). */
+export const LAB_SHOPIFY_SEO = {
+  title: 'Animaciones scroll para tu tienda Shopify — LAB | Scroll Lab',
+  description:
+    'Secciones animadas de nivel award para tu tienda Shopify, sin apps ni código: pegás una línea en una sección «Liquid personalizado» y las editás desde un panel. Empezá gratis.',
 }
 
 export const INDEXABLE_ROBOTS = 'index, follow, max-image-preview:large, noai, noimageai'
@@ -142,6 +149,14 @@ export function seoForPath(pathname) {
       description: BUILDER_SEO.description,
       robots: INDEXABLE_ROBOTS,
       canonical: `${SITE_URL}/builder`,
+    }
+  }
+  if (path === '/lab/shopify') {
+    return {
+      title: LAB_SHOPIFY_SEO.title,
+      description: LAB_SHOPIFY_SEO.description,
+      robots: INDEXABLE_ROBOTS,
+      canonical: `${SITE_URL}/lab/shopify`,
     }
   }
   if (path === '/lab') {

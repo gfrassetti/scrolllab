@@ -76,7 +76,13 @@ export default function CartDrawer({
     'grid size-9 place-items-center text-base leading-none text-[color:var(--shop-fg)] transition-colors hover:bg-[color:var(--shop-fg)] hover:text-[color:var(--shop-bg)] disabled:opacity-30'
 
   return (
-    <div className="fixed inset-0 z-[70] flex justify-end" role="dialog" aria-modal="true" aria-label={title}>
+    <div
+      className="fixed inset-0 z-[70] flex justify-end"
+      style={{ right: 'var(--builder-panel, 0px)' }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
       <button
         type="button"
         aria-label={closeLabel}

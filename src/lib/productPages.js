@@ -11,6 +11,8 @@
  */
 import { INDEXABLE_ROBOTS, SITE_NAME, SITE_URL } from './site.js'
 import { templatePriceUsd } from './pricing.js'
+import { isBuilderHiddenSku } from '../domain/catalog.js'
+import { REFUND_DAYS } from '../domain/policy.js'
 import { publicDemoSkus, renderSharePage, truncate } from './sharePages.js'
 
 export const PRODUCT_BASE_PATH = '/plantillas'
@@ -22,6 +24,18 @@ export const productUrl = (sku) => `${SITE_URL}${productPath(sku)}`
 export function isProductSku(sku) {
   return publicDemoSkus().includes(sku)
 }
+
+/**
+ * Lo que trae el código de cada template, más allá de lo común: 3D en tiempo real
+ * (Three.js) y formularios que funcionan. productPages.test.js lo compara con las
+ * secciones (un WebGLRenderer o un <form> sin anotar acá hace fallar el test).
+ */
+export const PRODUCT_TECH = Object.freeze({
+  monolith: ['webgl'],
+  fizz: ['webgl', 'form'],
+  meridian: ['form'],
+  apex: ['webgl', 'form'],
+})
 
 /** Textos que no cambian de un template a otro. Todo lo que dicen es verificable en el sitio. */
 export const PRODUCT_COPY = {
@@ -36,11 +50,32 @@ export const PRODUCT_COPY = {
   sectionsTitle: 'Secciones que trae',
   sectionsIntro: (n) => `${n} secciones animadas, listas para editar.`,
   effectsTitle: 'Efectos destacados',
+  specsTitle: 'Ficha técnica',
+  specs: {
+    stack: 'React 19 · Vite · Tailwind',
+    motion: 'GSAP y scroll suave (Lenis)',
+    webgl: '3D en tiempo real (Three.js)',
+    responsive: 'Responsive desde 320 px',
+    sections: (n) => `${n} secciones`,
+    form: 'Formulario con validación',
+    docs: 'Guía de instalación incluida',
+    builder: 'Editable en el builder',
+    calm: 'Versión calma (menos movimiento)',
+  },
+  licenseLine: 'Licencia Regular: proyectos propios y de clientes, sin límite de sitios',
+  licenseMore: 'Ver la licencia',
+  refundLine: `Reembolso total dentro de ${REFUND_DAYS} días si no descargás el ZIP`,
+  refundMore: 'Botón de arrepentimiento',
+  share: 'Compartir',
+  shareCopied: 'Link copiado',
   includesTitle: 'Qué te llevás',
   includes: [
     'El proyecto completo en un ZIP: React, Vite y Tailwind, listo para correr con npm install y npm run dev.',
-    'Todo el código fuente, sin dependencias del servidor de este sitio: lo editás como cualquier proyecto tuyo.',
+    'Todo el código fuente, sin ofuscar y sin dependencias del servidor de este sitio: lo editás como cualquier proyecto tuyo.',
+    'Animaciones con GSAP y scroll suave con Lenis, con una versión calma para quien pide «reducir movimiento».',
+    'Responsive: cada sección probada en teléfono, tablet y PC, desde 320 px.',
     'Textos e imágenes de ejemplo para reemplazar por los tuyos.',
+    'Un README con la instalación y cómo reemplazar el contenido: los textos y, donde los hay, el 3D, el video o el formulario.',
     'Licencia Regular: usalo en tus proyectos o en los de tus clientes, sin límite de sitios. No se puede revender.',
     'Descargás el ZIP apenas se confirma el pago y después desde tu cuenta, las veces que quieras.',
   ],
@@ -112,6 +147,26 @@ function textsOf(messages, sku) {
   return { meta, sections: messages?.builder?.sections?.[sku] ?? {} }
 }
 
+/**
+ * El recuadro de datos de la ficha: `{ key, label }` en orden. Sale del catálogo y
+ * del código (PRODUCT_TECH), no se escribe a mano por template.
+ */
+export function productSpecs(sku, sectionCount) {
+  const s = PRODUCT_COPY.specs
+  const tech = PRODUCT_TECH[sku] || []
+  return [
+    { key: 'stack', label: s.stack },
+    { key: 'motion', label: s.motion },
+    tech.includes('webgl') ? { key: 'webgl', label: s.webgl } : null,
+    { key: 'responsive', label: s.responsive },
+    sectionCount > 0 ? { key: 'sections', label: s.sections(sectionCount) } : null,
+    tech.includes('form') ? { key: 'form', label: s.form } : null,
+    { key: 'docs', label: s.docs },
+    sectionCount > 0 && !isBuilderHiddenSku(sku) ? { key: 'builder', label: s.builder } : null,
+    { key: 'calm', label: s.calm },
+  ].filter(Boolean)
+}
+
 /** Todo lo que necesita la página de un template. Falla si el SKU no tiene página. */
 export function productPageData(sku, messages) {
   if (!isProductSku(sku)) {
@@ -141,6 +196,7 @@ export function productPageData(sku, messages) {
     // Optional warning before buying (FOLD: the demo film is a sample).
     notice: meta.notice || '',
     sections: Object.entries(sections).map(([key, s]) => ({ key, name: s.name, blurb: s.blurb })),
+    specs: productSpecs(sku, Object.keys(sections).length),
     related: relatedSkus(sku).map((other) => ({
       sku: other,
       name: other.toUpperCase(),
@@ -229,7 +285,11 @@ export function productSnapshotHtml(data) {
     data.idealFor ? `<p>${e(c.idealForLabel)} ${e(data.idealFor)}</p>` : '',
     data.notice ? `<p>${e(data.notice)}</p>` : '',
     `<p>${e(data.priceLine)}</p>`,
+    `<p>${e(c.licenseLine)} — <a href="/legal/license">${e(c.licenseMore)}</a></p>`,
+    `<p>${e(c.refundLine)} — <a href="/arrepentimiento">${e(c.refundMore)}</a></p>`,
     `<p><a href="${e(data.demoPath)}">${e(c.demo)}</a></p>`,
+    `<h2>${e(c.specsTitle)}</h2>`,
+    `<ul>${items(data.specs.map((s) => s.label))}</ul>`,
     ...(data.sections.length
       ? [
           `<h2>${e(c.sectionsTitle)}</h2>`,

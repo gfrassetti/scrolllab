@@ -33,6 +33,8 @@ export function useBuilderComposition() {
   // receta, ver src/domain/design.js.
   const [font, setFontState] = useState(boot.font)
   const [preview, setPreview] = useState(false)
+  // La sección que el preview abre ya en edición (el «Editar» de cada fila de la lista).
+  const [previewEditUid, setPreviewEditUid] = useState(null)
   const [dragOver, setDragOver] = useState(null)
   const [limitNotice, setLimitNotice] = useState('')
   // Qué composición del carrito es esta (puede haber varias en el carrito).
@@ -140,15 +142,45 @@ export function useBuilderComposition() {
     [items],
   )
 
-  const openPreview = useCallback(() => {
+  // El preview tiene su propio lugar en el historial del navegador: «atrás»
+  // vuelve al builder (no a la página de antes) y dentro de la tienda vuelve a
+  // la pantalla anterior (ver CompositionShopShell). `shopDepth` = cuántas
+  // pantallas de la tienda se abrieron desde el inicio del preview.
+  const openPreview = useCallback((editUid) => {
+    // `onClick={openPreview}` le pasa el evento: solo vale un uid (string).
+    setPreviewEditUid(typeof editUid === 'string' ? editUid : null)
     window.scrollTo(0, 0)
+    try {
+      if (!window.history.state?.slPreview) {
+        window.history.pushState({ ...window.history.state, slPreview: true, shopDepth: 0 }, '')
+      }
+    } catch {
+      /* sin historial: el preview igual abre */
+    }
     setPreview(true)
   }, [])
 
   const closePreview = useCallback(() => {
     window.scrollTo(0, 0)
+    const depth = window.history.state?.slPreview ? (window.history.state.shopDepth || 0) : -1
+    if (depth >= 0) {
+      // Deshace la entrada del preview y las pantallas de la tienda: el popstate lo cierra.
+      window.history.go(-(depth + 1))
+      return
+    }
     setPreview(false)
   }, [])
+
+  useEffect(() => {
+    if (!preview) return undefined
+    const onPop = (event) => {
+      if (event.state?.slPreview) return
+      window.scrollTo(0, 0)
+      setPreview(false)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [preview])
 
   return {
     compositionId,
@@ -160,6 +192,7 @@ export function useBuilderComposition() {
     font,
     setFont,
     preview,
+    previewEditUid,
     dragOver,
     setDragOver,
     limitNotice,

@@ -4,7 +4,7 @@ import { sectionCopyKey, kindLabelKeys } from './sectionCopy.js'
 /**
  * Lista de la composición: reordenar arrastrando o con flechas, quitar, y los destinos de drop.
  */
-export default function CompositionList({ items, allowDropAt, setDragOver, handleDrop, dragOver, t, startReorderDrag, commerceSurcharge, moveItem, removeItem, limitNotice, emptyPriceLine = null }) {
+export default function CompositionList({ items, allowDropAt, setDragOver, handleDrop, dragOver, t, startReorderDrag, commerceSurcharge, moveItem, removeItem, onEdit = null, limitNotice, emptyPriceLine = null }) {
   return (
     <>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
@@ -89,6 +89,15 @@ export default function CompositionList({ items, allowDropAt, setDragOver, handl
                     </div>
 
                     <div className="flex w-full shrink-0 items-center justify-end gap-1.5 sm:w-auto">
+                      {onEdit ? (
+                        <button
+                          type="button"
+                          onClick={() => onEdit(item.uid)}
+                          className="ui-press mr-1 inline-flex min-h-10 items-center border border-ink/30 px-3 text-[11px] uppercase tracking-[0.18em] transition-colors duration-200 hover:border-ink hover:bg-ink hover:text-bone"
+                        >
+                          {t('builder.editRow')}
+                        </button>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => moveItem(item.uid, -1)}

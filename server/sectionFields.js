@@ -126,6 +126,7 @@ export const COLOR_PROP_KEYS = new Set([
   'errorColor',
   'endBg',
   'barColor',
+  'barBg',
   // Objetos 3D (ATELIER): bloque, anillo, marca y luz.
   'objectColor',
   'ringColor',
@@ -149,8 +150,9 @@ export const COLOR_PROP_KEYS = new Set([
 const HREF_PROP_KEYS = new Set(['href', 'link'])
 export const isHrefKey = (k) => HREF_PROP_KEYS.has(k) || /href$/i.test(k)
 // Interruptor de una capa decorativa (campo `toggle`): `showBubbles`, `showGrain`…
-// También los de otras pantallas de la tienda: `checkoutShowTrust` → `showTrust`.
-export const isToggleKey = (k) => /^(?:(?:checkout|cart|detail)Show|show)[A-Z]/.test(k)
+// También los de otras pantallas de la tienda: `checkoutShowTrust` → `showTrust`,
+// y el que enciende la tienda Shopify (`shopifyEnabled`).
+export const isToggleKey = (k) => /^(?:(?:checkout|cart|detail)Show|show)[A-Z]/.test(k) || k === 'shopifyEnabled'
 
 // Para el servidor un `textarea` es texto: solo color / href / image / price
 // tienen regla propia en sanitizeListValue.

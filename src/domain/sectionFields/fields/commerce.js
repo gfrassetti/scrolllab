@@ -3,6 +3,29 @@ import { toggle } from '../helpers.js'
 /** @typedef {import('../types.js').SectionField} SectionField */
 
 /**
+ * La tienda de prueba pública de Shopify (mock.shop): sin cuenta ni token.
+ * Sirve para ver en el preview el circuito real (productos, carrito y checkout
+ * de Shopify) antes de conectar la tienda propia.
+ */
+const SHOPIFY_DEMO = {
+  label: 'Probar con la tienda de ejemplo de Shopify',
+  value: 'mock.shop',
+  active: 'Con la tienda de ejemplo de Shopify (mock.shop): productos y carrito reales de Shopify. Su checkout es de prueba y aparece vacío; con una tienda real muestra el pedido. Para la tuya van su dominio y su token.',
+}
+
+const SHOPIFY_HELP = {
+  title: 'Cómo conectar una tienda Shopify',
+  steps: [
+    'Apagado, la tienda usa los productos de esta sección y un checkout de ejemplo que no cobra: ScrollLab no ofrece un checkout propio, así que el cobro lo conectás vos en el código que descargás. Con Shopify, los productos, precios, talles, stock y fotos salen de la tienda, y el pago es el checkout de Shopify: la plata va directo a la cuenta de la tienda.',
+    'En el panel de Shopify: Configuración → Apps y canales de venta → Shopify App Store. Instalá el canal «Headless» (es gratis).',
+    'Dentro del canal: «Crear tienda externa» → «Storefront API». Copiá el «Token de acceso público» (el privado no va acá).',
+    'Pegá acá el dominio (tu-tienda.myshopify.com) y el token. Para mostrar una sola colección, su handle va en «Colección».',
+    'Los productos se editan en Shopify y aparecen acá al recargar. Desde ScrollLab se editan los textos, los colores y la ficha.',
+  ],
+  zipSteps: ['En el código queda en <ShopCatalogProvider shopify> de src/App.jsx; el README trae el detalle.'],
+}
+
+/**
  * Campos editables de las secciones de COMMERCE (builder + LAB).
  * El ensamblado y la lista completa: ../fields.js.
  * @type {Record<string, SectionField[]>}
@@ -11,19 +34,19 @@ export const COMMERCE_FIELDS = {
   'commerce/ProductGrid': [
     {
       key: 'theme',
-      label: 'Color',
+      label: 'Paleta de colores',
       type: 'select',
       options: [
         { value: 'auto', label: 'Auto (sección de al lado)' },
         { value: 'chapters', label: 'Chapters · #ff4b00' },
-        { value: 'nocturne', label: 'Nocturne · #d9ff3f' },
+        { value: 'nocturne', label: 'Nocturne · #d9ff3f', retired: true },
         { value: 'monolith', label: 'Monolith · #2b3cff' },
-        { value: 'velocity', label: 'Velocity · #d9ff3f' },
+        { value: 'velocity', label: 'Velocity · #d9ff3f', retired: true },
         { value: 'fizz', label: 'Fizz · #ff3ea5' },
         { value: 'atelier', label: 'Atelier · #c8d0dc' },
         { value: 'comic', label: 'Comic · #e85a24' },
         { value: 'unity', label: 'Unity · #f4c518' },
-        { value: 'ratio', label: 'Ratio · #e23c24' },
+        { value: 'ratio', label: 'Ratio · #e23c24', retired: true },
         { value: 'atrium', label: 'Atrium · #111111' },
         { value: 'meridian', label: 'Meridian · #8f7a5e' },
         { value: 'kin', label: 'Kin · #e1371f' },
@@ -51,12 +74,24 @@ export const COMMERCE_FIELDS = {
         { value: 'GBP', label: 'Libras (GBP)' },
       ],
     },
-    { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-    { key: 'title', label: 'Title', type: 'text' },
-    { key: 'body', label: 'Body', type: 'textarea' },
+    { key: 'eyebrow', label: 'Sobretítulo', type: 'text' },
+    { key: 'title', label: 'Título', type: 'text' },
+    { key: 'body', label: 'Texto', type: 'textarea' },
     { key: 'addLabel', label: 'Botón de agregar rápido', type: 'text' },
     { key: 'soldOutLabel', label: 'Producto agotado — texto del botón', type: 'text' },
     { key: 'variantHint', label: 'Pista bajo el botón en productos con talle o color ({label} = el nombre de la variante)', type: 'text' },
+    // Tienda Shopify (src/lib/shop/shopify.js): con dominio y token, los
+    // productos, precios y stock salen de Shopify y se paga en su checkout.
+    toggle('shopifyEnabled', 'Cobrar con Shopify', undefined, 'off'),
+    {
+      key: 'shopifyDomain',
+      label: 'Shopify · Dominio de la tienda (tu-tienda.myshopify.com)',
+      type: 'text',
+      example: SHOPIFY_DEMO,
+      help: SHOPIFY_HELP,
+    },
+    { key: 'shopifyToken', label: 'Shopify · Token público de Storefront (canal «Headless»)', type: 'text' },
+    { key: 'shopifyCollection', label: 'Shopify · Colección a mostrar (su handle; vacío = toda la tienda)', type: 'text' },
     // El catálogo del kit: la grilla, la ficha, el carrito y el checkout usan
     // estos productos (src/lib/shop/catalog.js). Lo que una fila deja vacío
     // toma el valor del producto de ejemplo en esa posición.
@@ -102,7 +137,7 @@ export const COMMERCE_FIELDS = {
         { value: 'centered', label: 'Centrada: foto arriba y texto centrado' },
       ],
     },
-    { key: 'detailEyebrow', label: 'Ficha · Eyebrow', type: 'text' },
+    { key: 'detailEyebrow', label: 'Ficha · Sobretítulo', type: 'text' },
     { key: 'detailCta', label: 'Ficha · Agregar al carrito', type: 'text' },
     { key: 'detailBackLabel', label: 'Ficha · Volver', type: 'text' },
     { key: 'detailFallbackTitle', label: 'Ficha · Producto no encontrado', type: 'text' },
@@ -119,9 +154,9 @@ export const COMMERCE_FIELDS = {
     toggle('detailShowRelated', 'Ficha · Mostrar otros productos al pie'),
     // El checkout es una ruta (/checkout), no una sección seleccionable:
     // sus textos se editan desde acá y viajan como props `checkout*`.
-    { key: 'checkoutEyebrow', label: 'Checkout · Eyebrow', type: 'text' },
-    { key: 'checkoutTitle', label: 'Checkout · Title', type: 'text' },
-    { key: 'checkoutBody', label: 'Checkout · Body', type: 'textarea' },
+    { key: 'checkoutEyebrow', label: 'Checkout · Sobretítulo', type: 'text' },
+    { key: 'checkoutTitle', label: 'Checkout · Título', type: 'text' },
+    { key: 'checkoutBody', label: 'Checkout · Texto', type: 'textarea' },
     {
       key: 'checkoutStepsText',
       label: 'Checkout · Pasos (uno por línea)',
@@ -148,7 +183,7 @@ export const COMMERCE_FIELDS = {
       type: 'text',
     },
     { key: 'checkoutSummaryTitle', label: 'Checkout · Resumen', type: 'text' },
-    { key: 'checkoutPromoLabel', label: 'Checkout · Cupón — label', type: 'text' },
+    { key: 'checkoutPromoLabel', label: 'Checkout · Cupón — rótulo', type: 'text' },
     { key: 'checkoutPromoCode', label: 'Checkout · Cupón válido', type: 'text' },
     { key: 'checkoutPromoOff', label: 'Checkout · Cupón — % off', type: 'text' },
     { key: 'checkoutShippingFlat', label: 'Checkout · Costo envío', type: 'text' },
@@ -159,6 +194,7 @@ export const COMMERCE_FIELDS = {
       type: 'text',
     },
     { key: 'checkoutPayLabel', label: 'Checkout · Botón pagar', type: 'text' },
+    { key: 'checkoutShopifyNote', label: 'Checkout · Nota (en lugar de los formularios: el envío y el pago van en Shopify)', type: 'textarea' },
     toggle('checkoutShowTrust', 'Checkout · Mostrar las garantías bajo el botón de pagar'),
     {
       key: 'checkoutTrustText',
@@ -198,3 +234,54 @@ export const COMMERCE_FIELDS = {
     { key: 'checkoutSuccessCta', label: 'Checkout · Éxito — botón', type: 'text' },
   ],
 }
+
+/**
+ * El panel de la grilla en grupos plegables. Con Shopify encendido se ocultan
+ * los campos que pasan a Shopify (los productos, la moneda, y el envío, el
+ * pago y el cupón del checkout) y aparecen los propios de Shopify.
+ * @type {import('../types.js').SectionFieldGroup[]}
+ */
+export const PRODUCT_GRID_GROUPS = [
+  { id: 'grid', title: 'Grilla', open: true },
+  { id: 'style', title: 'Colores y moneda' },
+  { id: 'shopify', title: 'Cobrar con Shopify', switch: 'shopifyEnabled', note: 'Los productos, el stock y el pago salen de tu tienda Shopify. Apagado, el checkout es de ejemplo y no cobra: el cobro lo conectás vos en el código que descargás.' },
+  { id: 'products', title: 'Productos' },
+  { id: 'cart', title: 'Carrito' },
+  { id: 'detail', title: 'Ficha de producto' },
+  { id: 'checkout', title: 'Checkout' },
+]
+
+/** Lo que Shopify resuelve por su cuenta: con Shopify encendido no se muestra. */
+const SHOPIFY_REPLACES = new Set([
+  'currency', 'products',
+  'checkoutContactTitle', 'checkoutShippingTitle', 'checkoutCountryOptionsText', 'checkoutDeliveryTitle',
+  'checkoutStandardLabel', 'checkoutStandardNote', 'checkoutExpressLabel', 'checkoutExpressNote',
+  'checkoutPaymentTitle', 'checkoutPayCardLabel', 'checkoutPayWalletLabel', 'checkoutPayTransferLabel',
+  'checkoutPayCardNote', 'checkoutPayWalletNote', 'checkoutPayTransferNote',
+  'checkoutPromoLabel', 'checkoutPromoCode', 'checkoutPromoOff', 'checkoutPromoPlaceholder',
+  'checkoutPromoApplyLabel', 'checkoutPromoOkText', 'checkoutPromoErrorText',
+  'checkoutShippingFlat', 'checkoutExpressPrice', 'checkoutFreeShippingOver',
+  'checkoutSuccessTitle', 'checkoutSuccessBody', 'checkoutSuccessCta',
+  'checkoutEmailLabel', 'checkoutEmailPlaceholder', 'checkoutPhoneLabel', 'checkoutFirstNameLabel',
+  'checkoutLastNameLabel', 'checkoutAddressLabel', 'checkoutCityLabel', 'checkoutZipLabel',
+  'checkoutCountryLabel', 'checkoutNotesLabel', 'checkoutShippingLabel', 'checkoutDiscountLabel', 'checkoutFreeLabel',
+])
+
+/** Los ajustes de aspecto de la grilla: van en su propio grupo, plegado, para que los textos queden primero. */
+const STYLE_KEYS = new Set(['theme', 'bg', 'fg', 'accent', 'currency'])
+
+const GROUP_PREFIX = [
+  ['shopify', 'shopify'],
+  ['cart', 'cart'],
+  ['detail', 'detail'],
+  ['checkout', 'checkout'],
+]
+
+COMMERCE_FIELDS['commerce/ProductGrid'] = COMMERCE_FIELDS['commerce/ProductGrid'].map((field) => {
+  const prefixed = GROUP_PREFIX.find(([prefix]) => field.key.startsWith(prefix) && field.key.length > prefix.length)
+  const group = field.key === 'products' ? 'products' : STYLE_KEYS.has(field.key) ? 'style' : prefixed ? prefixed[1] : 'grid'
+  // El título del grupo ya dice «Carrito», «Checkout»…: el rótulo va sin prefijo.
+  const label = field.label.replace(/^(Carrito|Ficha|Checkout|Shopify) · /, '')
+  const shopify = field.key === 'checkoutShopifyNote' ? 'only' : SHOPIFY_REPLACES.has(field.key) ? 'hide' : undefined
+  return { ...field, label, group, ...(shopify ? { shopify } : {}) }
+})

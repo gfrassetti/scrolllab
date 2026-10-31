@@ -39,7 +39,12 @@ export const useShopCart = create(
             variant,
             variantLabel: variant ? product.variants?.label : null,
             name: product.name,
-            price: product.price,
+            // Con Shopify cada variante puede tener su precio (solo para
+            // mostrar: Shopify cobra el suyo) y el carrito lleva su id.
+            price: product.variantPrices?.[variant] ?? product.price,
+            ...(product.variantIds
+              ? { merchandiseId: product.variantIds[variant ?? ''] ?? null }
+              : {}),
             currency: product.currency,
             img: product.img,
             qty,
@@ -62,6 +67,13 @@ export const useShopCart = create(
       },
 
       clear: () => set({ lines: [] }),
+
+      /** Deja solo las líneas que cumplen `keep` (ej: las de la tienda Shopify conectada). */
+      keepOnly: (keep) => {
+        const lines = get().lines
+        const next = lines.filter(keep)
+        if (next.length !== lines.length) set({ lines: next })
+      },
 
       count: () => get().lines.reduce((n, l) => n + l.qty, 0),
 

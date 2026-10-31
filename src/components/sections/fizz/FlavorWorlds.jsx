@@ -541,7 +541,7 @@ function WorldCopy({ world, index, total, cta, ctaHref }) {
 
       <h2
         data-world-name
-        className="mt-3 font-brico text-[clamp(2.75rem,8vw,7.5rem)] leading-[0.9] font-extrabold tracking-[-0.03em] uppercase md:mt-4"
+        className="mt-3 font-brico text-[clamp(2.75rem,8vw,7.5rem)] md:text-[clamp(2.75rem,6.4vw,7.5rem)] leading-[0.9] font-extrabold tracking-[-0.03em] uppercase md:mt-4"
       >
         {world.name}
       </h2>

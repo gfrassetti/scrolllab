@@ -29,24 +29,33 @@ import joyCW640 from './joy-c-640.webp'
 import joyCW1080 from './joy-c-1080.webp'
 import mosaic1 from './mosaic-1.webp'
 import mosaic1W640 from './mosaic-1-640.webp'
+import mosaic1W1080 from './mosaic-1-1080.webp'
 import mosaic2 from './mosaic-2.webp'
 import mosaic2W640 from './mosaic-2-640.webp'
+import mosaic2W1080 from './mosaic-2-1080.webp'
 import mosaic3 from './mosaic-3.webp'
 import mosaic3W640 from './mosaic-3-640.webp'
+import mosaic3W1080 from './mosaic-3-1080.webp'
 import mosaic4 from './mosaic-4.webp'
 import mosaic4W640 from './mosaic-4-640.webp'
+import mosaic4W1080 from './mosaic-4-1080.webp'
 import mosaic5 from './mosaic-5.webp'
 import mosaic5W640 from './mosaic-5-640.webp'
+import mosaic5W1080 from './mosaic-5-1080.webp'
 import mosaic6 from './mosaic-6.webp'
 import mosaic6W640 from './mosaic-6-640.webp'
+import mosaic6W1080 from './mosaic-6-1080.webp'
 import mosaic7 from './mosaic-7.webp'
 import mosaic7W640 from './mosaic-7-640.webp'
+import mosaic7W1080 from './mosaic-7-1080.webp'
 import mosaic8 from './mosaic-8.webp'
 import mosaic8W640 from './mosaic-8-640.webp'
+import mosaic8W1080 from './mosaic-8-1080.webp'
 import orb from './orb.webp'
 import orbW640 from './orb-640.webp'
 import portrait from './portrait.webp'
 import portraitW640 from './portrait-640.webp'
+import portraitW1080 from './portrait-1080.webp'
 import risingMark from './rising-mark.webp'
 import risingMarkW320 from './rising-mark-320.webp'
 import stageA from './stage-a.webp'
@@ -66,20 +75,20 @@ export const variants = {
   [hopeA]: { srcSet: `${hopeAW640} 640w, ${hopeAW1080} 1080w, ${hopeA} 1536w`, width: 1536, height: 1024 },
   [hopeB]: { srcSet: `${hopeBW640} 640w, ${hopeBW1080} 1080w, ${hopeB} 1536w`, width: 1536, height: 1024 },
   [hopeC]: { srcSet: `${hopeCW640} 640w, ${hopeCW1080} 1080w, ${hopeC} 1536w`, width: 1536, height: 1024 },
-  [joyA]: { srcSet: `${joyAW640} 640w, ${joyAW1080} 1080w, ${joyA} 1536w`, width: 1536, height: 1024 },
-  [joyB]: { srcSet: `${joyBW640} 640w, ${joyBW1080} 1080w, ${joyB} 1536w`, width: 1536, height: 1024 },
-  [joyC]: { srcSet: `${joyCW640} 640w, ${joyCW1080} 1080w, ${joyC} 1536w`, width: 1536, height: 1024 },
-  [mosaic1]: { srcSet: `${mosaic1W640} 640w, ${mosaic1} 1024w`, width: 1024, height: 1536 },
-  [mosaic2]: { srcSet: `${mosaic2W640} 640w, ${mosaic2} 1024w`, width: 1024, height: 1536 },
-  [mosaic3]: { srcSet: `${mosaic3W640} 640w, ${mosaic3} 1024w`, width: 1024, height: 1536 },
-  [mosaic4]: { srcSet: `${mosaic4W640} 640w, ${mosaic4} 1024w`, width: 1024, height: 1536 },
-  [mosaic5]: { srcSet: `${mosaic5W640} 640w, ${mosaic5} 1024w`, width: 1024, height: 1536 },
-  [mosaic6]: { srcSet: `${mosaic6W640} 640w, ${mosaic6} 1024w`, width: 1024, height: 1536 },
-  [mosaic7]: { srcSet: `${mosaic7W640} 640w, ${mosaic7} 1024w`, width: 1024, height: 1536 },
-  [mosaic8]: { srcSet: `${mosaic8W640} 640w, ${mosaic8} 1024w`, width: 1024, height: 1536 },
+  [joyA]: { srcSet: `${joyAW640} 640w, ${joyAW1080} 1080w, ${joyA} 2048w`, width: 2048, height: 1360 },
+  [joyB]: { srcSet: `${joyBW640} 640w, ${joyBW1080} 1080w, ${joyB} 2048w`, width: 2048, height: 1360 },
+  [joyC]: { srcSet: `${joyCW640} 640w, ${joyCW1080} 1080w, ${joyC} 2048w`, width: 2048, height: 1360 },
+  [mosaic1]: { srcSet: `${mosaic1W640} 640w, ${mosaic1W1080} 1080w, ${mosaic1} 1360w`, width: 1360, height: 2048 },
+  [mosaic2]: { srcSet: `${mosaic2W640} 640w, ${mosaic2W1080} 1080w, ${mosaic2} 1360w`, width: 1360, height: 2048 },
+  [mosaic3]: { srcSet: `${mosaic3W640} 640w, ${mosaic3W1080} 1080w, ${mosaic3} 1360w`, width: 1360, height: 2048 },
+  [mosaic4]: { srcSet: `${mosaic4W640} 640w, ${mosaic4W1080} 1080w, ${mosaic4} 1360w`, width: 1360, height: 2048 },
+  [mosaic5]: { srcSet: `${mosaic5W640} 640w, ${mosaic5W1080} 1080w, ${mosaic5} 1360w`, width: 1360, height: 2048 },
+  [mosaic6]: { srcSet: `${mosaic6W640} 640w, ${mosaic6W1080} 1080w, ${mosaic6} 1360w`, width: 1360, height: 2048 },
+  [mosaic7]: { srcSet: `${mosaic7W640} 640w, ${mosaic7W1080} 1080w, ${mosaic7} 1360w`, width: 1360, height: 2048 },
+  [mosaic8]: { srcSet: `${mosaic8W640} 640w, ${mosaic8W1080} 1080w, ${mosaic8} 1360w`, width: 1360, height: 2048 },
   [orb]: { srcSet: `${orbW640} 640w, ${orb} 1024w`, width: 1024, height: 1024 },
-  [portrait]: { srcSet: `${portraitW640} 640w, ${portrait} 1024w`, width: 1024, height: 1536 },
-  [risingMark]: { srcSet: `${risingMarkW320} 320w, ${risingMark} 512w`, width: 512, height: 512 },
-  [stageA]: { srcSet: `${stageAW640} 640w, ${stageAW1080} 1080w, ${stageA} 1536w`, width: 1536, height: 1024 },
-  [stageB]: { srcSet: `${stageBW640} 640w, ${stageBW1080} 1080w, ${stageB} 1536w`, width: 1536, height: 1024 },
+  [portrait]: { srcSet: `${portraitW640} 640w, ${portraitW1080} 1080w, ${portrait} 1360w`, width: 1360, height: 2048 },
+  [risingMark]: { srcSet: `${risingMarkW320} 320w, ${risingMark} 1024w`, width: 1024, height: 1024 },
+  [stageA]: { srcSet: `${stageAW640} 640w, ${stageAW1080} 1080w, ${stageA} 2048w`, width: 2048, height: 1360 },
+  [stageB]: { srcSet: `${stageBW640} 640w, ${stageBW1080} 1080w, ${stageB} 2048w`, width: 2048, height: 1360 },
 }

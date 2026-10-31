@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { BUILDER_HIDDEN_SKUS } from '../../domain/catalog.js'
 
 import {
   SECTION_FIELDS,
@@ -445,5 +446,22 @@ describe('Builder — colores editables', () => {
         assert.ok(has, `${id}: falta bg/fg en sectionFields (o sumala a NO_COLORS con el motivo)`)
       }
     }
+  })
+})
+
+// Un template fuera de la venta no se ofrece como color de otra sección (la
+// lista «Theme» del contacto y de la tienda): queda `retired`, que el panel
+// oculta y el servidor sigue aceptando para rearmar composiciones vendidas.
+describe('colores de templates retirados', () => {
+  it('cada opción con un SKU fuera de la venta está marcada retired', () => {
+    const offenders = []
+    for (const [id, fields] of Object.entries(SECTION_FIELDS)) {
+      for (const field of fields) {
+        for (const option of field.options || []) {
+          if (BUILDER_HIDDEN_SKUS.includes(option.value) && !option.retired) offenders.push(`${id}.${field.key}=${option.value}`)
+        }
+      }
+    }
+    assert.deepEqual(offenders, [])
   })
 })

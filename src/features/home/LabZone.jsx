@@ -4,6 +4,7 @@ import LabMark from '../../components/LabMark'
 import LabDemo from '../../components/LabDemo'
 import LabDemoCopy from '../../components/LabDemoCopy'
 import LabDemoPaste from '../../components/LabDemoPaste'
+import PlatformLogo, { PLATFORM_LOGOS } from '../../components/PlatformLogo'
 
 /**
  * Zona 03 · LAB: la sección en vivo por suscripción, cómo funciona en tres
@@ -67,6 +68,19 @@ export default function LabZone({ t, ways, locale }) {
             {t('home.labBodyBefore')}
             <span className="text-accent">{t('home.labBodyLink')}</span>
             {t('home.labBodyAfter')}
+          </p>
+          {/* Dónde funciona: el mismo snippet en una tienda Shopify o en cualquier sitio. */}
+          <p
+            data-cta-bit
+            className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-body-sm text-ink/60 group-hover:text-bone/60"
+          >
+            <span>{t('lab.worksOn')}</span>
+            {Object.entries(PLATFORM_LOGOS).map(([id, logo]) => (
+              <span key={id} className="inline-flex items-center gap-1.5 text-ink/80 group-hover:text-bone/80">
+                <PlatformLogo id={id} className="h-4 w-4" />
+                {logo.name}
+              </span>
+            ))}
           </p>
         </div>
       </Link>

@@ -1,4 +1,5 @@
 import { db } from '../db.js'
+import { REFUND_DAYS } from '../../src/domain/policy.js'
 import { orderPriceSummary } from '../../src/domain/orderSummary.js'
 import { HOSTED_PLANS, subscriptionPlanPrice } from '../catalog.js'
 
@@ -241,6 +242,33 @@ const POLAR_INVOICE_NOTE = {
   en: 'Your invoice is issued by Polar, our authorized reseller, and arrives in a separate email.',
 }
 
+/**
+ * El Botón de arrepentimiento (/arrepentimiento) en la misma casa que la cuenta.
+ * La ley argentina lo pide a la vista y la UE pide avisar, antes de comprar y
+ * después, que existe y dónde está: por eso va en los recibos.
+ * @param {string} accountUrl
+ */
+export function withdrawalUrl(accountUrl) {
+  try {
+    return new URL('/arrepentimiento', accountUrl).href
+  } catch {
+    return ''
+  }
+}
+
+const WITHDRAWAL_NOTE = {
+  es: (url) =>
+    `¿Te arrepentiste? Tenés ${REFUND_DAYS} días para pedir el reembolso con el Botón de arrepentimiento: ${url}`,
+  en: (url) =>
+    `Changed your mind? You have ${REFUND_DAYS} days to request a refund with the Withdrawal request button: ${url}`,
+}
+
+/** La línea del Botón de arrepentimiento para el pie de un mail ('' si no hay URL). */
+export function withdrawalNote(locale, accountUrl) {
+  const url = withdrawalUrl(accountUrl)
+  return url ? WITHDRAWAL_NOTE[langOf(locale)](url) : ''
+}
+
 /** ¿Cobra un merchant of record en USD? (Polar). */
 export const isMerchantOfRecord = (provider) => provider === 'polar'
 
@@ -261,10 +289,14 @@ export function invoiceNote(locale) {
 export function buildOrderReceiptEn({ order, user, accountUrl, logoUrl }) {
   const id = orderIdOf(order)
   const summary = orderPriceSummary(order)
-  const footer =
+  const footer = [
     isMerchantOfRecord(order.provider)
       ? `This email is your purchase summary, not a tax invoice. ${invoiceNote('en')} Need help? Just reply.`
-      : 'This email is your purchase summary, not a tax invoice. Need help? Just reply.'
+      : 'This email is your purchase summary, not a tax invoice. Need help? Just reply.',
+    withdrawalNote('en', accountUrl),
+  ]
+    .filter(Boolean)
+    .join(' ')
   return render({
     lang: 'en',
     logoUrl,
@@ -595,8 +627,7 @@ export function buildSubscriptionWelcomeEn({ subscription, user, accountUrl, log
     cta: { href: accountUrl, label: 'Go to LAB' },
     after:
       'It renews automatically. Cancel anytime from LAB: you keep access until the end of the paid period.',
-    footer:
-      'This email confirms your subscription and is not a tax invoice. Need help? Just reply.',
+    footer: `This email confirms your subscription and is not a tax invoice. Need help? Just reply. ${withdrawalNote('en', accountUrl)}`.trim(),
   })
 }
 

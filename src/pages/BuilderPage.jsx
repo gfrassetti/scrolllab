@@ -65,6 +65,7 @@ export default function BuilderPage({ qa = false }) {
     font,
     setFont,
     preview,
+    previewEditUid,
     dragOver,
     setDragOver,
     limitNotice,
@@ -372,6 +373,7 @@ export default function BuilderPage({ qa = false }) {
           font={font}
           onChangeFont={setFont}
           onChangeProps={updateItemProps}
+          initialEditingUid={previewEditUid}
           onExit={closePreview}
         />
       </SmoothScrollProvider>
@@ -471,6 +473,7 @@ export default function BuilderPage({ qa = false }) {
             commerceSurcharge={commerceSurcharge}
             moveItem={moveItem}
             removeItem={removeItem}
+            onEdit={openPreview}
             limitNotice={limitNotice}
             emptyPriceLine={
               qa

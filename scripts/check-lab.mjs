@@ -269,8 +269,12 @@ try {
       .locator('input, textarea')
   }
 
-  const only = process.argv.slice(2).filter((a) => HOSTABLE_SECTIONS.includes(a))
-  const SECTIONS = only.length ? only : HOSTABLE_SECTIONS
+  // Los templates fuera de la venta (VELOCITY, NOCTURNE…) siguen sirviendo sus
+  // widgets ya publicados, pero no se crean nuevos: el servidor responde 400.
+  const { isBuilderHiddenSku } = await import('../src/domain/catalog.js')
+  const creatable = HOSTABLE_SECTIONS.filter((id) => !isBuilderHiddenSku(id.split('/')[0]))
+  const only = process.argv.slice(2).filter((a) => creatable.includes(a))
+  const SECTIONS = only.length ? only : creatable
   console.log(`Editando, previsualizando y publicando ${SECTIONS.length} secciones…`)
   let n = 0
   for (const sectionId of SECTIONS) {
