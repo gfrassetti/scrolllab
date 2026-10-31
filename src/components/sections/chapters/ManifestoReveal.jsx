@@ -77,7 +77,11 @@ export default function ManifestoReveal({
         <p className="text-[11px] uppercase tracking-[0.25em] md:text-xs">{label}</p>
       </div>
 
+      {/* SplitText reemplaza los hijos del párrafo: si el texto cambia, React
+          tiene que cambiar el párrafo entero (key), no parchar nodos que ya no
+          están — el builder se caía con «removeChild» al editar el texto. */}
       <p
+        key={children ? 'children' : (text ?? 'default')}
         data-manifesto
         className="max-w-[18ch] text-[clamp(2.2rem,6.5vw,6rem)] leading-[1.02] font-medium tracking-[-0.02em] [&_em]:font-display [&_em]:font-normal [&_em]:text-accent"
       >
