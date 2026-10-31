@@ -29,7 +29,7 @@ export const CONTACT_FIELDS = {
         { value: 'kin', label: 'Kin' },
         { value: 'fold', label: 'Fold' },
         { value: 'apex', label: 'Apex' },
-        { value: 'ordo', label: 'Ordo' },
+        { value: 'ordo', label: 'Ordo', retired: true },
       ],
     },
     {
