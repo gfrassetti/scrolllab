@@ -92,6 +92,7 @@ const TEMPLATE_PATHS = {
   meridian: '/templates/meridian',
   kin: '/templates/kin',
   fold: '/templates/fold',
+  ordo: '/templates/ordo',
   apex: '/templates/apex',
 }
 const TEMPLATES = Object.keys(TEMPLATE_PATHS)

@@ -30,6 +30,9 @@ import { chromium } from 'playwright'
 import { readZip } from '../server/__tests__/helpers/zip.js'
 import { ALLOWED_SECTIONS } from '../server/sections.js'
 import { BUILDER_HIDDEN_SKUS } from '../src/domain/catalog.js'
+
+// SHOW_HIDDEN=1: prueba también los modelos en obra (BUILDER_HIDDEN_SKUS), p. ej. ORDO; el builder los muestra con esa variable.
+if (process.env.SHOW_HIDDEN === '1') process.env.VITE_BUILDER_SHOW_HIDDEN = '1'
 import { sectionModelOf } from '../src/domain/sections.js'
 import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { NOT_IN_DOM } from './lib/not-in-dom.mjs'
@@ -61,7 +64,7 @@ async function waitUp(url, tries = 160) {
 
 // --- qué secciones -----------------------------------------------------------
 
-const BUILDER = ALLOWED_SECTIONS.filter((id) => !BUILDER_HIDDEN_SKUS.includes(sectionModelOf(id)))
+const BUILDER = ALLOWED_SECTIONS.filter((id) => process.env.SHOW_HIDDEN === '1' || !BUILDER_HIDDEN_SKUS.includes(sectionModelOf(id)))
 /** El primer texto suelto de la sección que se ve en la página (no un loader, un estado ni un aria-label). */
 const visibleTextField = (id) =>
   (SECTION_FIELDS[id] || []).find(

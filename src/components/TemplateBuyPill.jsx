@@ -20,6 +20,7 @@ const POSTERS = {
   kin: '/catalog/kin.webp',
   fold: '/catalog/fold.webp',
   apex: '/catalog/apex.webp',
+  ordo: '/catalog/ordo.webp',
 }
 
 /**

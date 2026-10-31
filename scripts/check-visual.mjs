@@ -220,7 +220,7 @@ const targets = [
 for (const arg of only.filter((a) => a.startsWith('custom:'))) {
   const model = arg.slice('custom:'.length)
   const ids = ALLOWED_SECTIONS.filter((id) => sectionModelOf(id) === model)
-  if (!ids.length || BUILDER_HIDDEN_SKUS.includes(model)) {
+  if (!ids.length || (process.env.SHOW_HIDDEN !== '1' && BUILDER_HIDDEN_SKUS.includes(model))) {
     console.error(`✖ ${arg}: el builder no tiene secciones de '${model}'`)
     process.exit(1)
   }

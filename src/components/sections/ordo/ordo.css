@@ -1,0 +1,2891 @@
+/*
+ * ORDO — the paper and the cursor.
+ *
+ * The whole page is a sheet of almost white paper with a fine grain (repeating SVG noise).
+ * The custom cursor only exists with a mouse (hover + fine pointer): on the phone there is nothing
+ * to hide.
+ */
+
+.od-root {
+  /* Poppins: round, open geometric (the closest to Cera Pro); Arial only if the font does not load. */
+  --od-font-body: 'Poppins', Arial, sans-serif;
+  --od-font-display: var(--od-font-body);
+  --od-font-label: var(--od-font-body);
+  --od-title-weight: 600;
+  --od-title-tracking: -0.025em;
+  --od-body-scale: 0.92;
+  /*
+   * The sheet: almost white paper with a barely perceptible grain, which repeats and moves with the page.
+   */
+  /* The film grain: a single fine, even noise (in greyscale, centred on mid grey), which blends with the
+     photo: the light grains lighten it and the dark ones dirty it, without drawing a pattern. */
+  --od-film: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' seed='6' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='0' intercept='1'/></feComponentTransfer></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+  --od-paper: #f3f1ea;
+  --od-ink: #161513;
+  --od-rust: #c4441f;
+  /* Greys derived from the ink on the paper: the muted text, the soft body text and the faint marks. */
+  --od-mute: color-mix(in srgb, var(--od-ink) 62%, var(--od-paper));
+  --od-soft: color-mix(in srgb, var(--od-ink) 85%, var(--od-paper));
+  --od-faint: color-mix(in srgb, var(--od-ink) 50%, var(--od-paper));
+  --od-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --od-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='g' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.38 -0.13'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  background-color: var(--od-paper);
+  background-image: var(--od-grain);
+  background-size: 200px 200px;
+  color: var(--od-ink);
+  font-family: var(--od-font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The loader sheet: exactly the same as the page's (otherwise, when the curtain rises, a colour jump shows). */
+.od-sheet {
+  background-color: var(--od-paper);
+  background-image: var(--od-grain);
+  background-size: 200px 200px;
+}
+
+/* Selection: the ink reversed. */
+.od-root ::selection {
+  background: var(--od-ink);
+  color: var(--od-paper);
+}
+
+/* Visible keyboard focus, with the brand rust. */
+.od-root :focus-visible {
+  outline: 2px solid var(--od-rust);
+  outline-offset: 4px;
+}
+
+/* ── Scroll ─────────────────────────────────────────────────────────── */
+/* With Lenis (the wheel and the nav links) the scroll is smooth through JS and Lenis turns this property off; the
+   rule applies to the rest: when Lenis is not running (keyboard jumps, a browser that holds it back) and
+   except for whoever asks for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+/* ── The scroll ruler (ScrollRuler.jsx) ─────────────────────────────── */
+/* The vertical sibling of the ruler that drops under the nav: it starts where that one ends and shares its measure
+   (a tick every 8 px, a long one every 80). */
+.od-ruler {
+  --y: 0px;
+  position: fixed;
+  z-index: 60;
+  top: calc(var(--nav-h) + 9px);
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s var(--od-ease) 0.2s;
+}
+.od-ruler[data-on] {
+  opacity: 1;
+}
+.od-ruler[data-fine] {
+  width: 34px;
+  pointer-events: auto;
+}
+.od-ruler__ticks,
+.od-ruler__lens {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  background-position: right top;
+}
+.od-ruler__ticks {
+  width: 10px;
+  background-image:
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 40%, transparent) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 20%, transparent) 0 1px, transparent 1px 8px);
+  background-size:
+    10px 100%,
+    5px 100%;
+}
+/* The magnifier: the same ticks, longer and darker, which are only seen around the cursor. */
+.od-ruler__lens {
+  width: 18px;
+  background-image:
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 75%, transparent) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 50%, transparent) 0 1px, transparent 1px 8px);
+  background-size:
+    18px 100%,
+    10px 100%;
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--y) - 64px), #000 var(--y), transparent calc(var(--y) + 64px));
+  mask-image: linear-gradient(to bottom, transparent calc(var(--y) - 64px), #000 var(--y), transparent calc(var(--y) + 64px));
+}
+/* A sheet of the site: a long line over the ruler, with its number. */
+.od-ruler__wp {
+  position: absolute;
+  right: 0;
+  width: 16px;
+  height: 1px;
+  background: color-mix(in srgb, var(--od-ink) 60%, transparent);
+}
+.od-ruler__wpn,
+.od-ruler__tag {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.28s var(--od-ease);
+}
+.od-ruler__wpn {
+  color: var(--od-mute);
+}
+/* The cursor: a rust line, longer than any tick, and the number of the sheet you are on. */
+.od-ruler__mark {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 24px;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--od-rust);
+  will-change: transform;
+}
+.od-ruler__tag {
+  right: 30px;
+  padding: 3px 5px 2px;
+  background: var(--od-paper);
+  color: var(--od-rust);
+}
+.od-ruler.is-active .od-ruler__wpn {
+  opacity: 0.85;
+}
+.od-ruler.is-active .od-ruler__tag {
+  opacity: 1;
+}
+.od-ruler[data-dragging] .od-ruler__mark {
+  height: 3px;
+  margin-top: -1.5px;
+}
+/* On the phone: indicator only, narrower and without numbers (the floor is 11 px and there is no room). */
+@media (max-width: 639px) {
+  .od-ruler__wpn,
+  .od-ruler__tag {
+    display: none;
+  }
+  .od-ruler__mark {
+    width: 16px;
+  }
+  .od-ruler__lens {
+    width: 12px;
+    background-size:
+      12px 100%,
+      7px 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .od-ruler__wpn,
+  :where(:root:not([data-motion='full'])) .od-ruler__tag {
+    transition: none;
+  }
+}
+
+/* ── Cursor ─────────────────────────────────────────────────────────── */
+.od-cursor {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .od-cursor {
+    display: block;
+  }
+  html.od-has-cursor,
+  html.od-has-cursor .od-root *,
+  html.od-has-cursor .od-root a,
+  html.od-has-cursor .od-root button {
+    cursor: none;
+  }
+}
+
+/* The hero crosshair: two axes that run across the screen, the red cross and the coordinates. */
+.od-cross {
+  position: absolute;
+  inset: 0;
+}
+.od-cross__h,
+.od-cross__v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: color-mix(in srgb, var(--od-ink) 22%, transparent);
+  will-change: transform;
+}
+.od-cross__h {
+  height: 1px;
+}
+.od-cross__v {
+  width: 1px;
+}
+.od-cross__pt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+.od-cross__plus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+}
+.od-cross__plus::before,
+.od-cross__plus::after {
+  content: '';
+  position: absolute;
+  background: var(--od-rust);
+}
+.od-cross__plus::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+}
+.od-cross__plus::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+}
+/* The coordinates: below and to the left of the cross; next to an edge they go to the other side. */
+.od-cross__coords {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  white-space: pre;
+  text-align: right;
+  font-family: var(--od-font-label);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.06em;
+  color: var(--od-mute);
+  font-variant-numeric: tabular-nums;
+}
+.od-cross__coords[data-flip-x='1'] {
+  right: auto;
+  left: 12px;
+  text-align: left;
+}
+.od-cross__coords[data-flip-y='1'] {
+  top: auto;
+  bottom: 12px;
+}
+
+/* The label next to the crosshair: below and to the right (near the right edge, to the left). */
+.od-cross__tip {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  max-width: 220px;
+  padding: 7px 10px 8px;
+  background: var(--od-ink);
+  color: var(--od-paper);
+  font-family: var(--od-font-label);
+  font-weight: 500;
+  font-size: 11.5px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: normal;
+  width: max-content;
+}
+.od-cross__tip[data-flip-x='1'] {
+  left: auto;
+  right: 14px;
+}
+/* Outside the hero: the ink dot (a disc with text over `data-cursor`). */
+.od-cursor__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+.od-cursor__body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--od-ink);
+  display: grid;
+  place-items: center;
+  will-change: transform, width, height;
+}
+.od-cursor__label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--od-paper);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* ── The frame: nav and bottom band, drawn with lines ──────────────── */
+.od-root {
+  /* The module: what the nav cells measure. The page lines are measured from the right edge in
+     multiples of it, so the nav dividers, the ruler ticks and the columns always coincide. */
+  --mod: 128px;
+  --nav-h: 54px;
+  /* The band under the hero (title and stage text), low like the one on heronaiapp.com. */
+  --band-h: max(250px, 30svh);
+  --line: color-mix(in srgb, var(--od-ink) 50%, transparent);
+}
+@media (min-width: 1024px) {
+  .od-root {
+    --mod: 192px;
+  }
+}
+@media (min-width: 640px) {
+  .od-root {
+    --nav-h: 64px;
+    --band-h: max(150px, 17svh);
+  }
+}
+.od-frame__nav {
+  height: var(--nav-h);
+}
+.od-frame__band {
+  height: var(--band-h);
+}
+.od-frame__binding {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(var(--nav-h) + 9px);
+}
+.od-frame__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+  transform-origin: center;
+}
+.od-frame__line--top {
+  top: var(--nav-h);
+}
+.od-frame__line--bottom {
+  bottom: var(--band-h);
+}
+/* The ruler under the nav: a tick every 8 px and a longer one every 80. */
+.od-frame__ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) + 1px);
+  height: 8px;
+  /* A tick every 8 px and a long one every 64 (a third / half of a nav cell), counted from the right
+     edge: the long ones fall on the nav dividers. */
+  background-image:
+    repeating-linear-gradient(to left, transparent 0 63px, color-mix(in srgb, var(--od-ink) 38%, transparent) 63px 64px),
+    repeating-linear-gradient(to left, transparent 0 7px, color-mix(in srgb, var(--od-ink) 22%, transparent) 7px 8px);
+  background-size: 100% 8px, 100% 4px;
+  background-repeat: no-repeat;
+  transform-origin: right center;
+  /* Only seen with the mouse over the drawing (together with the dotted guides): too many lines to have them always. */
+  opacity: 0;
+  transition: opacity 0.4s var(--od-ease);
+}
+.od-root:has(.od-lamina.is-hover) .od-frame__ruler {
+  opacity: 1;
+}.od-cell {
+  transition: background-color 0.3s var(--od-ease);
+}
+@media (hover: hover) {
+  .od-cell:hover {
+    background-color: color-mix(in srgb, var(--od-ink) 4.5%, transparent);
+  }
+}
+.od-cell__divider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+  transform-origin: top center;
+}
+/* Registration crosses in the corners of the frame. */
+.od-frame__mark {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+}
+.od-frame__mark::before,
+.od-frame__mark::after {
+  content: '';
+  position: absolute;
+  background: var(--od-ink);
+}
+.od-frame__mark::before {
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 1px;
+}
+.od-frame__mark::after {
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 1px;
+}
+.od-frame__mark--tl {
+  left: 12px;
+  top: calc(var(--nav-h) + 14px);
+}
+.od-frame__mark--tr {
+  right: 12px;
+  top: calc(var(--nav-h) + 14px);
+}
+.od-frame__mark--bl {
+  left: 12px;
+  bottom: calc(var(--band-h) + 10px);
+}
+.od-frame__mark--br {
+  right: 12px;
+  bottom: calc(var(--band-h) + 10px);
+}
+
+/* ── The hero sheet ─────────────────────────────────────────────────── */
+/* The column grid, between the nav and the bottom band. */
+/* The columns: the continuation of the nav dividers, one per module from the right edge. */
+.od-cols {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) + 1px);
+  bottom: var(--band-h);
+  pointer-events: none;
+}
+.od-cols > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(var(--i) * var(--mod) - 1px);
+  width: 1px;
+  background: color-mix(in srgb, var(--od-ink) 8.5%, transparent);
+  transform-origin: top center;
+}
+
+/* The drawing quadrant: four borders and their labels. */
+.od-panel {
+  position: absolute;
+  pointer-events: none;
+}
+.od-panel__edge {
+  position: absolute;
+  background: color-mix(in srgb, var(--od-ink) 42%, transparent);
+}
+.od-panel__edge--t,
+.od-panel__edge--b {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+.od-panel__edge--l,
+.od-panel__edge--r {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.od-panel__edge--t {
+  top: 0;
+  transform-origin: left center;
+}
+.od-panel__edge--r {
+  right: 0;
+  transform-origin: center top;
+}
+.od-panel__edge--b {
+  bottom: 0;
+  transform-origin: right center;
+}
+.od-panel__edge--l {
+  left: 0;
+  transform-origin: center bottom;
+}
+.od-panel__label {
+  /* On the top edge, centred in the band between the nav binding and the quadrant: it does not cover the drawing. */
+  position: absolute;
+  bottom: calc(100% + 4px);
+  line-height: 1.4;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+}
+/* On the phone the band is lower: the label drops to 11 px. */
+@media (max-width: 639px) {
+  .od-panel__label {
+    bottom: calc(100% + 2px);
+    line-height: 1.3;
+    font-size: 11px;
+  }
+}
+.od-panel__label--tl {
+  left: 0;
+}
+@media (max-width: 639px) {
+  /* The registration cross of the corner falls on the edge: the label starts after it. */
+  .od-panel__label--tl {
+    left: 14px;
+  }
+}
+.od-panel__label--tr {
+  right: 0;
+}
+.od-panel__sub {
+  display: block;
+  margin-top: 4px;
+  max-width: 34ch;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  line-height: 1.35;
+}
+
+/* The giant mark: it is placed and scaled from JS (font-size = the sheet width). */
+.od-word {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+  line-height: 0;
+}
+
+/* The label: the data block of a sheet. */
+.od-rotulo {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 232px;
+  background: var(--od-paper);
+  margin: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border-top: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.od-rotulo__row {
+  padding: 5px 8px 6px;
+  border-right: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  min-width: 0;
+}
+.od-rotulo__row dt {
+  color: var(--od-faint);
+  font-size: 10.5px;
+}
+.od-rotulo__row dt,
+.od-rotulo__row dd {
+  display: block;
+}
+.od-rotulo__row dd {
+  margin: 3px 0 0;
+  color: var(--od-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.od-rotulo__row--sign {
+  grid-column: 1 / -1;
+}
+
+/* The construction lines: dotted guides and a rust ruler around the quadrant. */
+.od-guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.od-guide {
+  position: absolute;
+  opacity: 0;
+  transition:
+    opacity 0.35s var(--od-ease),
+    transform 0.8s var(--od-ease);
+}
+.od-guide--h {
+  left: calc(var(--px) - 28px);
+  right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(to right, color-mix(in srgb, var(--od-ink) 30%, transparent) 0 6px, transparent 6px 11px);
+  transform: scaleX(0);
+}
+.od-guide--v {
+  top: calc(var(--nav-h) + 9px);
+  bottom: var(--band-h);
+  width: 1px;
+  background: repeating-linear-gradient(to bottom, color-mix(in srgb, var(--od-ink) 30%, transparent) 0 6px, transparent 6px 11px);
+  transform: scaleY(0);
+}
+.od-guide--rust-v {
+  left: calc(var(--px) - 14px);
+  top: var(--py);
+  height: var(--ph);
+  width: 1.5px;
+  background: var(--od-rust);
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+.od-guide--rust-h {
+  left: var(--px);
+  top: calc(var(--py) - 14px);
+  width: var(--pw);
+  height: 1.5px;
+  background: var(--od-rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.od-guide--h:nth-child(2),
+.od-guide--v:nth-child(6) {
+  transition-delay: 0.05s;
+}
+.od-guide--h:nth-child(3) {
+  transition-delay: 0.1s;
+}
+.od-guide--h:nth-child(4),
+.od-guide--v:nth-child(7) {
+  transition-delay: 0.15s;
+}
+.od-guide--rust-v,
+.od-guide--rust-h {
+  transition-delay: 0.12s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .od-lamina.is-hover .od-guide {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .od-guide {
+    transition: opacity 0.2s linear;
+  }
+}
+
+/* ── "Painted in" (paint.js) ────────────────────────────────────────── */
+/*
+ * The mask is three times the width of the element: ink on the left, empty on the right and, in the
+ * middle, an irregular stroke edge (noise that displaces the edge). Moving it from 100 % to 0 % sweeps the
+ * element from left to right.
+ */
+.od-paint {
+  --paint: 0;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='100' viewBox='0 0 600 100' preserveAspectRatio='none'><filter id='r' x='-10%' y='0' width='120%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.06 0.35' numOctaves='3' seed='3'/><feDisplacementMap in='SourceGraphic' scale='34' xChannelSelector='R' yChannelSelector='G'/></filter><rect x='-20' y='-10' width='330' height='120' fill='black' filter='url(%23r)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='100' viewBox='0 0 600 100' preserveAspectRatio='none'><filter id='r' x='-10%' y='0' width='120%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.06 0.35' numOctaves='3' seed='3'/><feDisplacementMap in='SourceGraphic' scale='34' xChannelSelector='R' yChannelSelector='G'/></filter><rect x='-20' y='-10' width='330' height='120' fill='black' filter='url(%23r)'/></svg>");
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: calc(var(--paint) * 1%) 0;
+  mask-position: calc(var(--paint) * 1%) 0;
+}
+
+/* The title in parts: each one appears with a fade (Hero.jsx). What has not arrived yet is not seen, but takes up its place. */
+.od-chunk {
+  position: relative;
+  display: inline-block;
+}
+.od-chunk__ink {
+  display: block;
+}
+
+/* ── The block under the hero ──────────────────────────────────────── */
+.od-info {
+  position: absolute;
+  /* the scroll cue is placed against this block */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--band-h);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.od-info__title {
+  margin: 0;
+  padding: 18px 16px 14px;
+  align-self: end;
+  font-family: var(--od-font-display);
+  font-size: clamp(22px, 7.2vw, 40px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: var(--od-title-tracking);
+  text-transform: none;
+  text-wrap: balance;
+}
+.od-info__line {
+  display: block;
+  /* The line height is tight: the air above keeps the paint mask from cutting the accent. */
+  padding-top: 0.16em;
+  margin-top: -0.16em;
+}
+.od-info__side {
+  position: relative;
+  border-top: 1px solid var(--line);
+  min-height: 0;
+  min-width: 0;
+  /* The number on top and the text below, resting on the title's line. */
+  display: flex;
+  flex-direction: column;
+}
+/* On the phone the text goes below the headline: the separation is the line above (border-top). */
+.od-info__vline {
+  display: none;
+}
+@media (min-width: 640px) {
+  .od-info__vline {
+    display: block;
+  }
+}
+.od-info__step {
+  display: block;
+  padding: 12px 16px 0;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+}
+.od-info__copy {
+  margin: 0;
+  padding: 8px 16px 16px;
+  max-width: 40ch;
+  font-size: calc(16px * var(--od-body-scale));
+  font-weight: 400;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
+  color: var(--od-ink);
+  text-wrap: pretty;
+}
+@media (min-width: 640px) {
+  .od-info {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    /* The edge of the text cell falls on a column line (a multiple of the module from the right). */
+    grid-template-columns: minmax(0, 1fr) round(down, 40vw, var(--mod));
+    padding-left: 36px;
+  }
+  .od-info__title {
+    padding: 0 24px 22px 0;
+    font-size: clamp(24px, 3.7vw, 66px);
+    white-space: nowrap;
+  }
+  .od-info__side {
+    border-top: 0;
+  }
+  .od-info__vline {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line);
+    transform-origin: top center;
+  }
+  .od-info__step {
+    padding: 16px 20px 0;
+  }
+  /* The foot of the text falls on the baseline of the last line of the title (its bottom padding). */
+  .od-info__copy {
+    margin-top: auto;
+    padding: 8px 24px 22px 20px;
+    max-width: 48ch;
+    font-size: clamp(16px, 1.35vw, 23px);
+  }
+}
+
+/* ── Sheet 05: the sheet left under the hero ──────────────────────── */
+.od-next__panel {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(var(--nav-h) + 16px);
+  bottom: 28px;
+  border: 1px solid color-mix(in srgb, var(--od-ink) 42%, transparent);
+  pointer-events: none;
+}
+.od-next__mark--bl {
+  left: 12px;
+  bottom: 18px;
+}
+.od-next__mark--br {
+  right: 12px;
+  bottom: 18px;
+}
+.od-next__body {
+  position: relative;
+  margin-top: calc(var(--nav-h) + 60px);
+}
+/* The shadow that the sheet above cast on it. */
+.od-next__shade {
+  position: absolute;
+  inset: 0;
+  background: var(--od-ink);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .od-next__panel {
+    left: 36px;
+    right: 36px;
+    top: calc(var(--nav-h) + 22px);
+    bottom: 36px;
+  }
+  .od-next__mark--bl,
+  .od-next__mark--br {
+    bottom: 26px;
+  }
+}
+
+/* ── Projects: the card where the hero's shop lands ─────────────────── */
+.od-proj,
+.od-sec {
+  padding: calc(var(--nav-h) + 22px) 16px clamp(40px, 6vw, 88px);
+}
+.od-proj__head,
+.od-sec__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.od-proj__title,
+.od-sec__title {
+  margin: 0;
+  font-family: var(--od-font-display);
+  font-size: clamp(24px, 7.2vw, 40px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: var(--od-title-tracking);
+  text-transform: none;
+}
+.od-proj__label,
+.od-sec__label {
+  padding-bottom: 4px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-proj__item {
+  display: grid;
+  gap: 16px;
+}
+.od-proj__item + .od-proj__item {
+  margin-top: clamp(56px, 9vw, 128px);
+}
+.od-proj__card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+/* The grain goes on top of the photo (it does not touch it): it blends in "overlay", so it only shifts the photo's tones. */
+.od-proj[data-grain='off'] .od-proj__card::after {
+  display: none;
+}
+.od-proj__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: var(--od-film);
+  background-size: 300px 300px;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+.od-proj__img {
+  position: absolute;
+  max-width: none;
+  display: block;
+}
+/* The project's own photo: it covers the card. */
+.od-proj__img--cover {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 55%;
+}
+.od-proj__ficha {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--od-soft);
+}
+.od-proj__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+.od-proj__row dt {
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-proj__row dd {
+  margin: 0;
+  text-align: right;
+}
+.od-proj__row--name {
+  border-top: 0;
+  padding-top: 0;
+}
+.od-proj__row--name dd {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  text-align: left;
+  font-family: var(--od-font-display);
+  font-size: clamp(24px, 2.3vw, 36px);
+  font-weight: var(--od-title-weight);
+  letter-spacing: -0.02em;
+  color: var(--od-ink);
+}
+.od-proj__n {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-rust);
+}
+@media (min-width: 640px) {
+  .od-proj,
+  .od-sec {
+    padding: calc(var(--nav-h) + 28px) 36px clamp(40px, 6vw, 88px);
+  }
+  .od-proj__title,
+  .od-sec__title {
+    font-size: clamp(26px, 3.7vw, 66px);
+  }
+  .od-proj__item {
+    gap: 24px;
+  }
+  .od-proj__card {
+    aspect-ratio: 16 / 10;
+  }
+  /* On tablet the info goes below, in two columns: the name and the details. */
+  .od-proj__ficha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
+  }
+  .od-proj__row--name {
+    grid-row: span 4;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+}
+@media (min-width: 1024px) {
+  .od-proj__item {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: end;
+  }
+  .od-proj__ficha {
+    display: block;
+  }
+  .od-proj__row--name {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* ── The sketch: on exit, the hero sheet goes back to pencil (--sk 0 → 1, Sketch.jsx) ─── */
+.od-sk {
+  --sk: 0;
+}
+/* The title: from ink to graphite. The letters stay in the grey of a soft pencil, with the grain of the
+   paper eating into the stroke (no outline or hatching, which on large letters look like a
+   colouring book, and no tremble). */
+.od-sk .od-chunk__ink {
+  color: color-mix(in srgb, var(--od-ink), color-mix(in srgb, var(--od-ink) 58%, transparent) calc(var(--sk) * 100%));
+  background-image: var(--od-pencil-grain);
+  background-size: 140px 140px;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.od-sk {
+  /* The graphite grain: light dots that let the paper show through the stroke. */
+  --od-pencil-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='p' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.19  0 0 0 0 0.17  0 0 0 1.5 -0.5'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+}
+/* The quadrant labels, from rust to graphite. */
+.od-sk .od-panel__label {
+  color: color-mix(in srgb, var(--od-rust), var(--od-faint) calc(var(--sk) * 100%));
+}
+/* The rest of the text, to graphite. */
+.od-sk .od-info__step {
+  color: color-mix(in srgb, var(--od-rust), var(--od-faint) calc(var(--sk) * 100%));
+}
+.od-sk .od-info__copy {
+  color: color-mix(in srgb, var(--od-ink), var(--od-faint) calc(var(--sk) * 100%));
+}
+/* The pencil tremble (#od-pencil filter, Sketch.jsx), only while there is a sketch. */
+.od-sk.is-sketch .od-info__side,
+.od-sk.is-sketch .od-panel,
+.od-sk.is-sketch .od-frame__line {
+  filter: url(#od-pencil);
+}
+
+/* ── The phone menu ─────────────────────────────────────────────────── */
+.od-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--nav-h) + 9px);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 16px max(20px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transition:
+    clip-path 0.5s var(--od-ease),
+    visibility 0s linear 0.5s;
+}
+.od-menu.is-open {
+  visibility: visible;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.55s var(--od-ease);
+}
+.od-menu__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.od-menu__link {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 18px 0 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--od-font-display);
+  font-size: clamp(28px, 9vw, 46px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: var(--od-title-tracking);
+  text-transform: none;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 0.3s var(--od-ease),
+    transform 0.45s var(--od-ease);
+}
+.od-menu.is-open .od-menu__link {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.12s + var(--i) * 0.05s);
+}
+.od-menu__n {
+  min-width: 2ch;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-mute);
+}
+.od-menu__foot {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-menu__ig {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -14px 0;
+  color: var(--od-ink);
+}
+/* The button: two bars that cross into an X on opening. */
+.od-menu__burger {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 16px;
+  height: 8px;
+  margin-top: -4px;
+}
+.od-menu__burger::before,
+.od-menu__burger::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.35s var(--od-ease);
+}
+.od-menu__burger::before {
+  top: 0;
+}
+.od-menu__burger::after {
+  bottom: 0;
+}
+.od-menu__burger.is-open::before {
+  transform: translateY(3.5px) rotate(45deg);
+}
+.od-menu__burger.is-open::after {
+  transform: translateY(-3.5px) rotate(-45deg);
+}
+@media (min-width: 768px) {
+  .od-menu {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .od-menu,
+  :where(:root:not([data-motion='full'])) .od-menu__link {
+    transition: none;
+  }
+}
+
+/* ── Tablet in portrait: the hero title larger (there is height to spare) ─── */
+@media (min-width: 640px) and (max-width: 1023px) and (orientation: portrait) {
+  .od-info__title {
+    font-size: clamp(24px, 3.9vw, 44px);
+  }
+}
+
+/* ── The Projects card is a link ──────────────────────────────────── */
+.od-proj__card {
+  display: block;
+}
+.od-proj__card .od-proj__img {
+  transition: transform 1.4s var(--od-ease);
+}
+.od-proj__name {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: background-size 0.5s var(--od-ease);
+}
+@media (hover: hover) {
+  .od-proj__card:hover .od-proj__img {
+    transform: scale(1.035);
+  }
+  .od-proj__item:hover .od-proj__name {
+    background-size: 100% 1px;
+  }
+}
+
+/* ── A project page (ProjectPage.jsx) ─────────────────────────────── */
+/* A horizontal strip (≥ 768 px, except with "reduce motion"): the vertical scroll moves it to the left.
+   Below 768 px and with "reduce motion" (.od-pd--v) the panels go one below the other. */
+.od-pd {
+  --pad: 16px;
+  --ph: calc(100svh - var(--nav-h) - 9px);
+}
+@media (min-width: 640px) {
+  .od-pd {
+    --pad: 36px;
+  }
+}
+/* The film grain, over the whole view: one that blends with the photos and another of fine dots for the paper. */
+.od-pd-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  pointer-events: none;
+  background-image: var(--od-film);
+  background-size: 300px 300px;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+.od-pd-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='s' x='0' y='0' width='100%' height='100%' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix type='matrix' values='6 0 0 0 -3  6 0 0 0 -3  6 0 0 0 -3  0 0 0 0 0.09'/></filter><rect width='100%' height='100%' filter='url(%23s)'/></svg>");
+  background-size: 260px 260px;
+}
+.od-pd-h {
+  padding-top: calc(var(--nav-h) + 9px);
+}
+.od-pd-track {
+  display: flex;
+  flex-direction: column;
+}
+.od-pd-p {
+  position: relative;
+}
+.od-pd-title {
+  margin: 0;
+  font-family: var(--od-font-display);
+  font-size: clamp(34px, 9vw, 64px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: var(--od-title-tracking);
+}
+/* The photos: a frame that crops, with the photo 24 % larger inside (the parallax moves it). */
+.od-px {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+.od-px img {
+  position: absolute;
+  left: 0;
+  top: -12%;
+  width: 100%;
+  height: 124%;
+  max-width: none;
+  object-fit: cover;
+  will-change: transform;
+}
+.od-px--fill {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  aspect-ratio: auto !important;
+}
+
+/* The cover: the colour panel */
+.od-pd-p--cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 42svh;
+  padding: 18px var(--pad) 22px;
+  background: var(--od-rust);
+  color: var(--od-paper);
+}
+.od-pd-hero__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.od-pd-hero__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -14px 0;
+}
+.od-pd-hero__mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.od-pd-hero__thumb {
+  display: block;
+  width: clamp(96px, 28vw, 150px);
+  aspect-ratio: 1;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--od-paper) 70%, transparent);
+}
+.od-pd-hero__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.od-pd-hero__kind,
+.od-pd-hero__meta {
+  margin: 0;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+.od-pd-hero__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.od-pd-p--cover .od-pd-title {
+  color: var(--od-paper);
+}
+.od-pd-p--hero {
+  height: 58svh;
+}
+
+/* The description */
+.od-pd-p--intro {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: clamp(56px, 11vw, 96px) var(--pad) 0;
+}
+.od-pd-intro__lede {
+  margin: 0;
+  max-width: 26ch;
+  font-size: clamp(22px, 2.4vw, 34px);
+  font-weight: 500;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+.od-pd-services {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+}
+.od-pd-services li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.od-pd-services li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.od-pd-services li span:last-child {
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  color: var(--od-mute);
+}
+.od-pd-stat__n {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.06em;
+  margin: 0;
+  font-size: clamp(96px, 30vw, 150px);
+  font-weight: var(--od-title-weight);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+}
+.od-pd-stat__mask {
+  display: block;
+  overflow: hidden;
+  padding: 0.04em 0.02em 0.06em;
+  margin: -0.04em -0.02em -0.06em;
+}
+.od-pd-stat__mask > span {
+  display: block;
+}
+.od-pd-stat__mask--u {
+  margin-top: 0.1em;
+  font-size: 0.17em;
+  letter-spacing: -0.02em;
+}
+
+/* The photos with their note */
+.od-pd-p--photo {
+  margin: clamp(56px, 10vw, 110px) 0 0;
+  padding: 0 var(--pad);
+}
+.od-pd-note {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 400px);
+  margin: -48px 0 0 auto;
+  padding: 20px 22px 22px;
+  background-color: var(--od-paper);
+  background-image: var(--od-grain);
+  background-size: 200px 200px;
+}
+.od-pd-note__label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+}
+.od-pd-note__text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.od-pd-p--small {
+  width: 72%;
+  margin: clamp(48px, 8vw, 90px) var(--pad) 0 auto;
+}
+
+/* The closing: a section below the strip, with normal vertical scroll. */
+.od-pd-end {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(64px, 12vw, 140px);
+  min-height: 100svh;
+  padding: clamp(72px, 12vw, 140px) var(--pad) 32px;
+}
+.od-pd-end__foot {
+  display: flex;
+  flex-direction: column;
+}
+.od-pd-end__quote {
+  max-width: 20ch;
+  margin: 0;
+  font-size: clamp(30px, 5vw, 84px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+.od-pd-end__next {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 0 26px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.od-pd-end__next > span:first-child {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-pd-end__name {
+  font-size: clamp(34px, 8vw, 72px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: var(--od-title-tracking);
+}
+.od-pd-end__name span {
+  display: inline-block;
+  color: var(--od-rust);
+  transition: transform 0.6s var(--od-ease);
+}
+@media (hover: hover) {
+  .od-pd-end__next:hover .od-pd-end__name span {
+    transform: translateX(0.18em);
+  }
+}
+.od-pd-end__ig {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 22px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.od-pd-missing {
+  padding: calc(var(--nav-h) + 80px) var(--pad, 24px) 120px;
+}
+.od-pd-back {
+  display: inline-block;
+  margin-top: 24px;
+}
+
+/* ── The horizontal strip ─────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .od-pd:not(.od-pd--v) .od-pd-h {
+    height: 100svh;
+    overflow: hidden;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-track {
+    flex-direction: row;
+    width: max-content;
+    height: var(--ph);
+    will-change: transform;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p {
+    flex: none;
+    height: 100%;
+    margin: 0;
+  }
+  /* Half and half: the cover and the first photo fill the screen. */
+  .od-pd:not(.od-pd--v) .od-pd-p--cover,
+  .od-pd:not(.od-pd--v) .od-pd-p--hero {
+    width: 50vw;
+    order: 0;
+    min-height: 0;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p--cover {
+    padding: 22px 36px 28px;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-title {
+    font-size: clamp(34px, 4.4vw, 80px);
+    white-space: nowrap;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p--intro {
+    width: clamp(520px, 44vw, 780px);
+    justify-content: space-between;
+    gap: 32px;
+    padding: 56px 36px 28px 40px;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-stat__n {
+    font-size: clamp(110px, 14vw, 230px);
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p--photo {
+    width: calc(var(--ph) * var(--r));
+    margin-left: 12px;
+    padding: 0;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p--photo .od-px {
+    height: 100%;
+    aspect-ratio: auto !important;
+  }
+  .od-pd:not(.od-pd--v) .od-px img {
+    left: -12%;
+    top: 0;
+    width: 124%;
+    height: 100%;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-note {
+    position: absolute;
+    bottom: 28px;
+    margin: 0;
+    width: min(380px, 80%);
+  }
+  .od-pd:not(.od-pd--v) .od-pd-note--bl {
+    left: 28px;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-note--br {
+    right: 28px;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p--small {
+    display: flex;
+    align-items: flex-end;
+    width: calc(var(--ph) * 0.92);
+    padding: 0 clamp(28px, 4vw, 64px) 28px;
+  }
+  .od-pd:not(.od-pd--v) .od-pd-p--small .od-px {
+    height: 62%;
+    aspect-ratio: auto !important;
+  }
+}
+
+/* The page-change curtain: rust, over everything except the cursor. */
+.od-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: none;
+  background: var(--od-rust);
+  pointer-events: none;
+  clip-path: inset(100% 0% 0% 0%);
+}
+
+/* ── The scroll cue: "Scroll" and a sketch arrow ───────────────────── */
+.od-scrollcue {
+  position: absolute;
+  display: none; /* on the phone it does not fit next to the title */
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+  color: var(--od-ink);
+}
+.od-scrollcue__label {
+  padding-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.6s var(--od-ease);
+}
+.od-scrollcue__arrow {
+  width: 30px;
+  height: 64px;
+  overflow: visible;
+}
+.od-scrollcue__arrow path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.od-scrollcue__s1 {
+  stroke-width: 1.6;
+}
+/* On wide screens it goes at the foot of the title column, against the text cell. */
+@media (min-width: 1024px) {
+  .od-scrollcue {
+    display: flex;
+    bottom: 22px;
+    left: auto;
+    right: calc(round(down, 40vw, var(--mod)) + 24px);
+  }
+  .od-scrollcue__arrow {
+    width: 34px;
+    height: 78px;
+  }
+}
+.od-scrollcue__s2 {
+  stroke-width: 0.8;
+  opacity: 0.55;
+}
+.od-scrollcue__h1,
+.od-scrollcue__h2 {
+  stroke-width: 1.6;
+}
+.od-scrollcue.is-on .od-scrollcue__label {
+  opacity: 1;
+}
+/* The arrow is traced like a pencil (the shaft, the second pass and the tip), it stays, is erased and comes back. */
+.od-scrollcue.is-on .od-scrollcue__arrow {
+  animation: od-cue-bob 2.8s var(--od-ease) infinite;
+}
+.od-scrollcue.is-on .od-scrollcue__s1 {
+  animation: od-cue-s1 2.8s infinite;
+}
+.od-scrollcue.is-on .od-scrollcue__s2 {
+  animation: od-cue-s2 2.8s infinite;
+}
+.od-scrollcue.is-on .od-scrollcue__h1 {
+  animation: od-cue-h1 2.8s infinite;
+}
+.od-scrollcue.is-on .od-scrollcue__h2 {
+  animation: od-cue-h2 2.8s infinite;
+}
+@keyframes od-cue-s1 {
+  0% { stroke-dashoffset: 1; opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  30% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes od-cue-s2 {
+  0%, 12% { stroke-dashoffset: 1; opacity: 0.55; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  40% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 0.55; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes od-cue-h1 {
+  0%, 32% { stroke-dashoffset: 1; opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  44% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes od-cue-h2 {
+  0%, 40% { stroke-dashoffset: 1; opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.3, 1); }
+  52% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; opacity: 1; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes od-cue-bob {
+  0%, 30% { transform: translateY(0); }
+  60% { transform: translateY(5px); }
+  100% { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(:root:not([data-motion='full'])) .od-scrollcue .od-scrollcue__arrow,
+  :where(:root:not([data-motion='full'])) .od-scrollcue path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+
+/* ── Studio ────────────────────────────────────────────────────────── */
+.od-studio__lede {
+  margin: 0 0 clamp(40px, 6vw, 88px);
+}
+.od-studio__marks {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: clamp(20px, 3vw, 36px);
+}
+.od-studio__marks .od-dim {
+  flex: 1;
+  max-width: 760px;
+}
+/* A small label with four crop marks on its corners, like the corner marks of a printed sheet. */
+.od-crop {
+  position: relative;
+  display: inline-flex;
+  padding: 0.55em 1em;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+  --crop: 8px;
+  background:
+    linear-gradient(var(--od-rust), var(--od-rust)) top left / var(--crop) 1px no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) top left / 1px var(--crop) no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) top right / var(--crop) 1px no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) top right / 1px var(--crop) no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) bottom left / var(--crop) 1px no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) bottom left / 1px var(--crop) no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) bottom right / var(--crop) 1px no-repeat,
+    linear-gradient(var(--od-rust), var(--od-rust)) bottom right / 1px var(--crop) no-repeat;
+}
+/* A dimension line: a rust rule with a tick at each end and its measure in the middle. */
+.od-dim {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+}
+.od-dim i {
+  position: relative;
+  flex: 1;
+  height: 1px;
+  background: var(--od-rust);
+}
+.od-dim i::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background: var(--od-rust);
+}
+.od-dim i:first-child::before {
+  left: 0;
+}
+.od-dim i:last-child::before {
+  right: 0;
+}
+.od-studio__lead {
+  margin: 0;
+  max-width: 30ch;
+  font-size: clamp(26px, 3.4vw, 54px);
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+}
+/* The words marked with asterisks: a rust bar under them. */
+.od-w--mark {
+  background-image: linear-gradient(color-mix(in srgb, var(--od-rust) 70%, transparent), color-mix(in srgb, var(--od-rust) 70%, transparent));
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 100% 0.13em;
+}
+.od-studio__figures {
+  display: grid;
+  margin: 0 0 clamp(48px, 7vw, 104px);
+  border-top: 1px solid var(--line);
+}
+.od-studio__figure {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.od-studio__num {
+  margin: 0;
+  font-size: clamp(56px, 11vw, 112px);
+  font-weight: var(--od-title-weight);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.od-studio__cap {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+  text-align: right;
+}
+.od-studio__principles {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.od-studio__principle {
+  padding: 22px 0 26px;
+  border-top: 1px solid var(--line);
+}
+.od-studio__n {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-rust);
+}
+.od-studio__h {
+  margin: 0 0 10px;
+  font-size: clamp(21px, 2vw, 28px);
+  font-weight: var(--od-title-weight);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.od-studio__p {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--od-soft);
+}
+@media (min-width: 768px) {
+  .od-studio__figures {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-bottom: 0;
+  }
+  .od-studio__figure {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 18px 24px 26px 0;
+    border-bottom: 0;
+  }
+  .od-studio__cap {
+    text-align: left;
+  }
+  .od-studio__principles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 36px;
+  }
+}
+
+/* ── Services: plates stacked on one stage (Services.jsx) ───────────── */
+.od-svc {
+  padding: calc(var(--nav-h) + 22px) 16px clamp(40px, 6vw, 88px);
+}
+.od-svc__plates {
+  display: grid;
+  gap: 16px;
+}
+.od-svc__plate {
+  position: relative;
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  padding: 28px 20px 22px;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--od-paper) 93%, var(--od-ink));
+  border: 1px solid var(--line);
+  transform-origin: 50% 0;
+}
+.od-svc__body {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+.od-svc__n {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-rust);
+}
+.od-svc__name {
+  margin: 0;
+  font-size: clamp(32px, 9vw, 72px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+/* The logo's slab, small: the corner tab of the plate. */
+.od-svc__slab {
+  position: absolute;
+  top: -1px;
+  right: 20px;
+  width: 54px;
+  height: 9px;
+  background: var(--od-rust);
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+}
+.od-svc__text {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--od-soft);
+}
+.od-svc__tags {
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-svc__fig {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+}
+.od-fig {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  overflow: visible;
+}
+.od-svc__fig figcaption {
+  margin-top: 8px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+
+.od-svc.od-svc--pin {
+  padding: 0;
+}
+.od-svc--pin .od-svc__stage {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: calc(var(--nav-h) + 22px) 16px 18px;
+}
+.od-svc--pin .od-svc__head {
+  margin-bottom: 0;
+}
+.od-svc--pin .od-svc__plates {
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+  padding-top: 52px;
+}
+.od-svc--pin .od-svc__plate {
+  grid-area: 1 / 1;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+.od-svc--pin .od-svc__fig {
+  justify-content: center;
+}
+@media (min-width: 640px) {
+  .od-svc--pin .od-svc__stage {
+    padding: calc(var(--nav-h) + 28px) 36px 26px;
+  }
+  .od-svc__plate {
+    padding: 34px 32px 28px;
+  }
+  .od-svc__slab {
+    right: 32px;
+  }
+}
+@media (min-width: 900px) {
+  .od-svc__plate {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 56px;
+    align-items: center;
+    padding: 44px 48px 36px;
+  }
+  .od-svc--pin .od-svc__plate {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .od-svc__body {
+    gap: 16px;
+  }
+  .od-svc__name {
+    font-size: clamp(48px, 6.4vw, 104px);
+  }
+  .od-svc__text {
+    font-size: 17px;
+  }
+}
+/* Without the slab (showSlab off) the plate has no tab. */
+.od-svc__plate:not(:has(.od-svc__slab)) {
+  padding-top: 28px;
+}
+
+/* ── Contact ───────────────────────────────────────────────────────── */
+.od-contact__main {
+  display: grid;
+  gap: 0;
+  margin-bottom: clamp(44px, 7vw, 100px);
+}
+/* The slab of the logo as a rule above the big sentence. */
+.od-contact__slab {
+  display: block;
+  width: clamp(120px, 14vw, 220px);
+  height: 14px;
+  margin-bottom: clamp(20px, 3vw, 36px);
+  background: var(--od-rust);
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+}
+.od-contact__big {
+  margin: 0;
+  max-width: 11ch;
+  font-size: clamp(50px, 10.5vw, 168px);
+  font-weight: var(--od-title-weight);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  /* The paint mask clips to the line box: leave room for the descender of the "g". */
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+.od-contact__sub {
+  max-width: 36ch;
+  margin: clamp(22px, 3vw, 36px) 0 0;
+  font-size: clamp(15px, 1.5vw, 19px);
+  line-height: 1.55;
+  color: var(--od-soft);
+}
+.od-contact__mail {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+  width: fit-content;
+  margin-top: clamp(24px, 3.4vw, 44px);
+  font-size: clamp(22px, 3.2vw, 46px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  color: var(--od-rust);
+}
+.od-contact__mailtext,
+.od-contact__link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition: background-size 0.5s var(--od-ease);
+}
+.od-contact__mailtext {
+  background-size: 100% 1px;
+}
+@media (hover: hover) {
+  .od-contact__mail:hover .od-contact__mailtext {
+    background-size: 0 1px;
+  }
+  .od-contact__link:hover {
+    background-size: 100% 1px;
+  }
+}
+.od-contact__blocks {
+  display: grid;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+}
+.od-contact__block {
+  padding: 18px 0 22px;
+  border-top: 1px solid var(--line);
+}
+.od-contact__bh {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-contact__bp {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.od-contact__legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding-top: 20px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-contact__legalnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+}
+@media (min-width: 768px) {
+  .od-contact__blocks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 36px;
+    border-bottom: 0;
+  }
+  .od-contact__block {
+    padding-bottom: 28px;
+  }
+  .od-contact__legal {
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* ── Projects, pinned: every project on the same stage (Projects.jsx) ── */
+/* The stage fills the screen and the projects are stacked on one grid cell; the scroll changes which one shows. With
+   «reduce motion» there is no `.od-proj--pin`: the rules above lay them out as a list. */
+.od-proj.od-proj--pin {
+  padding: 0;
+}
+.od-proj--pin .od-proj__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: calc(var(--nav-h) + 22px) 16px 18px;
+}
+.od-proj--pin .od-proj__head {
+  margin-bottom: 0;
+}
+/* The progress of the walk through the projects: a rust line on the rule of the header. */
+.od-proj__bar {
+  display: block;
+  height: 2px;
+  margin-top: -1px;
+  margin-bottom: 16px;
+  background: var(--od-rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.od-proj--pin .od-proj__slides {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+}
+.od-proj--pin .od-proj__item {
+  grid-area: 1 / 1;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.od-proj--pin .od-proj__item + .od-proj__item {
+  margin-top: 0;
+}
+.od-proj--pin .od-proj__card {
+  aspect-ratio: auto;
+  height: 100%;
+}
+@media (min-width: 640px) {
+  .od-proj--pin .od-proj__stage {
+    padding: calc(var(--nav-h) + 28px) 36px 26px;
+  }
+  .od-proj--pin .od-proj__item {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+}
+@media (min-width: 1024px) {
+  .od-proj--pin .od-proj__item {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: end;
+  }
+}
+
+
+/* ── Contact: the call and the tall footer (Contact.jsx) ───────────── */
+.od-contact__tag {
+  width: fit-content;
+  margin-bottom: clamp(18px, 2.4vw, 28px);
+}
+/* A button on the same sheet: rust text, crop marks on its corners, filled with rust when pointed at. */
+.od-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  width: fit-content;
+  margin-top: clamp(26px, 3.4vw, 44px);
+  padding: 1.05em 1.7em;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+  transition:
+    color 0.4s var(--od-ease),
+    background-color 0.4s var(--od-ease);
+}
+.od-btn.od-crop {
+  --crop: 10px;
+}
+.od-btn--plain {
+  border: 1px solid var(--od-rust);
+}
+@media (hover: hover) {
+  .od-btn:hover {
+    color: var(--od-paper);
+    background-color: var(--od-rust);
+  }
+}
+
+.od-ft {
+  margin-top: clamp(56px, 8vw, 120px);
+  border-top: 1px solid var(--line);
+}
+.od-ft__top {
+  display: grid;
+  gap: 32px;
+  padding: 28px 0 32px;
+}
+.od-ft__tagline {
+  margin: 0;
+  max-width: 17ch;
+  font-size: clamp(26px, 3vw, 46px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+.od-ft__reg {
+  display: none;
+  width: clamp(72px, 8vw, 120px);
+  height: auto;
+  margin-top: 28px;
+}
+.od-ft__cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 20px;
+}
+.od-ft__h {
+  margin: 0 0 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-ft__list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.od-ft__mid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+.od-ft__news {
+  min-width: 0;
+  padding: 24px 0 26px;
+  border-bottom: 1px solid var(--line);
+}
+.od-ft__newstext {
+  max-width: 32ch;
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--od-soft);
+}
+.od-ft__field {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--od-ink);
+}
+.od-ft__field input[type='email'] {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 15px;
+  color: var(--od-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+}
+.od-ft__field input[type='email']::placeholder {
+  color: var(--od-faint);
+}
+.od-ft__field button {
+  padding: 0 4px 0 18px;
+  font-size: 20px;
+  color: var(--od-rust);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.4s var(--od-ease);
+}
+.od-ft__field button:disabled {
+  opacity: 0.4;
+}
+@media (hover: hover) {
+  .od-ft__field button:hover {
+    transform: translateX(4px);
+  }
+}
+.od-ft__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.od-ft__status {
+  min-height: 1.4em;
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+}
+.od-ft__blocks {
+  display: grid;
+}
+.od-ft__block {
+  border-bottom: 1px solid var(--line);
+}
+.od-ft__word {
+  position: relative;
+  margin: clamp(28px, 4vw, 56px) 0 0;
+  padding: 0;
+}
+.od-ft__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.od-ft__rule {
+  display: block;
+  height: 1px;
+  background: var(--od-faint);
+}
+/* A name of the buyer's own (not the vector one): the same word, set huge as an outline. */
+.od-ft__text {
+  display: block;
+  padding: 0.05em 0 0;
+  font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif;
+  font-size: clamp(72px, 21vw, 340px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1.4px var(--od-ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.od-ft__note {
+  margin: 10px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-rust);
+}
+.od-ft__clock {
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 768px) {
+  .od-ft__top {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 48px;
+  }
+  .od-ft__reg {
+    display: block;
+  }
+  .od-ft__cols {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .od-ft__mid {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 48px;
+  }
+  .od-ft__news {
+    border-bottom: 0;
+    padding-top: 28px;
+  }
+  .od-ft__blocks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+  .od-ft__block {
+    border-bottom: 0;
+  }
+}
+
+/* Links stacked in a column: each one is a real box tall enough to touch (overlapping hit zones would steal each other). */
+.od-ft__a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+}
+@media (min-width: 1024px) {
+  .od-ft__a {
+    min-height: 28px;
+    min-width: 0;
+  }
+}
+
+.od-contact__alt {
+  margin: 14px 0 0;
+  font-size: 15px;
+}
+
+/* ── Self-drawing SVG (draw.jsx): plan of Process and figures of Services ── */
+.od-proc__svg path,
+.od-fig path {
+  fill: none;
+  stroke: var(--od-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.od-proc__svg .od-thin,
+.od-fig .od-thin {
+  stroke-width: 1;
+}
+.od-proc__svg .od-wall,
+.od-fig .od-wall {
+  stroke-width: 3.2;
+}
+.od-proc__svg .od-heavy {
+  stroke-width: 4;
+}
+.od-proc__svg .od-dim-line,
+.od-fig .od-dim-line {
+  stroke: var(--od-mute);
+  stroke-width: 1;
+  stroke-dasharray: 7 5;
+}
+.od-proc__svg path.od-fill,
+.od-fig path.od-fill {
+  stroke: none;
+  fill: var(--od-rust);
+}
+.od-fig path.od-rust {
+  stroke: var(--od-rust);
+}
+/* The layers the current step just added are drawn in rust; the next step turns them to ink. */
+.od-proc__svg .od-new path:not(.od-dim-line):not(.od-fill) {
+  stroke: var(--od-rust);
+  stroke-width: 2.2;
+}
+.od-proc__svg g path {
+  transition: stroke 0.5s var(--od-ease);
+}
+/* The small labels of a drawing would be unreadably small on a phone: they are left out there. */
+@media (max-width: 639px) {
+  .od-proc__svg .od-note,
+  .od-fig .od-note {
+    display: none;
+  }
+}
+.od-proc__svg .od-note,
+.od-fig .od-note {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  fill: var(--od-mute);
+  stroke: none;
+}
+
+/* ── Process: a pinned stage, the plan on one side and the steps on the other ── */
+.od-proc {
+  padding: calc(var(--nav-h) + 22px) 16px clamp(40px, 6vw, 88px);
+}
+.od-proc__body {
+  display: grid;
+  gap: 24px;
+}
+.od-proc__plan {
+  margin: 0;
+  min-width: 0;
+}
+.od-proc__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.od-proc__plan figcaption {
+  margin-top: 10px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-proc__side {
+  min-width: 0;
+}
+.od-proc__list {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.od-proc__steps {
+  display: grid;
+  gap: 28px;
+}
+.od-proc__step {
+  min-width: 0;
+}
+.od-proc__sh {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 8vw, 44px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.od-proc__sh span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-rust);
+}
+.od-proc__st {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--od-soft);
+}
+.od-proc__meta {
+  display: block;
+  margin-top: 14px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-proc--noplan .od-proc__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.od-proc.od-proc--pin {
+  padding: 0;
+}
+.od-proc--pin .od-proc__stage {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  box-sizing: border-box;
+  padding: calc(var(--nav-h) + 22px) 16px 18px;
+}
+.od-proc--pin .od-proc__head {
+  margin-bottom: 0;
+}
+.od-proc--pin .od-proc__body {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: auto auto;
+  align-content: center;
+  row-gap: 28px;
+}
+/* On a phone the plan sits above the text and fills what is left; the text block has the height of the tallest step. */
+.od-proc--pin .od-proc__plan {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+.od-proc--pin .od-proc__side {
+  grid-row: 2;
+}
+.od-proc--pin .od-proc__steps {
+  display: grid;
+  gap: 0;
+}
+.od-proc--pin .od-proc__step {
+  grid-area: 1 / 1;
+}
+.od-proc--pin .od-proc__sh {
+  font-size: clamp(30px, 9vw, 44px);
+}
+@media (min-width: 640px) {
+  .od-proc--pin .od-proc__stage {
+    padding: calc(var(--nav-h) + 28px) 36px 26px;
+  }
+}
+@media (min-width: 1024px) {
+  .od-proc__body {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: 64px;
+    align-items: center;
+  }
+  .od-proc--pin .od-proc__body {
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    align-content: stretch;
+  }
+  .od-proc--pin .od-proc__plan,
+  .od-proc--pin .od-proc__side {
+    grid-row: 1;
+  }
+  .od-proc--pin .od-proc__side {
+    grid-column: 1;
+  }
+  .od-proc--pin .od-proc__plan {
+    grid-column: 2;
+  }
+  .od-proc--pin .od-proc__list {
+    display: block;
+    margin-bottom: 36px;
+    border-top: 1px solid var(--line);
+  }
+  .od-proc__li {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .od-proc__n {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--od-rust);
+  }
+  .od-proc__ln {
+    font-size: clamp(22px, 2.2vw, 30px);
+    letter-spacing: -0.02em;
+  }
+  /* The list already shows the number and the name; the step repeats them only without it (reduce motion, phone). */
+  .od-proc--pin .od-proc__sh {
+    display: none;
+  }
+}
+
+/* ── Wall: the photographs as plates, in drifting columns (Wall.jsx) ───── */
+.od-wall {
+  padding: calc(var(--nav-h) + 22px) 16px clamp(56px, 8vw, 120px);
+}
+.od-wall__cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+  padding-top: 24px;
+}
+.od-wall__cols[data-n='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2.4vw, 36px);
+}
+.od-wall__col {
+  display: grid;
+  gap: clamp(14px, 2.4vw, 36px);
+  min-width: 0;
+  will-change: transform;
+}
+.od-wall__plate {
+  margin: 0;
+  min-width: 0;
+}
+.od-wall__frame {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--od-paper) 88%, var(--od-ink));
+}
+.od-wall__frame img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.od-wall__plate figcaption {
+  display: flex;
+  gap: 10px;
+  margin-top: 9px;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-wall__n {
+  color: var(--od-rust);
+}
+@media (min-width: 640px) {
+  .od-wall {
+    padding-left: 36px;
+    padding-right: 36px;
+  }
+}
+/* Wide screens: the columns are staggered so the top edge is not a straight line. */
+@media (min-width: 768px) {
+  .od-wall__cols[data-n='3'] .od-wall__col:nth-child(2) {
+    margin-top: clamp(40px, 8vw, 140px);
+  }
+  .od-wall__cols[data-n='3'] .od-wall__col:nth-child(3) {
+    margin-top: clamp(16px, 3vw, 56px);
+  }
+}
+
+/* ── Clients: an accordion beside one large photograph (Clients.jsx) ─── */
+.od-cl__body {
+  display: grid;
+  gap: 0;
+}
+.od-cl__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+}
+.od-cl__item {
+  border-top: 1px solid var(--line);
+}
+.od-cl__h {
+  margin: 0;
+  font: inherit;
+}
+.od-cl__btn {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 24px;
+  align-items: baseline;
+  width: 100%;
+  min-height: 44px;
+  padding: 22px 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.od-cl__n {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--od-rust);
+}
+.od-cl__name {
+  font-size: clamp(28px, 4.2vw, 60px);
+  font-weight: var(--od-title-weight);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--od-mute);
+  transition: color 0.5s var(--od-ease);
+}
+.od-cl__item[data-on] .od-cl__name,
+.od-cl__btn:focus-visible .od-cl__name {
+  color: var(--od-ink);
+}
+.od-cl__plus {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  justify-self: end;
+  align-self: center;
+}
+.od-cl__plus::before,
+.od-cl__plus::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1.5px;
+  background: var(--od-ink);
+  transition: transform 0.5s var(--od-ease);
+}
+.od-cl__plus::after {
+  transform: rotate(90deg);
+}
+.od-cl__item[data-on] .od-cl__plus::after {
+  transform: rotate(0deg);
+}
+/* The panel opens by growing its row from 0 to its height. */
+.od-cl__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.7s var(--od-ease);
+}
+.od-cl__item[data-on] .od-cl__panel {
+  grid-template-rows: 1fr;
+}
+.od-cl__inner {
+  min-height: 0;
+  overflow: hidden;
+  padding-left: 44px;
+}
+.od-cl__text {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--od-soft);
+}
+.od-cl__tags {
+  display: block;
+  margin: 14px 0 26px;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--od-mute);
+}
+.od-cl__pic {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  margin: 0 0 26px;
+  object-fit: cover;
+}
+.od-cl__stage {
+  display: none;
+}
+@keyframes od-cl-open {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: scale(1.14);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+  }
+}
+@media (min-width: 1024px) {
+  .od-cl__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(40px, 6vw, 110px);
+    align-items: start;
+  }
+  .od-cl__pic {
+    display: none;
+  }
+  .od-cl__stage {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    max-height: calc(100svh - var(--nav-h) - 80px);
+    justify-self: end;
+    width: 100%;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--od-paper) 88%, var(--od-ink));
+  }
+  .od-cl__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    clip-path: inset(100% 0 0 0);
+  }
+  .od-cl__img[data-seen] {
+    clip-path: inset(0 0 0 0);
+  }
+  .od-cl__img[data-on] {
+    animation: od-cl-open 1.1s var(--od-ease) both;
+  }
+}
+/* Reduce motion: the row and the photograph change at once. */
+.od-cl--calm .od-cl__panel,
+.od-cl--calm .od-cl__name,
+.od-cl--calm .od-cl__plus::before,
+.od-cl--calm .od-cl__plus::after,
+.od-cl--calm .od-cl__img {
+  transition: none;
+  animation: none;
+}

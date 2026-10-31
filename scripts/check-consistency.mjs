@@ -371,7 +371,7 @@ for (const sku of COMING_SOON_SKUS) {
   }
   if (
     !new RegExp(
-      `path="/templates/${sku}"[\\s\\S]{0,280}import\\.meta\\.env\\.DEV[\\s\\S]{0,160}Navigate to="/"`,
+      `path="/templates/${sku}(?:/\\*)?"[\\s\\S]{0,280}import\\.meta\\.env\\.DEV[\\s\\S]{0,160}Navigate to="/"`,
     ).test(appSrc)
   ) {
     fail(

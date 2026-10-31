@@ -1325,6 +1325,16 @@
           "name": "Footer",
           "blurb": "Full-height closer: brand and plain lines, the menu and a working newsletter field, contact blocks bottom right and the wordmark set huge bottom left."
         }
+      },
+      "ordo": {
+        "Hero": { "name": "Hero", "blurb": "A drafter's sheet: its own loader draws the logo, then a shop is designed piece by piece from the raw shell to the photograph of the finished space, and the sheet turns back into a sketch as it leaves; framed nav, scroll ruler and crosshair cursor." },
+        "Projects": { "name": "Projects", "blurb": "The studio's work as one row per project: a photo card that opens upwards from its lower edge and a ruled fact sheet." },
+        "Studio": { "name": "Studio", "blurb": "One sentence about how the studio works, three large figures and three numbered principles on the ruled sheet." },
+        "Process": { "name": "Process", "blurb": "How a project goes from brief to building as a plan that draws itself: pinned, each step of the scroll adds a layer (lot, survey, partitions, drawings, built) while the step list lights up and its text swaps." },
+        "Services": { "name": "Services", "blurb": "The disciplines as stacked plates, pinned: the scroll slides a new plate over the last one and its figure draws itself, with the rust slab of the logo on the corner." },
+        "Wall": { "name": "Wall", "blurb": "A wall of twelve photographs in three drifting columns (two on a phone): each plate opens upwards from its lower edge, moves inside its frame and carries its number and one line." },
+        "Clients": { "name": "Clients", "blurb": "Who the studio works for as an accordion beside one large photograph: the open row sets the picture, which opens upwards over the last one (inside the row on a phone)." },
+        "Contact": { "name": "Contact", "blurb": "Closing sheet: one huge sentence over a rust slab, the email as the way in, plain blocks of details and a legal line whose Privacy and Terms open in a panel." }
       }
     },
     "labNote": "You build the page with our sections and take the code. No code, just adding sections to your site?",

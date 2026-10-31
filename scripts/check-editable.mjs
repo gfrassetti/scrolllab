@@ -204,7 +204,7 @@ try {
   const { BUILDER_HIDDEN_SKUS } = await vite.ssrLoadModule('/src/domain/catalog.js')
   const h = React.createElement
 
-  const ids = SECTION_IDS.filter((id) => !BUILDER_HIDDEN_SKUS.includes(sectionModelOf(id))).filter(
+  const ids = SECTION_IDS.filter((id) => process.env.SHOW_HIDDEN === '1' || !BUILDER_HIDDEN_SKUS.includes(sectionModelOf(id))).filter(
     (id) => !only || id === only,
   )
   const render = (Comp, props) =>

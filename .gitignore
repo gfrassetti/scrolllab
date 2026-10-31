@@ -103,8 +103,11 @@ design/masters/apex-3d/
 
 # cāpsula33: demo privado del Estudio con fotos de un negocio real (no viajan al repo).
 design/masters/capsula33/
+# ORDO: el original de la foto generada (el sitio usa el WebP de src/components/sections/ordo/assets).
+design/masters/ordo/*.png
 public/studio/
 dist-capsula33
+dist-ordo
 
 # Kanvas: la pista de la demo (Pixabay Content License): se usa en el sitio, no se redistribuye en el repo ni en el ZIP.
 public/proto/kanvas/audio/

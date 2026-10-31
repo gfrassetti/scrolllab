@@ -116,6 +116,11 @@ export const PRODUCTS = {
     'APEX — template',
     'Modelo automotriz a pantalla completa: un film de cinco tomas que cierra en loop sin salto, menú-cortina, loader que el hero tapa de abajo hacia arriba, declaración que se enciende con el scroll, carrusel con miniatura en el cursor, lista de modelos con vista previa y footer a pantalla completa. El film y las fotos de la demo son de muestra: hay que producir los propios; trae el script que arma el film con tus clips (código fuente).',
   ),
+  ordo: template(
+    'ordo',
+    'ORDO — template',
+    'Modelo para estudios de arquitectura, interiorismo o dirección creativa: una hoja de dibujante donde el hero proyecta un local pieza por pieza, del boceto en obra gris a la foto terminada, y vuelve a lápiz al salir; proyectos con página propia en tira horizontal con parallax, regla de scroll y cursor propios. Las fotos de la demo son de muestra (código fuente).',
+  ),
   bundle: {
     sku: 'bundle',
     title: 'BUNDLE — los 8 modelos',

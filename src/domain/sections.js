@@ -152,6 +152,16 @@ const BY_MODEL = {
     Showroom: 'section',
     Footer: 'footer',
   },
+  ordo: {
+    Hero: 'hero',
+    Projects: 'section',
+    Studio: 'section',
+    Process: 'section',
+    Services: 'section',
+    Wall: 'section',
+    Clients: 'section',
+    Contact: 'footer',
+  },
   signal: {
     NavSignal: 'nav',
     HeroSignal: 'hero',

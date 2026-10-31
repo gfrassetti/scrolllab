@@ -26,6 +26,9 @@ import { SECTION_FIELDS } from '../src/lib/sectionFields.js'
 import { NOT_IN_DOM } from './lib/not-in-dom.mjs'
 import { BUILDER_HIDDEN_SKUS } from '../src/lib/pricing.js'
 
+// SHOW_HIDDEN=1: prueba también los modelos en obra (BUILDER_HIDDEN_SKUS), p. ej. ORDO; el builder los muestra con esa variable.
+if (process.env.SHOW_HIDDEN === '1') process.env.VITE_BUILDER_SHOW_HIDDEN = '1'
+
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 /** Modelos (`apex`) o secciones (`apex/Hero`) a revisar; sin argumentos, todas. */
 const ONLY = process.argv.slice(2).filter((a) => !a.startsWith('-'))
@@ -279,7 +282,7 @@ try {
   const sectionIds = Object.keys(SECTION_FIELDS).filter(
     (id) =>
       editsFor(id).expect.length > 0 &&
-      !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0]) &&
+      (process.env.SHOW_HIDDEN === '1' || !BUILDER_HIDDEN_SKUS.includes(id.split('/')[0])) &&
       wanted(id),
   )
   const total = sectionIds.reduce((sum, id) => sum + editsFor(id).expect.length, 0)

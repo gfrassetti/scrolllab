@@ -643,6 +643,7 @@ Cursor, graphify y Obsidian se usan **juntos**, no como alternativas:
 | Tocar la tipografía global del builder o probar el builder en el Chrome del usuario | `Builder — tipografía global (cómo está hecha y cómo se probó)` (la fuente viaja en la receta; trampas de la extensión de Chrome) |
 | Tocar el kit de tienda (Commerce), el conector con Shopify o el panel de campos del builder | `Builder — kit de tienda con Shopify (cómo está hecho y qué dice)` (cada comprador conecta SU Shopify; sin Shopify el checkout es de ejemplo y el cobro lo conecta él; grupos plegables; dónde se dice) |
 | Mejorar un template existente o sumarle 3D / capas / secciones | `Templates — segunda pasada award-level (2026-10-18)` (el listón del dueño: cambios que se vean, 3D realista; trampas: text-stroke con currentColor, pin en la raíz, autoAlpha e innerText) |
+| Retomar ORDO (template de arquitectura e interiorismo, en obra) o rehacer algo parecido: sitio de cliente → template, logo con fontTools, colores con `color-mix`, builder con rutas | `ORDO — template de arquitectura e interiorismo (2026-10-30)` (y `docs/ordo-template.md`) |
 
 Obsidian **no reemplaza** `graphify-out/`; lo complementa. El agente no “abre” Obsidian UI: lee los `.md` del vault cuando aportan contexto.
 
