@@ -1,11 +1,14 @@
 # ORDO — template de estudio de arquitectura e interiorismo (home de una página + páginas de proyecto)
 
-> **Estado (2026-10-30): en obra, solo en local; en el builder solo con `VITE_BUILDER_SHOW_HIDDEN=1`.** Está en `COMING_SOON_SKUS` / `LOCAL_ONLY_SKUS` / `BUILDER_HIDDEN_SKUS`
-> (`src/domain/catalog.js`): `/templates/ordo` renderiza en local y en producción redirige a la home. Precio propuesto:
-> **USD 349** (`TEMPLATE_PRICES_USD.ordo`), por debajo de la base del builder (549) y de KIN / MERIDIAN (379). Para
-> ponerlo a la venta: precio aprobado por el dueño, sacarlo de las tres listas, tarjeta en `templateMeta.js`, textos
-> `templates.ordo` en `src/i18n/locales`, OG (`npm run gen:og`), sitemap / llms.txt / JSON-LD, y las listas de
-> `check:mobile`, `check:motion` y `check:parity`. Después, `npm run check:visual -- ordo`.
+> **Estado (2026-10-31): a la vista solo por URL, también en producción.** `/templates/ordo` abre en producción (ruta en `App.jsx`)
+> y es `noindex` como todo `/templates/*`; sigue en `COMING_SOON_SKUS` / `LOCAL_ONLY_SKUS` / `BUILDER_HIDDEN_SKUS`
+> (`src/domain/catalog.js`): sin card en la home, sin sitemap ni página de producto, no se puede comprar, fuera del builder público
+> (el servidor rechaza sus secciones) y fuera de LAB. En el builder solo con `VITE_BUILDER_SHOW_HIDDEN=1`. Precio fijado por el
+> dueño: **USD 379** (`TEMPLATE_PRICES_USD.ordo`), igual que KIN / MERIDIAN (el más alto del catálogo; no cuenta para el piso del
+> builder mientras esté en `COMING_SOON_SKUS`). El poster (`public/catalog/ordo.*`) es provisorio: una captura de la sección Wall.
+> Para ponerlo a la venta: sacarlo de las tres listas, tarjeta en `templateMeta.js`, textos
+> `templates.ordo` en `src/i18n/locales`, OG (`npm run gen:og`), sitemap / llms.txt / JSON-LD, las listas de
+> `check:mobile`, `check:motion` y `check:parity`, y rehacer el poster con `npm run capture:catalog`. Después, `npm run check:visual -- ordo`.
 
 Sale del sitio que se armó para un estudio cliente («elStudio»): el cliente lo descartó, el código se quedó y se convirtió en
 producto. Nada del cliente viaja: marca, textos y fotos son de un negocio inventado.
@@ -136,6 +139,6 @@ con `react-router-dom` 7.18 puede fallar con «Named export 'Link' not found» (
 1. Decisión del dueño: precio y salida a la venta (ver arriba). Sacarlo de las tres listas lo muestra en el builder público.
 2. Un favicon propio en el ZIP (el de la demo, la R bajo la tapa, está en `src/studio/ordo/public/favicon.svg`, solo para el
    build de preview `npm run build:ordo`).
-3. Poster (`public/catalog/ordo.*`, 4:5): hoy es una captura de la hoja 04 del hero; rehacerlo con `npm run capture:catalog`
+3. Poster (`public/catalog/ordo.*`, 4:5): hoy es una captura provisoria de la sección Wall; rehacerlo con `npm run capture:catalog`
    cuando ORDO esté en `SCROLL_AT`.
 4. LAB: ORDO no es un widget (el hero se fija a pantalla y trae su loader); no entra a `HOSTABLE_SECTIONS`.

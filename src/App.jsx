@@ -221,16 +221,10 @@ export default function App() {
                     path="/estudio/capsula33"
                     element={Capsula33Page ? <Capsula33Page /> : <Navigate to="/" replace />}
                   />
-                  <Route
-                    path="/templates/ordo/*"
-                    element={
-                      import.meta.env.DEV ? (
-                        <OrdoPage />
-                      ) : (
-                        <Navigate to="/" replace />
-                      )
-                    }
-                  />
+                  {/* ORDO: a la vista solo por URL, también en producción (dueño, 2026-10-31): sin card en la home ni en el
+                      sitemap (LOCAL_ONLY_SKUS), fuera del builder y de LAB (BUILDER_HIDDEN_SKUS), sin comprar (COMING_SOON_SKUS)
+                      y noindex como todo /templates/* (src/lib/site.js). */}
+                  <Route path="/templates/ordo/*" element={<OrdoPage />} />
                   {/* DATUM: template en obra, solo en local como NEON. */}
                   <Route path="/templates/datum" element={import.meta.env.DEV ? <DatumPage /> : <Navigate to="/" replace />} />
                   {/* NEON: prototipo, solo en local. */}
