@@ -86,7 +86,7 @@ ORDO tiene cinco secciones en el builder, todas con todo editable (`src/domain/s
 | `ordo/Projects` | una etapa **fija** (pin de GSAP): los proyectos (hasta 6) se apilan en el mismo lugar y el scroll cambia el que se ve: la foto nueva se abre desde abajo, la ficha anterior se hunde, el scroll se pega a cada proyecto; con «reducir movimiento», una lista | nombre, tipo, lugar, año, m², foto, descripción de la foto y enlace por fila; rótulos; grano; colores |
 | `ordo/Studio` | frase con cotas, tres cifras, tres principios | todos los textos; marcas y cota (interruptor); colores |
 | `ordo/Process` | cómo se trabaja: plano que se dibuja | titular, pasos (2–6: nombre, texto, plazo), nota y cajetín del plano; interruptor del plano; colores |
-| `ordo/Services` | hasta 6 disciplinas | nombre, descripción, etiquetas; tapa al pasar el mouse; colores |
+| `ordo/Services` | hasta 6 láminas | nombre, descripción, etiquetas, rótulo de la figura; figuras y tapa (interruptores); colores |
 | `ordo/Contact` | cierre: llamada + pie alto | frase, botón, email, columnas de enlaces, boletín, cuatro bloques, nombre gigante, reloj, derechos, Privacy / Terms (panel), «volver arriba»; interruptores (tapa, marcas, boletín, registro, nombre, reloj); colores |
 
 - **Colores.** Todo sale de tres variables en `.od-root` (`--od-paper`, `--od-ink`, `--od-rust`) y de sus derivados (`--od-mute`,
