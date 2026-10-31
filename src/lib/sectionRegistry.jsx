@@ -120,6 +120,8 @@ import OrdoProjects from '../components/sections/ordo/Projects'
 import OrdoStudio from '../components/sections/ordo/Studio'
 import OrdoProcess from '../components/sections/ordo/Process'
 import OrdoServices from '../components/sections/ordo/Services'
+import OrdoWall from '../components/sections/ordo/Wall'
+import OrdoClients from '../components/sections/ordo/Clients'
 import OrdoContact from '../components/sections/ordo/Contact'
 import NavSignal from '../components/sections/signal/NavSignal'
 import HeroSignal from '../components/sections/signal/HeroSignal'
@@ -370,6 +372,8 @@ const allModels = [
       { id: 'ordo/Studio', name: 'Studio', kind: 'section', component: OrdoStudio, blurb: 'One sentence about how the studio works, three large figures and three numbered principles on the ruled sheet.' },
       { id: 'ordo/Process', name: 'Process', kind: 'section', component: OrdoProcess, blurb: 'How a project goes from brief to building as a plan that draws itself: pinned, each step of the scroll adds a layer (lot, survey, partitions, drawings, built) while the step list lights up and its text swaps.' },
       { id: 'ordo/Services', name: 'Services', kind: 'section', component: OrdoServices, blurb: 'The disciplines as stacked plates, pinned: the scroll slides a new plate over the last one and its figure draws itself, with the rust slab of the logo on the corner.' },
+      { id: 'ordo/Wall', name: 'Wall', kind: 'section', component: OrdoWall, blurb: 'A wall of twelve photographs in three drifting columns (two on a phone): each plate opens upwards from its lower edge, moves inside its frame and carries its number and one line.' },
+      { id: 'ordo/Clients', name: 'Clients', kind: 'section', component: OrdoClients, blurb: 'Who the studio works for as an accordion beside one large photograph: the open row sets the picture, which opens upwards over the last one (inside the row on a phone).' },
       { id: 'ordo/Contact', name: 'Contact', kind: 'footer', component: OrdoContact, blurb: 'Closing sheet: one huge sentence over a rust slab, the email as the way in, plain blocks of details and a legal line whose Privacy and Terms open in a panel.' },
     ],
     sectionsDir: 'src/components/sections/ordo',

@@ -1321,6 +1321,8 @@
         "Studio": { "name": "Studio", "blurb": "Una frase sobre cómo trabaja el estudio, tres cifras grandes y tres principios numerados sobre la hoja rayada." },
         "Process": { "name": "Process", "blurb": "Cómo un proyecto va del encargo a la obra, como un plano que se dibuja solo: fijo en pantalla, cada paso del scroll suma una capa (terreno, relevamiento, tabiques, planos, obra) mientras se enciende el paso de la lista y cambia su texto." },
         "Services": { "name": "Services", "blurb": "Las disciplinas como láminas apiladas, fijas en pantalla: con el scroll entra una lámina nueva sobre la anterior y su figura se dibuja sola, con la tapa de óxido del logo en la esquina." },
+        "Wall": { "name": "Wall", "blurb": "Una pared de doce fotografías en tres columnas que se desplazan (dos en el teléfono): cada lámina se abre hacia arriba desde su borde inferior, se mueve dentro de su marco y lleva su número y una línea." },
+        "Clients": { "name": "Clients", "blurb": "Para quién trabaja el estudio, como un acordeón junto a una fotografía grande: la fila abierta decide la imagen, que se abre hacia arriba sobre la anterior (dentro de la fila en el teléfono)." },
         "Contact": { "name": "Contact", "blurb": "Hoja de cierre: una frase enorme sobre una tapa de óxido, el email como puerta de entrada, bloques de datos y una línea legal cuyos Privacy y Terms se abren en un panel." }
       }
     },

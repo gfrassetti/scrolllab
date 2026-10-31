@@ -30,7 +30,7 @@ const EMAIL = 'hello@ordo.studio'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 const COLUMNS = [
-  { heading: 'Studio', lines: 'Projects | #projects\nStudio | #studio\nServices | #services\nContact | #contact' },
+  { heading: 'Studio', lines: 'Projects | #projects\nStudio | #studio\nProcess | #process\nServices | #services\nContact | #contact' },
   { heading: 'Work', lines: 'Linho | #projects\nCasa Muralha | #projects\nMaré | #projects' },
   { heading: 'Services', lines: 'Architecture | #services\nInterior design | #services\nCreative direction | #services\nFurniture & joinery | #services' },
   { heading: 'Social', lines: 'Instagram | https://www.instagram.com/\nLinkedIn | https://www.linkedin.com/\nBehance | https://www.behance.net/' },

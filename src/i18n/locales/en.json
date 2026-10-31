@@ -1321,6 +1321,8 @@
         "Studio": { "name": "Studio", "blurb": "One sentence about how the studio works, three large figures and three numbered principles on the ruled sheet." },
         "Process": { "name": "Process", "blurb": "How a project goes from brief to building as a plan that draws itself: pinned, each step of the scroll adds a layer (lot, survey, partitions, drawings, built) while the step list lights up and its text swaps." },
         "Services": { "name": "Services", "blurb": "The disciplines as stacked plates, pinned: the scroll slides a new plate over the last one and its figure draws itself, with the rust slab of the logo on the corner." },
+        "Wall": { "name": "Wall", "blurb": "A wall of twelve photographs in three drifting columns (two on a phone): each plate opens upwards from its lower edge, moves inside its frame and carries its number and one line." },
+        "Clients": { "name": "Clients", "blurb": "Who the studio works for as an accordion beside one large photograph: the open row sets the picture, which opens upwards over the last one (inside the row on a phone)." },
         "Contact": { "name": "Contact", "blurb": "Closing sheet: one huge sentence over a rust slab, the email as the way in, plain blocks of details and a legal line whose Privacy and Terms open in a panel." }
       }
     },

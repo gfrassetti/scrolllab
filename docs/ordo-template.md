@@ -27,7 +27,7 @@ Contacto de ficción: `hello@ordo.studio`, `+351 21 555 0142`, Rua do Poço 14. 
 
 ## Qué tiene
 
-Orden de la home: **Loader → Nav → Hero (cuatro hojas) → Sketch (salida a boceto) → Projects → Studio → Process → Services → Contact**.
+Orden de la home: **Loader → Nav → Hero (cuatro hojas) → Sketch (salida a boceto) → Projects → Studio → Process → Services → Wall → Clients → Contact**.
 Cada proyecto es una página (`/projects/<slug>`): tira horizontal con parallax (≥ 768 px), vertical en teléfono.
 
 - **Loader** (`Loader.jsx`, `Logo.jsx`, `logoPaths.js`): la primera O de ORDO se dibuja con un trazo (stroke-dashoffset) y se
@@ -57,6 +57,14 @@ Cada proyecto es una página (`/projects/<slug>`): tira horizontal con parallax 
 - **Services — láminas** (`Services.jsx`): fijas; cada servicio es una lámina con su figura (cuatro dibujos en código: alzado, planta,
   grilla de identidad, encuentro de carpintería; del quinto en adelante se repiten) que se dibuja al entrar; la nueva sube sobre la
   anterior y las de abajo quedan asomando, más arriba y más chicas. Sin pin en calma: láminas en lista con la figura completa.
+- **Wall** (`Wall.jsx`, fotos en `wallImages.js`): pared de 12 fotografías en tres columnas (dos en teléfono) que se desplazan a
+  distinta velocidad con el scroll (scrub) y cuyas láminas se abren hacia arriba desde el borde inferior al llegar, con la foto
+  moviéndose dentro del marco. Cada foto va a la columna más corta en ese momento (`ratio` = alto ÷ ancho; sin `ratio` se asume
+  1,25), así que las columnas quedan parejas con cualquier proporción. Fotos de muestra: Higgsfield `gpt_image_2_5`, 2k, calidad
+  media (12 créditos), originales en `design/masters/ordo/wall-NN.png` (no viajan al repo); sitio: `assets/wall-NN.webp` (1100 px) y `-s` (560 px).
+- **Clients** (`Clients.jsx`): acordeón (una fila abierta a la vez: clic, teclado o mouse quieto sobre la fila) junto a una foto grande
+  que se abre hacia arriba sobre la anterior; en teléfono la foto va dentro de la fila abierta. Las fotos por defecto reusan las del
+  hero de los proyectos y la de la escalera de la pared.
 - **Contact — llamada + pie alto**: la llamada (frase grande sobre la tapa, botón con marcas de corte, el email debajo) y un pie
   rayado como plano: frase y registro, cuatro columnas de enlaces (`Texto | #sección` por renglón), boletín (valida, estados, honeypot;
   sin `endpoint` simula el éxito, con uno hace POST `{ formType: 'newsletter', email }`), tres bloques de datos, el nombre gigante
@@ -86,6 +94,8 @@ ORDO tiene cinco secciones en el builder, todas con todo editable (`src/domain/s
 | `ordo/Projects` | una etapa **fija** (pin de GSAP): los proyectos (hasta 6) se apilan en el mismo lugar y el scroll cambia el que se ve: la foto nueva se abre desde abajo, la ficha anterior se hunde, el scroll se pega a cada proyecto; con «reducir movimiento», una lista | nombre, tipo, lugar, año, m², foto, descripción de la foto y enlace por fila; rótulos; grano; colores |
 | `ordo/Studio` | frase con cotas, tres cifras, tres principios | todos los textos; marcas y cota (interruptor); colores |
 | `ordo/Process` | cómo se trabaja: plano que se dibuja | titular, pasos (2–6: nombre, texto, plazo), nota y cajetín del plano; interruptor del plano; colores |
+| `ordo/Wall` | pared de fotos | hasta 18 fotos (foto, descripción, línea); números y líneas (interruptor); colores |
+| `ordo/Clients` | para quién trabajamos | hasta 6 tipos (nombre, texto, etiquetas, foto grande); colores |
 | `ordo/Services` | hasta 6 láminas | nombre, descripción, etiquetas, rótulo de la figura; figuras y tapa (interruptores); colores |
 | `ordo/Contact` | cierre: llamada + pie alto | frase, botón, email, columnas de enlaces, boletín, cuatro bloques, nombre gigante, reloj, derechos, Privacy / Terms (panel), «volver arriba»; interruptores (tapa, marcas, boletín, registro, nombre, reloj); colores |
 

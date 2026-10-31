@@ -71,3 +71,11 @@ Higgsfield `gpt_image_2_5` (2k, calidad media, ~1 crédito cada una). De cada pr
 `image_references`, para que sean el mismo lugar: `-hero` (3:4), `-thumb` (1:1), `-light` (16:9), `-colour` (3:4),
 `-craft` (16:9). Los originales PNG no viajan al repo (`.gitignore`); el sitio usa los WebP de
 `src/components/sections/ordo/assets/<proyecto>-<pieza>.webp` (y `-s`, o `-900` en la portada).
+
+## Pared de fotos (2026-10-31)
+
+Doce fotos de ambiente para la sección Wall (`wall-01.png` … `wall-12.png`, no viajan al repo): Higgsfield `gpt_image_2_5`,
+2k, calidad media, 1 crédito cada una, texto → imagen, sin referencias (ventana en Alfama, plano en papel vegetal, escalera de
+piedra caliza, la mesa del estudio, tablero de materiales, puerta del Alentejo, comedor, manija de latón, patio con olivo,
+tapial en obra, nicho con jarrones, baño de travertino). Proporciones 3:4, 1:1 y 3:2. 429 si se mandan más de ~3 a la vez.
+Sitio: `src/components/sections/ordo/assets/wall-NN.webp` (1100 px, q78) y `wall-NN-s.webp` (560 px, q74), conversión con PIL.

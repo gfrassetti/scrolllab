@@ -13,6 +13,8 @@ import Projects from './Projects'
 import Studio from './Studio'
 import Process from './Process'
 import Services from './Services'
+import Wall from './Wall'
+import Clients from './Clients'
 import Contact from './Contact'
 import ProjectPage from './ProjectPage'
 import { setTransitionHandler, takePendingSection, useRoute } from './router'
@@ -215,6 +217,8 @@ export default function Site() {
               <Studio calm={calm} />
               <Process calm={calm} />
               <Services calm={calm} />
+              <Wall calm={calm} />
+              <Clients calm={calm} />
               <Contact calm={calm} />
             </>
           )}

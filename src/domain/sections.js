@@ -158,6 +158,8 @@ const BY_MODEL = {
     Studio: 'section',
     Process: 'section',
     Services: 'section',
+    Wall: 'section',
+    Clients: 'section',
     Contact: 'footer',
   },
   signal: {

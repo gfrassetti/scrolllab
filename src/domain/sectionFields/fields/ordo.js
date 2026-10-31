@@ -197,6 +197,41 @@ export const ORDO_FIELDS = {
     toggle('showSlab', 'Tapa de óxido en la esquina de la lámina'),
     ...COLORS,
   ],
+  'ordo/Wall': [
+    { key: 'title', label: 'Titular', type: 'text' },
+    { key: 'label', label: 'Rótulo de la esquina (vacío: «12 plates»)', type: 'text' },
+    {
+      key: 'plates',
+      label: 'Fotos de la pared (hasta 18; se reparten solas en las columnas)',
+      type: 'list',
+      max: 18,
+      item: [
+        { key: 'image', label: 'Foto', type: 'image' },
+        { key: 'alt', label: 'Descripción de la foto', type: 'text' },
+        { key: 'caption', label: 'Línea bajo la foto', type: 'text' },
+      ],
+    },
+    toggle('showCaptions', 'Número y línea bajo cada foto'),
+    ...COLORS,
+  ],
+  'ordo/Clients': [
+    { key: 'title', label: 'Titular', type: 'text' },
+    { key: 'label', label: 'Rótulo de la esquina', type: 'text' },
+    {
+      key: 'items',
+      label: 'Tipos de cliente (hasta 6)',
+      type: 'list',
+      max: 6,
+      item: [
+        { key: 'name', label: 'Nombre', type: 'text' },
+        { key: 'text', label: 'Descripción', type: 'textarea' },
+        { key: 'tags', label: 'Etiquetas (separadas por ·)', type: 'text' },
+        { key: 'image', label: 'Foto grande', type: 'image' },
+        { key: 'alt', label: 'Descripción de la foto', type: 'text' },
+      ],
+    },
+    ...COLORS,
+  ],
   'ordo/Contact': [
     { key: 'title', label: 'Titular', type: 'text' },
     { key: 'label', label: 'Rótulo de la esquina', type: 'text' },

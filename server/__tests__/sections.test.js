@@ -132,6 +132,8 @@ const APPROVED = [
   'ordo/Studio',
   'ordo/Process',
   'ordo/Services',
+  'ordo/Wall',
+  'ordo/Clients',
   'ordo/Contact',
   'contact/ContactForm',
   'commerce/ProductGrid',
